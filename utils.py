@@ -23,10 +23,12 @@ def load_train(mat=True):
     trainPathReturns = [path_to_train_labels0, path_to_train_labels1, path_to_train_labels2]
     x_train = []
     y_train = []
+    i = 0
     for path_features,path_labels in zip(trainPaths,trainPathReturns) : 
         y_train.append(pd.read_csv(path_labels))
-        temp = pd.read_csv(path_features,sep = ' ',dtype = 'float64', header = None)
-        temp['Id'] = y_train[0]['Id']
+        temp = pd.read_csv(path_features,sep = ' ', dtype = 'float64', header = None)
+        temp['Id'] = y_train[i]['Id']
+        i +=1
         x_train.append(temp)
         
     print('Done')
@@ -51,42 +53,45 @@ def load_test(mat=True, test_size = 1000):
 
 
 
-# Split the train dataset into training and validation (keep different date)
+# Split the train dataset 
 def split_dataset(data, labels, split_val=0.1, seed=SEED):
+    
     np.random.seed(seed)
-    
-    data = data.merge(labels, on = 'Id')
-
-    dates = data["date"].unique().copy()
-    n_dates = len(dates)
-    all_index = np.arange(n_dates)
-    np.random.shuffle(all_index)
-
-    train_index = all_index[int(split_val*n_dates):]
-    val_index = all_index[0:int(split_val*n_dates)]
-
-    train = data[data["date"].isin(dates[train_index])]
-    val = data[data["date"].isin(dates[val_index])]
-    
-    train_labels = train[['ID','end_of_day_return']]
-    val_labels = val[['ID','end_of_day_return']]
-    
-    train = train.drop('end_of_day_return',axis = 1)
-    val = val.drop('end_of_day_return',axis = 1)
-    
+    train,val = [],[]
+    train_labels, val_labels = [],[]
+    print('Splitting data set...')
+    for i in range(len(data)) :
+        data[i] = data[i].merge(labels[i], on = 'Id')
+        n_samples = data[i].shape[0]
+        train_temp = data[i].sample(frac = 1).iloc[:int((1 - split_val)*n_samples),:].sort_values(by = ['Id'])
+        val_temp = data[i].sample(frac = 1).iloc[int((1 - split_val)*n_samples):,:].sort_values(by = ['Id'])
+        train_temp.reset_index(inplace = True)
+        val_temp.reset_index(inplace = True)
+        train_labels_temp = train_temp[['Id','Bound']]
+        val_labels_temp = val_temp[['Id','Bound']]
+        data[i] = data[i].drop('Bound',axis = 1)
+        train_temp,val_temp = train_temp.drop('Bound',axis = 1),val_temp.drop('Bound',axis = 1)
+        train.append(train_temp)
+        val.append(val_temp)
+        train_labels.append(train_labels_temp)
+        val_labels.append(val_labels_temp)
+    print('Done')
     return train, val, train_labels, val_labels
 
 
 # Tools to give the csv format
-def submission(prediction, ID = None) :  
+def submission(prediction,test_size = 1000) :  
     
-    if isinstance(prediction,pd.core.frame.DataFrame) :
-        prediction.to_csv('predictions.csv', index=False)
-    else : 
-        pred = pd.DataFrame()
-        pred['ID'] = ID
-        pred['end_of_day_return'] = prediction
-        pred.to_csv('predictions.csv', index=False)
+    pred = pd.DataFrame(columns = ['Id','Bound'])
+    for i in range(len(prediction)) :
+        predictions = prediction[i]
+        temp = pd.DataFrame(data = predictions,columns = ['Bound'])
+        temp['Id'] = np.linspace(i*test_size, (i+1)*test_size - 1, test_size, dtype = 'int')
+        temp = temp.reindex(columns=['Id','Bound'])
+        pred = pred.append(temp)
+    pred.reset_index(inplace = True)
+    pred = pred.drop('index',axis = 1)
+    pred.to_csv('predictions.csv',index = False)
         
 
 
@@ -103,4 +108,5 @@ def progressBar(value, endvalue, bar_length=50):
 if __name__ == "__main__":
     x_train,y_train = load_train()
     x_test = load_test()
+    train,val,train_labels,val_labels = split_dataset(x_train, y_train)
     

@@ -10,20 +10,23 @@ from kernel import Kernel
 from cvxopt import matrix, solvers
 import numpy as np
 
+#### TODO: score, gram_matrix, verifier opti, biais, tester function
+
 class SVM(object) :
     
     def __init__(self, kernel = 'linear', C = 1.0, gamma = 0, dim = 0, offset = 0) :
         
         self.C = C
+        self.kernel_type = kernel
         
         if kernel == 'linear' : 
-            self.kernel = Kernel.linear()
+            self.kernel = Kernel().linear()
         elif kernel == 'gaussian' :
-            self.kernel = Kernel.gaussian(gamma)
+            self.kernel = Kernel().gaussian(gamma)
         elif kernel == 'sigmoid' :
-            self.kernel = Kernel.sigmoid(gamma,offset)
+            self.kernel = Kernel().sigmoid(gamma,offset)
         elif kernel == 'polynomial' :
-            self.kernel = Kernel.polynomial(dim,offset)
+            self.kernel = Kernel().polynomial(dim,offset)
         else :
             raise Exception('Invalid Kernel')
         
@@ -32,12 +35,12 @@ class SVM(object) :
         n_samples,n_features = self.X.shape
         self.K = self.gram_matrix(X)
         temp = np.diag(y)
-        Q = self.K
-        p = self.transform_label(y)
-        h = np.hstack([self.C*np.ones(n_samples),np.zeros(n_samples)])
-        G = np.vstack([temp,-temp])
-        A = np.zeros((1,1))
-        b = np.zeros(1)
+        Q = matrix(self.K)
+        p = matrix(self.transform_label(y))
+        h = matrix(np.hstack([self.C*np.ones(n_samples),np.zeros(n_samples)]))
+        G = matrix(np.vstack([temp,-temp]))
+        A = matrix(np.zeros((1,1)))
+        b = matrix(np.zeros(1))
         sol=solvers.qp(Q, p, G, h, A, b)
         self.alpha = np.ravel(sol['x'])
         self.support_vectors = (self.alpha>tol)
@@ -57,10 +60,12 @@ class SVM(object) :
     
     def gram_matrix(self,X) :
         
-        return self.kernel(X,X.T)
+        if self.kernel_type == 'linear' : 
+            return self.kernel(X,X.T)
+        elif True:
+            pass
     
     def transform_label(self,y) :
-        
         return 2*y - 1
     
         

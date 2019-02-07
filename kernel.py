@@ -10,17 +10,21 @@ import numpy as np
 
 
 class Kernel(object) :
-    
+
     def __init__(self) :
         pass
-    
+        
     def linear(self) :
         return lambda x,y : np.dot(x,y)
     
     def gaussian(self,gamma) :
-        return lambda x,y : np.exp(-gamma*np.linalg.norm(x-y)**2)
+        return lambda x,y : np.exp(-gamma*np.dot(x-y,x-y))
     
     def sigmoid(self,gamma, offset) :
         return lambda x,y : np.tanh(gamma*np.dot(x,y) + offset)
+    
+    def polynomial(self,dim,offset) :
+        return lambda x,y : (offset + np.dot(x,y))**dim
+    
     
     
