@@ -10,11 +10,11 @@ from kernel import Kernel
 from cvxopt import matrix, solvers
 import numpy as np
 
-#### TODO: verifier opti, biais, tester function
+#### TODO: biais, tester function
 
 class SVM(object) :
     
-    def __init__(self, kernel = 'linear', C = 1.0, gamma = 0, dim = 0, offset = 0) :
+    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 0) :
         
         self.C = C
         self.kernel_type = kernel
@@ -32,26 +32,25 @@ class SVM(object) :
         
     def fit(self,X, y, tol = 10**-5) :
         
-        self.X = X
+        self.X = X        
         y  = self.transform_label(y).astype('float64')
-        n_samples,n_features = self.X.shape
+        self.n_samples,n_features = self.X.shape
         self.K = self.gram_matrix(X)
         temp = np.diag(y)
         Q = matrix(self.K)
         p = -1*matrix(y)
-        h = matrix(np.hstack([self.C*np.ones(n_samples),np.zeros(n_samples)]))
+        h = matrix(np.hstack([self.C*np.ones(self.n_samples),np.zeros(self.n_samples)]))
         G = matrix(np.vstack([temp,-temp]))
         sol=solvers.qp(Q, p, G, h)
         self.alpha = np.ravel(sol['x'])
-        self.support_vectors = (self.alpha>tol)
-        self.alpha = self.alpha*self.support_vectors
+        self.support_vectors = np.linspace(0,self.n_samples-1,self.n_samples,dtype = 'int')[(np.abs(self.alpha)>tol)]
+        self.alpha = self.alpha
     
     def predict(self,X) :
         
         n_samples,n_features = X.shape
-        indexes = np.linspace(0,n_samples-1,n_samples,dtype = 'int')[self.support_vectors]
         projection = 0
-        for i in indexes :
+        for i in self.support_vectors :
             projection += self.alpha[i]*self.kernel(self.X[i],X)
         return np.sign(projection)
             

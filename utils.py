@@ -104,6 +104,15 @@ def progressBar(value, endvalue, bar_length=50):
     sys.stdout.write("\n Progress: [{0}] {1}%".format(arrow + spaces, int(round(percent * 100))))
     sys.stdout.flush()
 
+def scale(X) :
+    
+    mu = np.mean(X,axis = 1)
+    sigma = np.std(X,axis = 1)
+    
+    if sigma > 0 :
+        return (X-mu)/sigma
+    else :
+        return X-mu
 
 if __name__ == "__main__":
     x_train,y_train = load_train()
