@@ -10,7 +10,7 @@ from kernel import Kernel
 from cvxopt import matrix, solvers
 import numpy as np
 
-#### TODO: score, gram_matrix, verifier opti, biais, tester function
+#### TODO: verifier opti, biais, tester function
 
 class SVM(object) :
     
@@ -31,17 +31,17 @@ class SVM(object) :
             raise Exception('Invalid Kernel')
         
     def fit(self,X, y, tol = 10**-5) :
+        
         self.X = X
+        y  = self.transform_label(y).astype('float64')
         n_samples,n_features = self.X.shape
         self.K = self.gram_matrix(X)
         temp = np.diag(y)
         Q = matrix(self.K)
-        p = matrix(self.transform_label(y))
+        p = -1*matrix(y)
         h = matrix(np.hstack([self.C*np.ones(n_samples),np.zeros(n_samples)]))
         G = matrix(np.vstack([temp,-temp]))
-        A = matrix(np.zeros((1,1)))
-        b = matrix(np.zeros(1))
-        sol=solvers.qp(Q, p, G, h, A, b)
+        sol=solvers.qp(Q, p, G, h)
         self.alpha = np.ravel(sol['x'])
         self.support_vectors = (self.alpha>tol)
         self.alpha = self.alpha*self.support_vectors
@@ -56,14 +56,23 @@ class SVM(object) :
         return np.sign(projection)
             
     def score(self,X,y) :
-        pass
+        predictions = self.predict(X)
+        return np.sum(y == predictions)/X.shape[0]
     
     def gram_matrix(self,X) :
         
         if self.kernel_type == 'linear' : 
             return self.kernel(X,X.T)
-        elif True:
-            pass
+        else :
+            n_samples = X.shape[0]
+            K = np.zeros((n_samples,n_samples))
+            for i in range(n_samples) :
+                K[i,i] = self.kernel(X[i],X[i])
+                for j in range(i+1,n_samples) :
+                    K[i,j] = self.kernel(X[i],X[j])
+                    K[j,i] = K[i,j]
+            return K
+                    
     
     def transform_label(self,y) :
         return 2*y - 1
