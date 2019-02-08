@@ -10,7 +10,7 @@ from kernel import Kernel
 from cvxopt import matrix, solvers
 import numpy as np
 
-#### TODO: biais, tester function
+
 
 class SVM(object) :
     
