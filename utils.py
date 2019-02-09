@@ -26,8 +26,11 @@ def load_train(mat=True):
     i = 0
     for path_features,path_labels in zip(trainPaths,trainPathReturns) : 
         y_train.append(pd.read_csv(path_labels))
-        temp = pd.read_csv(path_features,sep = ' ', dtype = 'float64', header = None)
-        temp['Id'] = y_train[i]['Id']
+        if mat :
+            temp = pd.read_csv(path_features,sep = ' ', dtype = 'float64', header = None)
+            temp['Id'] = y_train[i]['Id']
+        else : 
+            temp = pd.read_csv(path_features,sep = ',')
         i +=1
         x_train.append(temp)
         
@@ -45,8 +48,12 @@ def load_test(mat=True, test_size = 1000):
         testPaths = [path_to_test0, path_to_test1, path_to_test2]
     x_test = []
     for i,path_features in enumerate(testPaths) : 
-        temp = pd.read_csv(path_features,sep = ' ',dtype = 'float64', header = None)
-        temp['Id'] = np.linspace(i*test_size, (i+1)*test_size - 1, test_size, dtype = 'int')
+        if mat :
+            temp = pd.read_csv(path_features,sep = ' ',dtype = 'float64', header = None)
+            temp['Id'] = np.linspace(i*test_size, (i+1)*test_size - 1, test_size, dtype = 'int')
+        
+        else : 
+            temp = pd.read_csv(path_features,sep = ',')
         x_test.append(temp)
     print('Done')
     return x_test
@@ -115,7 +122,7 @@ def scale(X) :
         return X-mu
 
 if __name__ == "__main__":
-    x_train,y_train = load_train()
-    x_test = load_test()
+    x_train,y_train = load_train(mat = False)
+    x_test = load_test(mat = False)
     train,val,train_labels,val_labels = split_dataset(x_train, y_train)
     

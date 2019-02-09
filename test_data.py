@@ -57,3 +57,13 @@ def gen_lin_separable_overlap_data():
     y2 = np.ones(len(X2)) * (-1)
     return X1, y1, X2, y2
 
+def gen_circular_data() :
+    rayon1,rayon2 = 1,2 
+    cov = np.array([[0.8, 0.6], [0.6, 0.8]])
+    X1 = np.random.multivariate_normal(np.zeros(2), cov, 100)
+    X1 = rayon1*X1/np.linalg.norm(X1,axis = 1).reshape((100,1))
+    y1 = np.ones(len(X1))
+    X2 = np.random.multivariate_normal(np.zeros(2), cov, 100)
+    X2 = rayon2*X2/np.linalg.norm(X2,axis = 1).reshape((100,1))
+    y2 = np.ones(len(X2)) * (-1)
+    return X1, y1, X2, y2
