@@ -10,6 +10,7 @@ import pandas as pd
 from config import *
 import numpy as np
 import sys
+from Kernel import *
 
 
 # Load train data
@@ -85,6 +86,22 @@ def split_dataset(data, labels, split_val=0.1, seed=SEED):
     print('Done')
     return train, val, train_labels, val_labels
 
+def split_kfold(data, labels, n_fold, seed=SEED, shuffle = False):
+    np.random.seed(seed)
+    
+    data = np.hstack([data,labels.reshape((len(labels),1))])
+    if shuffle == True :
+       np.random.shuffle(data,axis = 0)
+    n_samples = data.shape[0]
+    indexes = np.linspace(0,n_samples-1,n_fold+1,dtype = 'int')
+    splitted = {}
+    for j in range(n_fold) :
+        temp = data[indexes[j] : indexes[j+1],:]
+        train,labels = temp[:,:-1],temp[:,-1]
+        splitted[j] = (train,labels)
+    return list(splitted.values())        
+    
+
 
 # Tools to give the csv format
 def submission(prediction,test_size = 1000) :  
@@ -99,7 +116,18 @@ def submission(prediction,test_size = 1000) :
     pred.reset_index(inplace = True)
     pred = pred.drop('index',axis = 1)
     pred.to_csv('predictions.csv',index = False)
-        
+
+def get_kernel(kernel, gamma = 1, offset = 0, dim = 1) :
+    if kernel == 'linear' : 
+        return Kernel().linear()
+    elif kernel == 'gaussian' :
+        return Kernel().gaussian(gamma)
+    elif kernel == 'sigmoid' :
+        return Kernel().sigmoid(gamma,offset)
+    elif kernel == 'polynomial' :
+        return Kernel().polynomial(dim,offset)
+    else :
+        raise Exception('Invalid Kernel')
 
 
 # Give some cool bar when we are waiting
@@ -116,13 +144,10 @@ def scale(X) :
     mu = np.mean(X,axis = 1)
     sigma = np.std(X,axis = 1)
     
-    if sigma > 0 :
-        return (X-mu)/sigma
-    else :
-        return X-mu
+    return (X-mu.reshape((mu.shape[0],1)))/sigma.reshape((sigma.shape[0],1))
 
 if __name__ == "__main__":
-    x_train,y_train = load_train(mat = False)
-    x_test = load_test(mat = False)
+    x_train,y_train = load_train(mat = True)
+    x_test = load_test(mat = True)
     train,val,train_labels,val_labels = split_dataset(x_train, y_train)
     

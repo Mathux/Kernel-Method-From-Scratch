@@ -9,30 +9,25 @@ Created on Thu Feb  7 17:57:27 2019
 from kernel import Kernel
 from cvxopt import matrix, solvers
 import numpy as np
+from utils import *
 
 
 
 class SVM(object) :
     
-    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 0) :
+    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 0, scale = True) :
         
         self.C = C
         self.kernel_type = kernel
-        
-        if kernel == 'linear' : 
-            self.kernel = Kernel().linear()
-        elif kernel == 'gaussian' :
-            self.kernel = Kernel().gaussian(gamma)
-        elif kernel == 'sigmoid' :
-            self.kernel = Kernel().sigmoid(gamma,offset)
-        elif kernel == 'polynomial' :
-            self.kernel = Kernel().polynomial(dim,offset)
-        else :
-            raise Exception('Invalid Kernel')
+        self.scale = scale
+        self.kernel = get_kernel(kernel, gamma = gamma, dim = dim, offset = offset)
         
     def fit(self,X, y, tol = 10**-5) :
         
-        self.X = X        
+        if self.scale == True :
+            self.X = scale(X) 
+        else :
+            self.X = X
         y  = self.transform_label(y).astype('float64')
         self.n_samples,n_features = self.X.shape
         self.K = self.gram_matrix(X)
@@ -47,16 +42,25 @@ class SVM(object) :
         self.alpha = self.alpha
     
     def predict(self,X) :
-        
         n_samples,n_features = X.shape
-        projection = 0
-        for i in self.support_vectors :
-            projection += self.alpha[i]*self.kernel(self.X[i],X)
+        projection = np.zeros(n_samples)
+        for j in range(n_samples) : 
+            for i in self.support_vectors :
+                projection[j] += self.alpha[i]*self.kernel(self.X[i],X[j])
         return np.sign(projection)
             
     def score(self,X,y) :
         predictions = self.predict(X)
         return np.sum(y == predictions)/X.shape[0]
+    
+    def recall_and_precision(self,X,y) :
+        y = self.transform_label(y)
+        predictions = self.predict(X).astype('int')
+        tp = np.sum((predictions == 1)*(y == 1))
+        fn = np.sum((predictions == -1)*(y == 1))
+        fp = np.sum((predictions == 1)*(y == -1))
+        return tp/(fn+tp),tp/(fp+tp)
+    
     
     def gram_matrix(self,X) :
         
