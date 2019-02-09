@@ -10,7 +10,7 @@ import pandas as pd
 from config import *
 import numpy as np
 import sys
-from Kernel import *
+from kernel import *
 
 
 # Load train data

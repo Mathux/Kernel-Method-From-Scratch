@@ -8,10 +8,11 @@ Created on Sat Feb  9 20:59:32 2019
 
 import numpy as np
 from utils import *
+from scipy.linalg import sqrtm
 
 class KernelLogisticRegression(object) :
     
-    def __init__(self,kernel,la, n_iter = 100, gamma = 1, dim = 1, offset = 0, scale = False) :
+    def __init__(self,kernel = 'linear', la = 10**-2, n_iter = 100, gamma = 1, dim = 1, offset = 0, scale = False) :
         
         self.la = la
         self.n_iter = n_iter
@@ -56,7 +57,7 @@ class KernelLogisticRegression(object) :
             return K
 
     def WKRR(self,W,z,la,n) :
-        sqrt_W = np.lingal.sqrtm(W)
+        sqrt_W = sqrtm(W)
         inv_reg_W = np.linalg.inv(n*la*np.eye(n) + np.dot(sqrt_W,np.dot(self.K,sqrt_W)))
         return np.dot(sqrt_W,np.dot(inv_reg_W,np.dot(sqrt_W,z)))
     
@@ -70,9 +71,11 @@ class KernelLogisticRegression(object) :
         n_samples,n_features = X.shape
         projection = np.zeros(n_samples)
         for j in range(n_samples) : 
-            for i in self.support_vectors :
+            for i in range(self.n_samples) :
                 projection[j] += self.alpha[i]*self.kernel(self.X[i],X[j])
-        return np.sign(projection)
+        proba = self.sigmoid(projection)
+        print(proba)  
+        return 1*(proba >= 1/2)
             
     def score(self,X,y) :
         predictions = self.predict(X)
