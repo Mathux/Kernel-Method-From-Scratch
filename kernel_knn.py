@@ -55,7 +55,8 @@ class KernelKNN(object) :
         distance = []
         nearest_neighbors = []
         for i in range(self.n_samples) :
-            hq.heappush(distance,(self.kernel(self.X[i],x),i))
+            d = self.kernel(self.X[i],self.X[i]) + self.kernel(x,x) - 2*self.kernel(self.X[i],x)
+            hq.heappush(distance,d)
         for j in range(self.n_neighbors) : 
             nearest_neighbors.append(hq.heappop(distance)[1])
         print(nearest_neighbors)
