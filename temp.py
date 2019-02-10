@@ -29,15 +29,15 @@ preds = a.predict(X)
 
 alpha = a.alpha
 
-x,y = np.linspace(-6,6),np.linspace(-6,6)
-XX,YY = np.meshgrid(x,y)
+xx,yy = np.linspace(-6,6),np.linspace(-6,6)
+XX,YY = np.meshgrid(xx,yy)
 
 
 l = lambda x,y : sum([alpha[i]*a.kernel(X[i],np.array([x,y])) for i in range(len(X))]) 
 Z = []
-for xx in x : 
-    for yy in y :
-        Z.append(l(xx,yy))
+for xxx in xx : 
+    for yyy in yy :
+        Z.append(l(xxx,yyy))
         
 Z = np.array(Z).reshape((50,50))
 plt.contour(XX,YY,Z,0)

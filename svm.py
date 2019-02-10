@@ -6,26 +6,25 @@ Created on Thu Feb  7 17:57:27 2019
 @author: evrardgarcelon
 """
 
-from kernel import Kernel
 from cvxopt import matrix, solvers
 import numpy as np
-from utils import *
+import utils
 
 
 
 class SVM(object) :
     
-    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 0, scale = True) :
+    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 0, scale = False) :
         
         self.C = C
         self.kernel_type = kernel
         self.scale = scale
-        self.kernel = get_kernel(kernel, gamma = gamma, dim = dim, offset = offset)
+        self.kernel = utils.get_kernel(kernel, gamma = gamma, dim = dim, offset = offset)
         
     def fit(self,X, y, tol = 10**-5) :
         
         if self.scale == True :
-            self.X = scale(X) 
+            self.X = utils.scale(X) 
         else :
             self.X = X
         y  = self.transform_label(y).astype('float64')
@@ -56,9 +55,10 @@ class SVM(object) :
     def recall_and_precision(self,X,y) :
         y = self.transform_label(y)
         predictions = self.predict(X).astype('int')
-        tp = np.sum((predictions == 1)*(y == 1))
-        fn = np.sum((predictions == -1)*(y == 1))
-        fp = np.sum((predictions == 1)*(y == -1))
+        tp = np.sum((predictions == 1)*(y == 1.))
+        fn = np.sum((predictions == -1)*(y == 1.))
+        fp = np.sum((predictions == 1)*(y == -1.))
+        print('tp = ', tp, 'fn = ',fn, 'fp = ',fp)
         return tp/(fn+tp),tp/(fp+tp)
     
     

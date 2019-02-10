@@ -6,7 +6,7 @@ Created on Sat Feb  9 20:56:13 2019
 @author: evrardgarcelon
 """
 import numpy as np
-from utils import *
+import utils
 import heapq as hq
 
 class KernelKNN(object) :
@@ -14,7 +14,7 @@ class KernelKNN(object) :
     def __init__(self, n_neighbors = 5, kernel = 'linear', gamma = 1, dim = 1, offset = 0, scale = False) :
         
         self.n_neighbors = n_neighbors
-        self.kernel = get_kernel(kernel, gamma = 1, dim = 1, offset = 0)
+        self.kernel = utils.get_kernel(kernel, gamma = 1, dim = 1, offset = 0)
         self.scale = scale
         self.kernel_type = kernel
     

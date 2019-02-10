@@ -7,7 +7,7 @@ Created on Sat Feb  9 20:59:32 2019
 """
 
 import numpy as np
-from utils import *
+import utils
 from scipy.linalg import sqrtm
 
 class KernelLogisticRegression(object) :
@@ -16,14 +16,14 @@ class KernelLogisticRegression(object) :
         
         self.la = la
         self.n_iter = n_iter
-        self.kernel = get_kernel(kernel, gamma = gamma, dim = dim, offset = offset)
+        self.kernel = utils.get_kernel(kernel, gamma = gamma, dim = dim, offset = offset)
         self.scale = scale
         self.kernel_type = kernel
     
     def fit(self,X,y,tol = 10**-5,eps = 10**-5 ):
         
         if self.scale :
-            self.X = scale(X)
+            self.X = utils.scale(X)
         else :
             self.X = X
         y  = self.transform_label(y)
@@ -34,6 +34,7 @@ class KernelLogisticRegression(object) :
         t = 0
         print('Fitting LogisticRegression...')
         while t < self.n_iter and np.linalg.norm(self.alpha - old_alpha) > tol :
+            utils.progressBar(t,self.n_iter)
             m = np.dot(self.K,self.alpha)
             W = self.sigmoid(y*m)*self.sigmoid(-y*m)
             z = m + y/(self.sigmoid(-y*m) + eps)
