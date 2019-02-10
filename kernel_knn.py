@@ -56,10 +56,9 @@ class KernelKNN(object) :
         nearest_neighbors = []
         for i in range(self.n_samples) :
             d = self.kernel(self.X[i],self.X[i]) + self.kernel(x,x) - 2*self.kernel(self.X[i],x)
-            hq.heappush(distance,d)
-        for j in range(self.n_neighbors) : 
+            hq.heappush(distance,(d,i))
+        for j in range(self.n_neighbors) :
             nearest_neighbors.append(hq.heappop(distance)[1])
-        print(nearest_neighbors)
         return nearest_neighbors
     
     def transform_label(self,y) :

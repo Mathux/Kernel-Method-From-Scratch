@@ -12,7 +12,7 @@ from scipy.linalg import sqrtm
 
 class KernelLogisticRegression(object) :
     
-    def __init__(self,kernel = 'linear', la = 10**-2, n_iter = 100, gamma = 1, dim = 1, offset = 0, scale = False) :
+    def __init__(self,kernel = 'linear', la = 10**2, n_iter = 100, gamma = 1, dim = 1, offset = 0, scale = False) :
         
         self.la = la
         self.n_iter = n_iter
@@ -20,7 +20,7 @@ class KernelLogisticRegression(object) :
         self.scale = scale
         self.kernel_type = kernel
     
-    def fit(self,X,y,tol = 10**-5) :
+    def fit(self,X,y,tol = 10**-5,eps = 10**-5 ):
         
         if self.scale :
             self.X = scale(X)
@@ -36,7 +36,7 @@ class KernelLogisticRegression(object) :
         while t < self.n_iter and np.linalg.norm(self.alpha - old_alpha) > tol :
             m = np.dot(self.K,self.alpha)
             W = self.sigmoid(y*m)*self.sigmoid(-y*m)
-            z = m + y/self.sigmoid(-y*m)
+            z = m + y/(self.sigmoid(-y*m) + eps)
             W = np.diag(W)
             old_alpha = self.alpha
             self.alpha = self.WKRR(W,z,self.la,self.n_samples)
@@ -58,7 +58,7 @@ class KernelLogisticRegression(object) :
 
     def WKRR(self,W,z,la,n) :
         sqrt_W = sqrtm(W)
-        inv_reg_W = np.linalg.inv(n*la*np.eye(n) + np.dot(sqrt_W,np.dot(self.K,sqrt_W)))
+        inv_reg_W = np.linalg.inv(la*np.eye(n) + np.dot(sqrt_W,np.dot(self.K,sqrt_W)))
         return np.dot(sqrt_W,np.dot(inv_reg_W,np.dot(sqrt_W,z)))
     
     def sigmoid(self,x) :
@@ -74,8 +74,7 @@ class KernelLogisticRegression(object) :
             for i in range(self.n_samples) :
                 projection[j] += self.alpha[i]*self.kernel(self.X[i],X[j])
         proba = self.sigmoid(projection)
-        print(proba)  
-        return 1*(proba >= 1/2)
+        return 2*(proba >= 1/2) - 1
             
     def score(self,X,y) :
         predictions = self.predict(X)

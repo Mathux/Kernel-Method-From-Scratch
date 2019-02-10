@@ -78,7 +78,7 @@ def split_dataset(data, labels, split_val=0.1, seed=SEED):
         train_labels_temp = train_temp[['Id','Bound']]
         val_labels_temp = val_temp[['Id','Bound']]
         data[i] = data[i].drop('Bound',axis = 1)
-        train_temp,val_temp = train_temp.drop('Bound',axis = 1),val_temp.drop('Bound',axis = 1)
+        train_temp,val_temp = train_temp.drop(['Bound','index'],axis = 1),val_temp.drop(['Bound','index'],axis = 1)
         train.append(train_temp)
         val.append(val_temp)
         train_labels.append(train_labels_temp)

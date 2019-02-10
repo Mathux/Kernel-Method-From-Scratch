@@ -15,9 +15,9 @@ class VotingClassifier(object) :
         self.base_classifiers = base_classifiers
         self.n_clfs = len(self.base_classifiers)
         if weights is None :
-            self.weights = 1/self.n_clfs
+            self.weights = np.ones(self.n_clfs)/self.n_clfs
         else :
-            if np.sum(weights) != 1. :
+            if np.sum(weighns) != 1. :
                 raise Exception('Error weights do not sum to 1')
             self.weights = weights
         self.hard_pred = hard_pred
@@ -32,7 +32,12 @@ class VotingClassifier(object) :
             else :
                 predictions_base_clfs[:,j] = self.base_classifiers[j].predict_proba(X)
         predictions = np.average(predictions_base_clfs, axis = 1, weights = self.weights)
-        return 1*(predictions >= 1/2)
+        if self.hard_pred :
+            return 2*(predictions >= 0) - 1
+        else : 
+            return 2*(predictions >= 1/2) - 1
+        
+        
     
     def score(self,X,y) :
         predictions = self.predict(X)
