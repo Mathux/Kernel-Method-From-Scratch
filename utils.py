@@ -10,7 +10,10 @@ import pandas as pd
 from config import *
 import numpy as np
 import sys
-from kernel import *
+from kernel import Kernel
+from svm import SVM
+from kernel_lr import KernelLogisticRegression
+from kernel_knn import KernelKNN
 
 
 # Load train data
@@ -116,6 +119,7 @@ def submission(prediction,test_size = 1000) :
     pred.reset_index(inplace = True)
     pred = pred.drop('index',axis = 1)
     pred.to_csv('predictions.csv',index = False)
+    return None
 
 def get_kernel(kernel, gamma = 1, offset = 0, dim = 1) :
     if kernel == 'linear' : 
@@ -128,7 +132,18 @@ def get_kernel(kernel, gamma = 1, offset = 0, dim = 1) :
         return Kernel().polynomial(dim,offset)
     else :
         raise Exception('Invalid Kernel')
-
+    
+def get_kernel_parameters(kernel) :
+    if kernel == 'linear' : 
+        return []
+    elif kernel == 'gaussian' :
+        return ['gamma',]
+    elif kernel == 'sigmoid' :
+        return ['gamma','offset']
+    elif kernel == 'polynomial' :
+        return ['offset','dim']
+    else :
+        raise Exception('Invalid Kernel')
 
 # Give some cool bar when we are waiting
 def progressBar(value, endvalue, bar_length=50):
