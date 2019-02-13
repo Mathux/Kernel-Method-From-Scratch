@@ -14,13 +14,12 @@ from time import time
 start_time_0 = time()  # Just to count the total running time at the end
 
 import numpy as np
-import pylab as plt
 
 
 def gen_lin_separable_data():
     """ Generate training data in the 2-d case. """
-    mean1 = np.array([0, 2])
-    mean2 = np.array([2, 0])
+    mean1 = np.array([1, 2])
+    mean2 = np.array([2, 1])
     cov = np.array([[0.8, 0.6], [0.6, 0.8]])
     X1 = np.random.multivariate_normal(mean1, cov, 100)
     y1 = np.ones(len(X1))

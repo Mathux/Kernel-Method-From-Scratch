@@ -1,16 +1,16 @@
 import pylab as plt
 import numpy as np 
-from test_data import *
+import test_data
 from svm import SVM
 from kernel_lr import KernelLogisticRegression
 from kernel_knn import KernelKNN
-from utils import *
+import utils
 
 plt.figure(1)
-X1,y1,X2,y2 = gen_circular_data()
+X1,y1,X2,y2 = gen_lin_separable_data()
 X = np.vstack([X1,X2])
 y = np.hstack([y1,y2])
-a = KernelLogisticRegression(kernel = 'gaussian',la = 10, offset = 0, dim = 2)
+a = SVM(kernel = 'linear')
 a.fit(X,y)
 
 plt.scatter(X1[:,0],X1[:,1],color = 'red',marker = 'o')
