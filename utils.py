@@ -11,9 +11,9 @@ from config import *
 import numpy as np
 import sys
 from kernel import Kernel
-from svm import SVM
-from kernel_lr import KernelLogisticRegression
-from kernel_knn import KernelKNN
+import svm
+import kernel_lr
+import kernel_knn 
 
 
 # Load train data

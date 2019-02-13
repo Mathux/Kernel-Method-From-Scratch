@@ -9,6 +9,8 @@ Created on Fri Feb  8 17:43:18 2019
 #! /usr/bin/env python
 # -*- coding: utf-8; mode: python -*-
 
+
+
 print("\nLaunching script, importing modules ...")
 from time import time
 start_time_0 = time()  # Just to count the total running time at the end
@@ -17,10 +19,11 @@ import numpy as np
 
 
 def gen_lin_separable_data():
-    """ Generate training data in the 2-d case. """
-    mean1 = np.array([1, 2])
-    mean2 = np.array([2, 1])
-    cov = np.array([[0.8, 0.6], [0.6, 0.8]])
+    A = np.array([[2,1],[1,2]])
+    b= np.array([2,1])
+    mean1 = np.dot(A,np.array([1, 2])) + b
+    mean2 = np.dot(A,np.array([2, 1])) + b
+    cov = np.dot(A,np.dot(np.array([[0.8, 0.6], [0.6, 0.8]]),A.T))
     X1 = np.random.multivariate_normal(mean1, cov, 100)
     y1 = np.ones(len(X1))
     X2 = np.random.multivariate_normal(mean2, cov, 100)

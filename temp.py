@@ -1,16 +1,14 @@
 import pylab as plt
 import numpy as np 
 import test_data
-from svm import SVM
-from kernel_lr import KernelLogisticRegression
-from kernel_knn import KernelKNN
+import svm
 import utils
 
 plt.figure(1)
-X1,y1,X2,y2 = gen_lin_separable_data()
+X1,y1,X2,y2 = test_data.gen_lin_separable_data()
 X = np.vstack([X1,X2])
 y = np.hstack([y1,y2])
-a = SVM(kernel = 'linear')
+a = svm.SVM(kernel = 'linear')
 a.fit(X,y)
 
 plt.scatter(X1[:,0],X1[:,1],color = 'red',marker = 'o')
@@ -29,7 +27,7 @@ preds = a.predict(X)
 
 alpha = a.alpha
 
-xx,yy = np.linspace(-6,6),np.linspace(-6,6)
+xx,yy = np.linspace(-6,15),np.linspace(-6,15)
 XX,YY = np.meshgrid(xx,yy)
 
 

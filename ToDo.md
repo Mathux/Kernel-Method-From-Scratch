@@ -1,5 +1,7 @@
 To do : 
   - Embeddings for non matrix data
   - Bias
-  - main.py
+  - main.py 
+  - intercept coefficient
+
   
