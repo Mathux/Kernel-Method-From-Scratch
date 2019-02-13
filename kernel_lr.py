@@ -13,7 +13,7 @@ import pylab as plt
 
 class KernelLogisticRegression(object) :
     
-    def __init__(self,kernel = 'linear', la = 10**2, n_iter = 10**3, gamma = 1, dim = 1, offset = 1, scale = False) :
+    def __init__(self,kernel = 'linear', la = 10**0, n_iter = 10**3, gamma = 1, dim = 1, offset = 1, scale = False) :
         
         self.la = la
         self.n_iter = n_iter
@@ -27,33 +27,29 @@ class KernelLogisticRegression(object) :
             self.X = utils.scale(X)
         else :
             self.X = X
-        y  = self.transform_label(y)
+        #y  = self.transform_label(y)
+        y = y.squeeze()
         self.n_samples,self.n_features = self.X.shape
         self.alpha = np.zeros(self.n_samples)
         old_alpha = self.alpha +1
         self.K = self.gram_matrix(self.X)
         t = 0
-        error = []
         print('Fitting LogisticRegression...')
         while t < self.n_iter and np.linalg.norm(self.alpha - old_alpha) > tol :
-            #utils.progressBar(t,self.n_iter)
+            utils.progressBar(t,self.n_iter)
             m = np.dot(self.K,self.alpha)
             W = self.sigmoid(y*m)*self.sigmoid(-y*m)
-            z = m + y/(self.sigmoid(-y*m) + eps)
+            z = m + y/np.maximum(self.sigmoid(y*m),0)
             W = np.diag(W)
             old_alpha = self.alpha
             self.alpha = self.WKRR(W,z,self.la,self.n_samples)
-            error.append(np.linalg.norm(self.alpha - old_alpha))
             t +=1
         print('Done')
-        error = np.array(error)
-        plt.figure(5)
-        plt.plot(error,marker = '+')
         if t == self.n_iter :
             print('Attention Convergence non atteinte')
         
     def gram_matrix(self,X) :
-        if self.kernel_type == 'linear' : 
+        if self.kernel_type == None : 
             return self.kernel(X,X.T)
         else :
             n_samples = X.shape[0]
@@ -66,9 +62,9 @@ class KernelLogisticRegression(object) :
             return K
 
     def WKRR(self,W,z,la,n) :
-        sqrt_W = sqrtm(W)
-        inv_reg_W = np.linalg.inv(la*np.eye(n) + np.dot(sqrt_W,np.dot(self.K,sqrt_W)))
-        return np.dot(sqrt_W,np.dot(inv_reg_W,np.dot(sqrt_W,z)))
+        inv_reg_W = np.linalg.inv(n*la*np.eye(n) + np.dot(W,self.K))
+        alpha = np.dot(inv_reg_W,np.dot(W,z))
+        return  alpha
     
     def sigmoid(self,x) :
         return 1/(1+np.exp(-x))
@@ -96,6 +92,3 @@ class KernelLogisticRegression(object) :
         fn = np.sum((predictions == -1)*(y == 1))
         fp = np.sum((predictions == 1)*(y == -1))
         return tp/(fn+tp),tp/(fp+tp)
-    
-            
-        

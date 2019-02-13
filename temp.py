@@ -6,16 +6,17 @@ import kernel_lr
 import utils
 
 plt.figure(1)
-X1,y1,X2,y2 = test_data.gen_lin_separable_data()
+X1,y1,X2,y2 = test_data.gen_circular_data()
 X = np.vstack([X1,X2])
 y = np.hstack([y1,y2]).reshape((len(X),1))
-XX = np.hstack([X,y])
-np.random.shuffle(XX)
-X = XX[:,:-1]
-y = XX[:,-1]
-np.random.shuffle(X)
-a = kernel_lr.KernelLogisticRegression(kernel = 'linear', la = 10**-3)
+#XX = np.hstack([X,y])
+#np.random.shuffle(XX)
+#X = XX[:,:-1]
+#y = XX[:,-1]
+#np.random.shuffle(X)
+a = kernel_lr.KernelLogisticRegression(kernel = 'gaussian', la = 10,gamma = 3)
 a.fit(X,y)
+
 
 plt.figure(1)
 plt.scatter(X1[:,0],X1[:,1],color = 'red',marker = 'o')
@@ -32,9 +33,9 @@ preds = a.predict(X)
 #        print('pb')
 #        
 
-alpha = a.alpha/2
+alpha = a.alpha
 
-xx,yy = np.linspace(-6,15),np.linspace(-6,15)
+xx,yy = np.linspace(-2,2),np.linspace(-2,2)
 XX,YY = np.meshgrid(xx,yy)
 
 

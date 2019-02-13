@@ -1,6 +1,6 @@
 To do : 
   - Embeddings for non matrix data
   - main.py 
-  - kernel logistic regression erreur
+  - kernel for biological data
 
   
