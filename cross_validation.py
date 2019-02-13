@@ -7,7 +7,7 @@ Created on Sat Feb  9 17:00:46 2019
 """
 
 import numpy as np
-from utils import *
+import utils
 
 
 class CrossValidation(object):
@@ -16,7 +16,7 @@ class CrossValidation(object):
         self.accuracy = np.zeros(n_fold)
         self.recall = np.zeros(n_fold)
         self.precision = np.zeros(n_fold)
-        self.splitted_data = split_kfold(X,y,n_fold = 5,shuffle = False)
+        self.splitted_data = utils.split_kfold(X,y,n_fold = 5,shuffle = False)
         for k in range(n_fold) :
             data_to_stack = []
             labels_to_stack = []

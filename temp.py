@@ -8,7 +8,7 @@ plt.figure(1)
 X1,y1,X2,y2 = test_data.gen_lin_separable_data()
 X = np.vstack([X1,X2])
 y = np.hstack([y1,y2])
-a = svm.SVM(kernel = 'linear')
+a = svm.SVM(kernel = 'linear', C = 1/4, gamma = 1/2,offset = 1)
 a.fit(X,y)
 
 plt.scatter(X1[:,0],X1[:,1],color = 'red',marker = 'o')
@@ -25,7 +25,7 @@ preds = a.predict(X)
 #        print('pb')
 #        
 
-alpha = a.alpha
+alpha = a.alpha/2
 
 xx,yy = np.linspace(-6,15),np.linspace(-6,15)
 XX,YY = np.meshgrid(xx,yy)

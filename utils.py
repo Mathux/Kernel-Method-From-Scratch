@@ -121,9 +121,9 @@ def submission(prediction,test_size = 1000) :
     pred.to_csv('predictions.csv',index = False)
     return None
 
-def get_kernel(kernel, gamma = 1, offset = 0, dim = 1) :
+def get_kernel(kernel, gamma = 1, offset = 1, dim = 1) :
     if kernel == 'linear' : 
-        return Kernel().linear()
+        return Kernel().linear(offset)
     elif kernel == 'gaussian' :
         return Kernel().gaussian(gamma)
     elif kernel == 'sigmoid' :
@@ -135,7 +135,7 @@ def get_kernel(kernel, gamma = 1, offset = 0, dim = 1) :
     
 def get_kernel_parameters(kernel) :
     if kernel == 'linear' : 
-        return []
+        return ['offset']
     elif kernel == 'gaussian' :
         return ['gamma',]
     elif kernel == 'sigmoid' :

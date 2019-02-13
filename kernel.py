@@ -14,8 +14,8 @@ class Kernel(object) :
     def __init__(self) :
         pass
         
-    def linear(self) :
-        return lambda x,y : np.dot(x,y)
+    def linear(self,offset = 1) :
+        return lambda x,y : np.dot(x,y) + offset
     
     def gaussian(self,gamma) :
         return lambda x,y : np.exp(-gamma*np.dot(x-y,x-y))

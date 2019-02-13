@@ -14,7 +14,7 @@ import utils
 
 class SVM(object) :
     
-    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 0, scale = False) :
+    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 1, scale = False) :
         
         self.C = C
         self.kernel_type = kernel
@@ -64,7 +64,7 @@ class SVM(object) :
     
     def gram_matrix(self,X) :
         
-        if self.kernel_type == 'linear' : 
+        if self.kernel_type == None: 
             return self.kernel(X,X.T)
         else :
             n_samples = X.shape[0]
