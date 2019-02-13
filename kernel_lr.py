@@ -9,10 +9,11 @@ Created on Sat Feb  9 20:59:32 2019
 import numpy as np
 import utils
 from scipy.linalg import sqrtm
+import pylab as plt
 
 class KernelLogisticRegression(object) :
     
-    def __init__(self,kernel = 'linear', la = 10**2, n_iter = 100, gamma = 1, dim = 1, offset = 0, scale = False) :
+    def __init__(self,kernel = 'linear', la = 10**2, n_iter = 10**3, gamma = 1, dim = 1, offset = 1, scale = False) :
         
         self.la = la
         self.n_iter = n_iter
@@ -32,17 +33,24 @@ class KernelLogisticRegression(object) :
         old_alpha = self.alpha +1
         self.K = self.gram_matrix(self.X)
         t = 0
+        error = []
         print('Fitting LogisticRegression...')
         while t < self.n_iter and np.linalg.norm(self.alpha - old_alpha) > tol :
-            utils.progressBar(t,self.n_iter)
+            #utils.progressBar(t,self.n_iter)
             m = np.dot(self.K,self.alpha)
             W = self.sigmoid(y*m)*self.sigmoid(-y*m)
             z = m + y/(self.sigmoid(-y*m) + eps)
             W = np.diag(W)
             old_alpha = self.alpha
             self.alpha = self.WKRR(W,z,self.la,self.n_samples)
+            error.append(np.linalg.norm(self.alpha - old_alpha))
             t +=1
         print('Done')
+        error = np.array(error)
+        plt.figure(5)
+        plt.plot(error,marker = '+')
+        if t == self.n_iter :
+            print('Attention Convergence non atteinte')
         
     def gram_matrix(self,X) :
         if self.kernel_type == 'linear' : 
