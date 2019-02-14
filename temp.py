@@ -6,7 +6,7 @@ import kernel_lr
 import utils
 
 plt.figure(1)
-X1,y1,X2,y2 = test_data.gen_circular_data()
+X1,y1,X2,y2 = test_data.gen_lin_separable_data()
 X = np.vstack([X1,X2])
 y = np.hstack([y1,y2]).reshape((len(X),1))
 #XX = np.hstack([X,y])
@@ -14,7 +14,7 @@ y = np.hstack([y1,y2]).reshape((len(X),1))
 #X = XX[:,:-1]
 #y = XX[:,-1]
 #np.random.shuffle(X)
-a = kernel_lr.KernelLogisticRegression(kernel = 'gaussian', la = 10,gamma = 3)
+a = svm.SVM(kernel = 'linear', C = 10, offset = 1)
 a.fit(X,y)
 
 
@@ -35,7 +35,7 @@ preds = a.predict(X)
 
 alpha = a.alpha
 
-xx,yy = np.linspace(-2,2),np.linspace(-2,2)
+xx,yy = np.linspace(-2,12),np.linspace(-2,12)
 XX,YY = np.meshgrid(xx,yy)
 
 

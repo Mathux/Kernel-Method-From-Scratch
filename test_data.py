@@ -21,14 +21,14 @@ import numpy as np
 def gen_lin_separable_data():
     
     A = np.array([[2,1],[1,2]])
-    mean1 = np.dot(A,np.array([0, 2]))
-    mean2 = np.dot(A,np.array([2, 0])) 
-    cov = np.dot(A,np.dot(np.array([[0.8, 0.6], [0.6, 0.8]]),A.T))
+    mean1 = np.array([0, 2]) 
+    mean2 = np.array([2, 0])
+    cov = np.array([[0.8, 0.6], [0.6, 0.8]])
     X1 = np.random.multivariate_normal(mean1, cov, 100)
     y1 = np.ones(len(X1))
     X2 = np.random.multivariate_normal(mean2, cov, 100)
     y2 = np.ones(len(X2)) * (-1)
-    return X1, y1, X2, y2
+    return np.dot(X1,A) + np.array([[1,1]]), y1, np.dot(X2,A) + np.array([[1,1]]), y2
 
 
 def gen_non_lin_separable_data():

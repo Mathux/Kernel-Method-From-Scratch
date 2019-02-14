@@ -27,7 +27,7 @@ class SVM(object) :
             self.X = utils.scale(X) 
         else :
             self.X = X
-        y  = self.transform_label(y).astype('float64')
+        y  = self.transform_label(y).astype('float64').squeeze()
         self.n_samples,n_features = self.X.shape
         self.K = self.gram_matrix(X)
         temp = np.diag(y)
