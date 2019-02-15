@@ -13,13 +13,14 @@ import pylab as plt
 
 class KernelLogisticRegression(object) :
     
-    def __init__(self,kernel = 'linear', la = 10**0, n_iter = 10**3, gamma = 1, dim = 1, offset = 1, scale = False) :
+    def __init__(self,kernel = 'linear', la = 10**0, n_iter = 10**3, gamma = 1, dim = 1, offset = 1, scale = False, kernel_matrix = None) :
         
         self.la = la
         self.n_iter = n_iter
         self.kernel = utils.get_kernel(kernel, gamma = gamma, dim = dim, offset = offset)
         self.scale = scale
         self.kernel_type = kernel
+        self.kernel_matrix = kernel_matrix
     
     def fit(self,X,y,tol = 10**-5,eps = 10**-5 ):
         
@@ -32,7 +33,10 @@ class KernelLogisticRegression(object) :
         self.n_samples,self.n_features = self.X.shape
         self.alpha = np.zeros(self.n_samples)
         old_alpha = self.alpha +1
-        self.K = self.gram_matrix(self.X)
+        if self.kernel_matrix is None :
+            self.K = self.gram_matrix(self.X)
+        else :
+            self.K = self.kernel_matrix
         t = 0
         print('Fitting LogisticRegression...')
         while t < self.n_iter and np.linalg.norm(self.alpha - old_alpha) > tol :

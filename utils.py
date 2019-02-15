@@ -130,6 +130,10 @@ def get_kernel(kernel, gamma = 1, offset = 1, dim = 1) :
         return Kernel().sigmoid(gamma,offset)
     elif kernel == 'polynomial' :
         return Kernel().polynomial(dim,offset)
+    elif kernel == 'spectral' :
+        return Kernel().spectral_kernel(3)
+    elif kernel == 'mismatch' :
+        return Kernel().mismatch_kernel(k = 3, m =1)
     else :
         raise Exception('Invalid Kernel')
     
@@ -142,6 +146,10 @@ def get_kernel_parameters(kernel) :
         return ['gamma','offset']
     elif kernel == 'polynomial' :
         return ['offset','dim']
+    elif kernel == 'spectral' :
+        return []
+    elif kernel == 'mismatch' :
+        return []
     else :
         raise Exception('Invalid Kernel')
 
@@ -162,7 +170,7 @@ def scale(X) :
     return (X-mu.reshape((mu.shape[0],1)))/sigma.reshape((sigma.shape[0],1))
 
 if __name__ == "__main__":
-    x_train,y_train = load_train(mat = True)
-    x_test = load_test(mat = True)
+    x_train,y_train = load_train(mat = False)
+    x_test = load_test(mat = False)
     train,val,train_labels,val_labels = split_dataset(x_train, y_train)
     

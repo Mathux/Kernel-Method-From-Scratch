@@ -14,13 +14,13 @@ import utils
 
 class SVM(object) :
     
-    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 1, scale = False) :
+    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 1, scale = False, kernel_matrix = None) :
         
         self.C = C
         self.kernel_type = kernel
         self.scale = scale
         self.kernel = utils.get_kernel(kernel, gamma = gamma, dim = dim, offset = offset)
-        
+        self.kernel_matrix = kernel_matrix
     def fit(self,X, y, tol = 10**-5) :
         
         if self.scale == True :
@@ -29,7 +29,10 @@ class SVM(object) :
             self.X = X
         y  = self.transform_label(y).astype('float64').squeeze()
         self.n_samples,n_features = self.X.shape
-        self.K = self.gram_matrix(X)
+        if self.kernel_matrix is None :
+            self.K = self.gram_matrix(X)
+        else :
+            self.K = self.kernel_matrix
         temp = np.diag(y)
         Q = matrix(self.K)
         p = -1*matrix(y)

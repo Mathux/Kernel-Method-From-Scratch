@@ -17,7 +17,7 @@ class VotingClassifier(object) :
         if weights is None :
             self.weights = np.ones(self.n_clfs)/self.n_clfs
         else :
-            if np.sum(weighns) != 1. :
+            if np.sum(weights) != 1. :
                 raise Exception('Error weights do not sum to 1')
             self.weights = weights
         self.hard_pred = hard_pred
