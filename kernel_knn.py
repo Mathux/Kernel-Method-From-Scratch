@@ -43,12 +43,11 @@ class KernelKNN(object) :
                 majority += -1
             
         if majority > 0 :
-            return 1
+            return 1.
         elif majority < 0 :
-            return 0
+            return -1.
         else :
-            print('lol')
-            return np.random.randint(0,2)
+            return np.choice(np.array([-1.,1.]))
             
     def compute_nearest_neighbors(self,x) :
         
@@ -61,19 +60,15 @@ class KernelKNN(object) :
             nearest_neighbors.append(hq.heappop(distance)[1])
         return nearest_neighbors
     
-    def transform_label(self,y) :
-        return 2*y - 1
-    
     def score(self,X,y) :
         predictions = self.predict(X)
         return np.sum(y == predictions)/X.shape[0]
     
     def recall_and_precision(self,X,y) :
-        y = self.transform_label(y)
-        predictions = self.predict(X).astype('int')
-        tp = np.sum((predictions == 1)*(y == 1))
-        fn = np.sum((predictions == -1)*(y == 1))
-        fp = np.sum((predictions == 1)*(y == -1))
+        predictions = self.predict(X)
+        tp = np.sum((predictions == 1.)*(y == 1.))
+        fn = np.sum((predictions == -1.)*(y == 1.))
+        fp = np.sum((predictions == 1.)*(y == -1.))
         return tp/(fn+tp),tp/(fp+tp)
             
         

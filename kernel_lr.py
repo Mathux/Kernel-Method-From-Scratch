@@ -8,12 +8,10 @@ Created on Sat Feb  9 20:59:32 2019
 
 import numpy as np
 import utils
-from scipy.linalg import sqrtm
-import pylab as plt
 
 class KernelLogisticRegression(object) :
     
-    def __init__(self,kernel = 'linear', la = 10**0, n_iter = 10**3, gamma = 1, dim = 1, offset = 1, scale = False, kernel_matrix = None) :
+    def __init__(self,kernel = 'linear', la = 10**0, n_iter = 10**3, gamma = 1, dim = 1, offset = 1, scale = False, kernel_matrix = None, verbose = False) :
         
         self.la = la
         self.n_iter = n_iter
@@ -21,6 +19,7 @@ class KernelLogisticRegression(object) :
         self.scale = scale
         self.kernel_type = kernel
         self.kernel_matrix = kernel_matrix
+        self.verbose = verbose
     
     def fit(self,X,y,tol = 10**-5,eps = 10**-5 ):
         
@@ -28,17 +27,16 @@ class KernelLogisticRegression(object) :
             self.X = utils.scale(X)
         else :
             self.X = X
-        #y  = self.transform_label(y)
-        y = y.squeeze()
         self.n_samples,self.n_features = self.X.shape
         self.alpha = np.zeros(self.n_samples)
         old_alpha = self.alpha +1
         if self.kernel_matrix is None :
             self.K = self.gram_matrix(self.X)
         else :
-            self.K = self.kernel_matrix
+            self.K = utils.normalize_kernel(self.kernel_matrix)
         t = 0
-        print('Fitting LogisticRegression...')
+        if self.verbose :
+            print('Fitting LogisticRegression...')
         while t < self.n_iter and np.linalg.norm(self.alpha - old_alpha) > tol :
             utils.progressBar(t,self.n_iter)
             m = np.dot(self.K,self.alpha)
@@ -48,7 +46,8 @@ class KernelLogisticRegression(object) :
             old_alpha = self.alpha
             self.alpha = self.WKRR(W,z,self.la,self.n_samples)
             t +=1
-        print('Done')
+        if self.verbose :
+            print('\n Done')
         if t == self.n_iter :
             print('Attention Convergence non atteinte')
         
@@ -72,10 +71,7 @@ class KernelLogisticRegression(object) :
     
     def sigmoid(self,x) :
         return 1/(1+np.exp(-x))
-    
-    def transform_label(self,y) :
-        return 2*y-1
-    
+        
     def predict(self,X) :
         n_samples,n_features = X.shape
         projection = np.zeros(n_samples)
@@ -83,7 +79,7 @@ class KernelLogisticRegression(object) :
             for i in range(self.n_samples) :
                 projection[j] += self.alpha[i]*self.kernel(self.X[i],X[j])
         proba = self.sigmoid(projection)
-        return 2*(proba >= 1/2) - 1
+        return 2.*(proba >= 1/2) - 1.
             
     def score(self,X,y) :
         predictions = self.predict(X)
@@ -91,8 +87,8 @@ class KernelLogisticRegression(object) :
     
     def recall_and_precision(self,X,y) :
         y = self.transform_label(y)
-        predictions = self.predict(X).astype('int')
-        tp = np.sum((predictions == 1)*(y == 1))
-        fn = np.sum((predictions == -1)*(y == 1))
-        fp = np.sum((predictions == 1)*(y == -1))
+        predictions = self.predict(X)
+        tp = np.sum((predictions == 1.)*(y == 1.))
+        fn = np.sum((predictions == -1.)*(y == 1.))
+        fp = np.sum((predictions == 1.)*(y == -1.))
         return tp/(fn+tp),tp/(fp+tp)

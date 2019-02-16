@@ -18,8 +18,7 @@ import scipy.stats
 
 ''' TO DO :
         
-             - 3 sections to train each classifier with a random hyper param
-               search and cross-validation with report on mean accuracy on the
+             - cross-validation with report on mean accuracy on the
                validation set after splitting
              
              - Une section averaging pour average les classifieurs
@@ -110,12 +109,13 @@ for i in range(3) :
     
     parameter_grid_klr = { 'kernel' : ['gaussian','polynomial','linear'],
                        'la' : scipy.stats.uniform(loc = 25, scale = 100),
+                       'n_iter' : scipy.stats.randint(500,501),
                        'gamma' : scipy.stats.uniform(loc = 0,scale = 1),
                        'dim' : scipy.stats.randint(1,5),
                        'offset' : scipy.stats.randint(1,2)
                      }
     parameter_grid_knn = { 'kernel' : ['gaussian','polynomial','linear'],
-                       'n_neighbors' : scipy.stats.randint(loc = 5, scale = 15),
+                       'n_neighbors' : scipy.stats.randint(5, 20),
                        'gamma' : scipy.stats.uniform(loc = 0,scale = 1),
                        'dim' : scipy.stats.randint(1,5),
                        'offset' : scipy.stats.randint(1,2)
