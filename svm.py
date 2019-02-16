@@ -10,7 +10,7 @@ from cvxopt import matrix, solvers
 import numpy as np
 import utils
 
-
+solvers.options['show_progress'] = False
 
 class SVM(object) :
     
@@ -61,7 +61,6 @@ class SVM(object) :
         tp = np.sum((predictions == 1)*(y == 1.))
         fn = np.sum((predictions == -1)*(y == 1.))
         fp = np.sum((predictions == 1)*(y == -1.))
-        print('tp = ', tp, 'fn = ',fn, 'fp = ',fp)
         return tp/(fn+tp),tp/(fp+tp)
     
     

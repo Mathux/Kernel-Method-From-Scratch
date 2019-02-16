@@ -134,6 +134,8 @@ def get_kernel(kernel, gamma = 1, offset = 1, dim = 1) :
         return Kernel().spectral_kernel(3)
     elif kernel == 'mismatch' :
         return Kernel().mismatch_kernel(k = 3, m =1)
+    elif kernel == 'laplace' :
+        return Kernel().laplace(gamma)
     else :
         raise Exception('Invalid Kernel')
     
@@ -141,7 +143,7 @@ def get_kernel_parameters(kernel) :
     if kernel == 'linear' : 
         return ['offset']
     elif kernel == 'gaussian' :
-        return ['gamma',]
+        return ['gamma']
     elif kernel == 'sigmoid' :
         return ['gamma','offset']
     elif kernel == 'polynomial' :
@@ -150,6 +152,8 @@ def get_kernel_parameters(kernel) :
         return []
     elif kernel == 'mismatch' :
         return []
+    elif kernel =='laplace' :
+        return ['gamma']
     else :
         raise Exception('Invalid Kernel')
 

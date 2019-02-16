@@ -6,6 +6,7 @@ Created on Thu Feb  7 15:57:37 2019
 @author: evrardgarcelon
 """
 
+
 import numpy as np
 from trie_dna import Trie
 
@@ -25,6 +26,9 @@ class Kernel(object) :
     
     def polynomial(self,dim,offset) :
         return lambda x,y : (offset + np.dot(x,y))**dim
+    
+    def laplace(self,gamma) :
+        return lambda x,y  : np.exp(np.linalg.norm(x-y)*gamma)
     
     def spectral_kernel(self, k) :
         

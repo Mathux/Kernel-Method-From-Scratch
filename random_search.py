@@ -16,13 +16,14 @@ from svm import SVM
 
 class RandomHyperParameterTuningPerKernel(object) :
     
-    def __init__(self,clf,kernel, parameter_grid, X, y, n_sampling) :
+    def __init__(self,clf,kernel, parameter_grid, X, y, n_sampling, k_fold = 5) :
         self.clf = clf
         self.kernel = kernel
         self.parameter_grid = parameter_grid
         self.X = X
         self.y = y
         self.n = n_sampling
+        self.k_fold = k_fold
         self.kernel_parameters = utils.get_kernel_parameters(self.kernel)
         self.kernels = parameter_grid['kernel']
         if isinstance(clf(kernel = kernel),KernelKNN) :
@@ -46,7 +47,7 @@ class RandomHyperParameterTuningPerKernel(object) :
             self.parameters[j] = temp_parameters
             temp_clf = self.clf(**temp_parameters)
             temp_clf.fit(self.X,self.y)
-            CV = CrossValidation(self.X, self.y, temp_clf)
+            CV = CrossValidation(self.X, self.y, temp_clf, n_fold = self.k_fold)
             mean_acc, std_acc = CV.mean_acc(), CV.std_acc()
             mean_recall, std_recall = CV.mean_recall_score(), CV.std_recall_score()
             mean_precision, std_precision = CV.mean_precision_score(), CV.std_precision_score()
@@ -68,11 +69,12 @@ class RandomHyperParameterTuning(object):
         
         self.clf = classifier
         self.parameter_grid = parameter_grid
-        self.clf = classifier
         self.X = X
         self.y = y
         self.n = n_sampling
-        self.criteria = criteria
+        if criteria == 'accuracy' :
+            self.criteria = 'mean acc'
+        self.kernels = parameter_grid['kernel']
     
     def fit(self) :
         
@@ -80,8 +82,10 @@ class RandomHyperParameterTuning(object):
         self.parameters = {}
         for kernel in self.kernels :
             temp = RandomHyperParameterTuningPerKernel(self.clf,kernel, self.parameter_grid, self.X, self.y, self.n)
-            scores = temp.scores()[self.criteria]
-            self.parameters[kernel] = temp.parameters[np.argmax(np.array(scores))]
+            temp.fit()
+            scores = np.array([temp.scores[j][self.criteria] for j in range(len(temp.scores))])
+            print(temp.parameters[0])
+            self.parameters[kernel] = temp.parameters[np.argmax(scores)]
             self.accuracy[kernel] = scores
     
     def best_parameters(self) :
@@ -94,7 +98,8 @@ class RandomHyperParameterTuning(object):
                 argmax = np.argmax(np.array(self.accuracy[kernel]))
         best_kernel = self.kernels[argmax]
         best_parameters = self.parameters[best_kernel]
-        return np.array([best_kernel] + list(best_parameters))
+        best_parameters['kernel'] = best_kernel
+        return best_parameters,max_acc
             
             
             
