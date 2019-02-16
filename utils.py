@@ -175,13 +175,31 @@ def scale(X) :
 
 def transform_label(y) :
     if -1 in y :
-        return (y+1)/2
+        return ((y+1)/2).astype('float64')
     elif 0 in y :
-        return 2*y - 1
+        return (2*y - 1).astype('float64')
     else :
-        raise Exception('Bad labrls')
+        raise Exception('Bad labels')
+        
+def normalize_kernel(kernel):
+    
+    nkernel = np.copy(kernel)
+
+    assert nkernel.ndim == 2
+    assert nkernel.shape[0] == nkernel.shape[1]
+
+    for i in range(nkernel.shape[0]):
+        for j in range(i + 1, nkernel.shape[0]):
+            q = np.sqrt(nkernel[i, i] * nkernel[j, j])
+            if q > 0:
+                nkernel[i, j] /= q
+                nkernel[j, i] = nkernel[i, j]
+    np.fill_diagonal(nkernel, 1.)
+
+    return nkernel
+
 if __name__ == "__main__":
-    x_train,y_train = load_train(mat = False)
-    x_test = load_test(mat = False)
+    x_train,y_train = load_train(mat = True)
+    x_test = load_test(mat = True)
     train,val,train_labels,val_labels = split_dataset(x_train, y_train)
     

@@ -24,7 +24,7 @@ class SVM(object) :
         
     def fit(self,X, y, tol = 10**-5) :
         
-        if self.scale == True :
+        if self.scale :
             self.X = utils.scale(X) 
         else :
             self.X = X
@@ -32,7 +32,7 @@ class SVM(object) :
         if self.kernel_matrix is None :
             self.K = self.gram_matrix(X)
         else :
-            self.K = self.kernel_matrix
+            self.K = utils.normalize_kernel(self.kernel_matrix)
         temp = np.diag(y)
         Q = matrix(self.K)
         p = -1*matrix(y)
@@ -49,17 +49,17 @@ class SVM(object) :
         for j in range(n_samples) : 
             for i in self.support_vectors :
                 projection[j] += self.alpha[i]*self.kernel(self.X[i],X[j])
-        return np.sign(projection)
+        return np.sign(projection).astype('float64')
             
     def score(self,X,y) :
-        predictions = self.predict(X).astype('int')
+        predictions = self.predict(X)
         return np.sum(y == predictions)/X.shape[0]
     
     def recall_and_precision(self,X,y) :
-        predictions = self.predict(X).astype('int')
-        tp = np.sum((predictions == 1)*(y == 1.))
-        fn = np.sum((predictions == -1)*(y == 1.))
-        fp = np.sum((predictions == 1)*(y == -1.))
+        predictions = self.predict(X)
+        tp = np.sum((predictions == 1.)*(y == 1.))
+        fn = np.sum((predictions == -1.)*(y == 1.))
+        fp = np.sum((predictions == 1.)*(y == -1.))
         return tp/(fn+tp),tp/(fp+tp)
     
     
