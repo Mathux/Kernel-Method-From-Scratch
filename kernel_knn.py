@@ -11,7 +11,7 @@ import heapq as hq
 
 class KernelKNN(object) :
     
-    def __init__(self, n_neighbors = 5, kernel = 'linear', gamma = 1, dim = 1, offset = 0, scale = False) :
+    def __init__(self, n_neighbors = 5, kernel = 'linear', gamma = 1, dim = 1, offset = 0, scale = False, kernel_matrix = None) :
         
         self.n_neighbors = n_neighbors
         self.kernel = utils.get_kernel(kernel, gamma = 1, dim = 1, offset = 0)
@@ -21,7 +21,7 @@ class KernelKNN(object) :
     def fit(self,X,y) :
         
         self.X = X
-        self.y = self.transform_label(y)
+        self.y = y
         self.n_samples,self.n_features = X.shape
     
     def predict(self,X) :
@@ -47,7 +47,7 @@ class KernelKNN(object) :
         elif majority < 0 :
             return -1.
         else :
-            return np.choice(np.array([-1.,1.]))
+            return np.random.choice(np.array([-1.,1.]))
             
     def compute_nearest_neighbors(self,x) :
         

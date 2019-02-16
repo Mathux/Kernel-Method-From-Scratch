@@ -80,6 +80,12 @@ class RandomHyperParameterTuning(object):
         self.n = n_sampling
         if criteria == 'accuracy' :
             self.criteria = 'mean acc'
+        elif criteria == 'recall' :
+            self.criteria = 'mean recall'
+        elif criteria == 'precision' :
+            self.criteria = 'mean precision'
+        elif criteria == 'f1 score' :
+            self.criteria = 'mean f1 score'
         self.kernels = parameter_grid['kernel']
         self.kernel_matrix = kernel_matrix
     
@@ -100,16 +106,16 @@ class RandomHyperParameterTuning(object):
     
     def best_parameters(self) :
         
-        max_acc,argmax = 0,0
+        max_criteria,argmax = 0,0
         for kernel in self.kernels :
-            acc = np.max(np.array(self.accuracy[kernel]))
-            if acc > max_acc :
-                max_acc = acc
+            crit = np.max(np.array(self.accuracy[kernel]))
+            if crit > max_criteria :
+                max_criteria = crit
                 argmax = np.argmax(np.array(self.accuracy[kernel]))
         best_kernel = self.kernels[argmax]
         best_parameters = self.parameters[best_kernel]
         best_parameters['kernel'] = best_kernel
-        return best_parameters,max_acc
+        return best_parameters,max_criteria
             
             
             

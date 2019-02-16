@@ -12,18 +12,13 @@ import kernel_lr
 import kernel_knn
 import random_search
 import pickle
+import voting_classifier
 
 import scipy.stats
 
 
 ''' TO DO :
-        
-             - cross-validation with report on mean accuracy on the
-               validation set after splitting
-             
-             - Une section averaging pour average les classifieurs
-             
-             - Une section predictions pour creer le fichier de predictions
+             - gerer train matrices et train strings pour le voting classifier
 '''
 
 # Load kernel matrices for the spectral kernel
@@ -101,11 +96,11 @@ for i in range(3) :
 
 #%%
     
-## Next we train a Kernel Logistic Regression and a Kernel KNearestNeighbors and optimize them
+## Next we train a Kernel Logistic Regression and a Kernel KNearestNeighbors
     
 clfs_klr = []
 clfs_knn = []
-for i in range(3) :
+for i in range(1) :
     
     parameter_grid_klr = { 'kernel' : ['gaussian','polynomial','linear'],
                        'la' : scipy.stats.uniform(loc = 25, scale = 100),
@@ -120,7 +115,7 @@ for i in range(3) :
                        'dim' : scipy.stats.randint(1,5),
                        'offset' : scipy.stats.randint(1,2)
                      }
-    n_sampling = 10
+    n_sampling = 1
 
     clf_klr = kernel_lr.KernelLogisticRegression
     clf_knn = kernel_knn.KernelKNN
@@ -141,7 +136,22 @@ for i in range(3) :
     clfs_klr.append(kernel_lr.KernelLogisticRegression(**parameters_klr))
     clfs_knn.append(kernel_knn.KernelKNN(**parameters_knn))
 
+#%%
+    
+## Finally before making final predictions, we average predictions of each tra-
+##  -ined classifiers and create a submission file
+    
+predictions = []
+for i in range(3) :
+    
+    base_classifiers = [clfs_embeddings[i],clfs_strings[i],clfs_klr[i],clfs_knn[i]] 
+    voting_clf = voting_classifier.VotingClassifier(base_classifiers,hard_pred = True)
+    predictions.append(voting_clf.predict(x_test_mat[i]))
 
+utils.submission(predictions)
+    
+    
+   
 
 
 

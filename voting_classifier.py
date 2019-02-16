@@ -33,9 +33,9 @@ class VotingClassifier(object) :
                 predictions_base_clfs[:,j] = self.base_classifiers[j].predict_proba(X)
         predictions = np.average(predictions_base_clfs, axis = 1, weights = self.weights)
         if self.hard_pred :
-            return 2*(predictions >= 0) - 1
+            return 2.*(predictions >= 0) - 1.
         else : 
-            return 2*(predictions >= 1/2) - 1
+            return 2.*(predictions >= 1/2) - 1.
         
         
     
@@ -46,9 +46,9 @@ class VotingClassifier(object) :
     def recall_and_precision(self,X,y) :
         y = self.transform_label(y)
         predictions = self.predict(X).astype('int')
-        tp = np.sum((predictions == 1)*(y == 1))
-        fn = np.sum((predictions == -1)*(y == 1))
-        fp = np.sum((predictions == 1)*(y == -1))
+        tp = np.sum((predictions == 1.)*(y == 1.))
+        fn = np.sum((predictions == -1.)*(y == 1.))
+        fp = np.sum((predictions == 1.)*(y == -1.))
         return tp/(fn+tp),tp/(fp+tp)
 
         

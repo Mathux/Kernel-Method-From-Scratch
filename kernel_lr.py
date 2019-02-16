@@ -38,7 +38,8 @@ class KernelLogisticRegression(object) :
         if self.verbose :
             print('Fitting LogisticRegression...')
         while t < self.n_iter and np.linalg.norm(self.alpha - old_alpha) > tol :
-            utils.progressBar(t,self.n_iter)
+            if self.verbose :
+                utils.progressBar(t,self.n_iter)
             m = np.dot(self.K,self.alpha)
             W = self.sigmoid(y*m)*self.sigmoid(-y*m)
             z = m + y/np.maximum(self.sigmoid(y*m),0)
@@ -86,7 +87,6 @@ class KernelLogisticRegression(object) :
         return np.sum(y == predictions)/X.shape[0]
     
     def recall_and_precision(self,X,y) :
-        y = self.transform_label(y)
         predictions = self.predict(X)
         tp = np.sum((predictions == 1.)*(y == 1.))
         fn = np.sum((predictions == -1.)*(y == 1.))

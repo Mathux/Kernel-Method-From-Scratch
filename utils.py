@@ -111,7 +111,7 @@ def submission(prediction,test_size = 1000) :
     
     pred = pd.DataFrame(columns = ['Id','Bound'])
     for i in range(len(prediction)) :
-        predictions = prediction[i]
+        predictions = 2*prediction[i] - 1
         temp = pd.DataFrame(data = predictions,columns = ['Bound'])
         temp['Id'] = np.linspace(i*test_size, (i+1)*test_size - 1, test_size, dtype = 'int')
         temp = temp.reindex(columns=['Id','Bound'])
