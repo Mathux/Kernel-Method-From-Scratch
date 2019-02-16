@@ -44,7 +44,6 @@ class VotingClassifier(object) :
         return np.sum(y == predictions)/X.shape[0]
     
     def recall_and_precision(self,X,y) :
-        y = self.transform_label(y)
         predictions = self.predict(X).astype('int')
         tp = np.sum((predictions == 1.)*(y == 1.))
         fn = np.sum((predictions == -1.)*(y == 1.))
