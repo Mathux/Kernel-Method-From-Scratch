@@ -21,13 +21,13 @@ class SVM(object) :
         self.scale = scale
         self.kernel = utils.get_kernel(kernel, gamma = gamma, dim = dim, offset = offset)
         self.kernel_matrix = kernel_matrix
+        
     def fit(self,X, y, tol = 10**-5) :
         
         if self.scale == True :
             self.X = utils.scale(X) 
         else :
             self.X = X
-        y  = self.transform_label(y).astype('float64').squeeze()
         self.n_samples,n_features = self.X.shape
         if self.kernel_matrix is None :
             self.K = self.gram_matrix(X)
@@ -52,11 +52,10 @@ class SVM(object) :
         return np.sign(projection)
             
     def score(self,X,y) :
-        predictions = self.predict(X)
+        predictions = self.predict(X).astype('int')
         return np.sum(y == predictions)/X.shape[0]
     
     def recall_and_precision(self,X,y) :
-        y = self.transform_label(y)
         predictions = self.predict(X).astype('int')
         tp = np.sum((predictions == 1)*(y == 1.))
         fn = np.sum((predictions == -1)*(y == 1.))
@@ -77,10 +76,7 @@ class SVM(object) :
                     K[i,j] = self.kernel(X[i],X[j])
                     K[j,i] = K[i,j]
             return K
-                    
-    
-    def transform_label(self,y) :
-        return 2*y - 1
+        
     
         
         

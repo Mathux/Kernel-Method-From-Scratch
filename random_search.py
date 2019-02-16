@@ -45,6 +45,7 @@ class RandomHyperParameterTuningPerKernel(object) :
             for parameter_name in self.clf_parameters : 
                 temp_parameters[parameter_name] = self.parameter_grid[parameter_name].rvs()
             self.parameters[j] = temp_parameters
+            print(temp_parameters)
             temp_clf = self.clf(**temp_parameters)
             temp_clf.fit(self.X,self.y)
             CV = CrossValidation(self.X, self.y, temp_clf, n_fold = self.k_fold)

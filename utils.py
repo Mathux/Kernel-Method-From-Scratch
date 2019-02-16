@@ -173,6 +173,13 @@ def scale(X) :
     
     return (X-mu.reshape((mu.shape[0],1)))/sigma.reshape((sigma.shape[0],1))
 
+def transform_label(y) :
+    if -1 in y :
+        return (y+1)/2
+    elif 0 in y :
+        return 2*y - 1
+    else :
+        raise Exception('Bad labrls')
 if __name__ == "__main__":
     x_train,y_train = load_train(mat = False)
     x_test = load_test(mat = False)
