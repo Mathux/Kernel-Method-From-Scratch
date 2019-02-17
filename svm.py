@@ -10,7 +10,7 @@ from cvxopt import matrix, solvers
 import numpy as np
 import utils
 
-solvers.options['show_progress'] = False
+#solvers.options['show_progress'] = False
 
 class SVM(object) :
     

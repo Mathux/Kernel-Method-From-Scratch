@@ -102,20 +102,15 @@ class RandomHyperParameterTuning(object):
             for l in list(temp.parameters.values()) :
                 param.append(l[argmax_parameters])
             self.parameters[kernel] = dict(zip(list(temp.parameters.keys()),param))
-            self.accuracy[kernel] = scores
+            self.accuracy[kernel] = scores[argmax_parameters]
     
     def best_parameters(self) :
         
-        max_criteria,argmax = 0,0
-        for kernel in self.kernels :
-            crit = np.max(np.array(self.accuracy[kernel]))
-            if crit > max_criteria :
-                max_criteria = crit
-                argmax = np.argmax(np.array(self.accuracy[kernel]))
-        best_kernel = self.kernels[argmax]
+        argmax_kernel = np.argmax(np.array(list(self.accuracy.values())))
+        best_kernel = self.kernels[argmax_kernel]
         best_parameters = self.parameters[best_kernel]
         best_parameters['kernel'] = best_kernel
-        return best_parameters,max_criteria
+        return best_parameters,self.accuracy[best_kernel]
             
             
             

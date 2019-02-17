@@ -45,7 +45,7 @@ x_test = utils.load_test(mat = False)
 # First the embeddings case :
 
 clfs_embeddings = []
-for i in range(3) :
+for i in range(1) :
     
     parameter_grid = { 'kernel' : ['gaussian','polynomial','linear'],
                        'C' : scipy.stats.uniform(loc = 25, scale = 100),
@@ -53,7 +53,7 @@ for i in range(3) :
                        'dim' : scipy.stats.randint(1,5),
                        'offset' : scipy.stats.randint(1,2)
                      }
-    n_sampling = 10
+    n_sampling = 2
 
     clf = svm.SVM
     X = x_train_mat[i].drop('Id',axis = 1).values

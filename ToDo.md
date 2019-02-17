@@ -1,4 +1,4 @@
 To do : 
   - commenter le code 
-  - Spectral kernel probleme de rang
+  - Spectral kernel pb implémentation car non psd
   - Voting classifier gerer les train et test en string
