@@ -1,104 +1,134 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Feb 15 16:46:40 2019
+import nose
+import nose.tools
+import numpy.testing
+import numpy as np
 
-@author: evrardgarcelon
-"""
 
-class TrieNode(object) :
-    
-    def __init__(self, label = None, depth = -1, parent = None, count = 0) :
-        
-        self.depth = depth 
+def normalize_kernel(kernel):
+
+    nkernel = numpy.copy(kernel)
+
+    assert nkernel.ndim == 2
+    assert nkernel.shape[0] == nkernel.shape[1]
+
+    for i in xrange(nkernel.shape[0]):
+        for j in xrange(i + 1, nkernel.shape[0]):
+            q = np.sqrt(nkernel[i, i] * nkernel[j, j])
+            if q > 0:
+                nkernel[i, j] /= q
+                nkernel[j, i] = nkernel[i, j]  # symmetry
+
+    # finally, set diagonal elements to 1
+    np.fill_diagonal(nkernel, 1.)
+
+    return nkernel
+
+
+class Trie(object):
+
+    def __init__(self, label=None, parent=None):
+
+        self.label = label  
+        self.level = 0  
         self.children = {}
+        self.kgrams = {}
         self.parent = parent
-        self.count = count
-        if self.parent is None :
-            self.label = None
-        else :
-            if self.parent.label is None :
-                self.label = label
-            else :
-                self.label = self.parent.label + label
-        
-    def add_child(self,child,label) :
-        
-        self.children[label] = child
-    
-    def is_leaf(self) :
+        if not parent is None:
+            parent.add_child(self)
 
-        return (len(self.children) == 0)
-    
-    def get_children(self) :
-        
-        return list(self.children.values())
+    def is_root(self):
 
-class Trie(object) :
-    
-    def __init__(self,string, vocab, k) :
-        self.string = string
-        self.vocab = vocab
-        self.root = TrieNode(count = 1, depth = 0)
-        self.l = len(vocab)
-        self.node_to_process = [self.root]
-        self.k = k
-        while len(self.node_to_process) > 0 :
-            node = self.node_to_process.pop()
-            if node.depth < k :
-                self.process_node(node)
-    
-    
-    def process_node(self,node) :
-        
-        if node.count > 0 :
-            for j in range(self.l):
-                if not node.label is None : 
-                    label = node.label + self.vocab[j]
-                else :
-                    label = self.vocab[j]
-                count = self.string.count(label)
-                if  count > 0 and node.depth < self.k:
-                    child = TrieNode(label = self.vocab[j], depth = node.depth + 1, parent = node, count = count)
-                    node.add_child(child,self.vocab[j])
-            if node.depth < self.k :
-                self.node_to_process = node.get_children() + self.node_to_process
-        
-        
-    def is_leaf(self,string) :
-        is_leaf = True
-        node = self.root
-        count = 0
-        for c in string :
-            try :
-                node = node.children[c]
-                count = node.count
-            except KeyError :
-                is_leaf = False
-                break
-        if is_leaf :
-            is_leaf = node.is_leaf()
-        return is_leaf,count
-    
-    def m_mistach(self,string) :
-        pass
+        return self.parent is None
 
-            
- 
-string = 'ACCCTGCCTACACCGCGGCGGGGACAGGTGGAGGTTTCAACCCCTGTTTGGCAACCTCGGGCGCAGCCAGGCCCCGCCCAGAAATTTCCGGGACACGCCCC'   
-vocab  = { 0 : 'A',
-           1 : 'T',
-           2 : 'G',
-           3 : 'C'}
-        
-if __name__ == '__main__' :
-    trie = Trie(string,vocab,3)
-    
-                
-            
-            
-        
+    def is_leaf(self):
 
-    
-    
-        
+        return len(self.children) == 0
+
+    def is_empty(self):
+
+        return len(self.kgrams) == 0
+
+    def copy_kgrams(self):
+  
+        return {index: np.array(substring_pointers)
+                for index, substring_pointers in self.kgrams.items()}
+
+    def add_child(self, child):
+
+        assert not child.label in self.children
+        child.kgrams = self.copy_kgrams()
+        child.level = self.level + 1
+        self.children[child.label] = child
+        child.parent = self
+
+    def delete_child(self, child):
+
+        label = child.label if isinstance(child, Trie) else child
+        assert label in self.children, "No child with label %s exists." % label
+        del self.children[label]
+
+    def compute_kgrams(self, X, k):
+
+        if not isinstance(X, np.ndarray):
+            X = np.array(X)
+
+        if X.ndim == 1:
+            X = np.array([X])
+
+        assert X.ndim == 2
+
+        for index in range(len(X)):
+            self.kgrams[index] = np.array([(offset,0) for offset in range(len(X[index]) - k + 1)])
+
+    def process_node(self, X, k, m):
+
+        if not isinstance(X, np.ndarray):
+            X = np.array(X)
+        if X.ndim == 1:
+            X = np.array([X])
+
+        assert X.ndim == 2
+
+        if self.is_root():
+            self.compute_kgrams(X, k)
+        else:
+            for index, substring_pointers in self.kgrams.items():
+                substring_pointers[..., 1] += (X[index][
+                        substring_pointers[..., 0] + self.level - 1
+                        ] != self.label)
+                self.kgrams[index] = np.delete(substring_pointers,
+                                               np.nonzero(
+                        substring_pointers[..., 1] > m),
+                                               axis=0)
+            self.kgrams = {index: substring_pointers for (
+                    index, substring_pointers) in self.kgrams.items(
+                    ) if len(substring_pointers)}
+
+        return not self.is_empty()
+
+    def update_kernel(self, kernel, m) :
+        for i in self.kgrams:
+            for j in self.kgrams:
+                kernel[i, j] += len(self.kgrams[i]) * len(self.kgrams[j])
+
+    def dfs(self, X, k, m, kernel=None) :
+        l = 4
+        if kernel is None:
+            kernel = np.zeros((len(X), len(X)))
+        n_kmers = 0
+        alive = self.process_node(X, k, m)
+        if alive:
+            if k == 0:
+                n_kmers += 1
+                self.update_kernel(kernel, m)
+            else:
+                for j in range(l):
+                    child = Trie(label=j, parent=self)
+                    kernel, child_kmers, child_alive = child.dfs(X, k - 1, m, kernel=kernel)
+                    if child.is_empty():
+                        self.delete_child(child)
+                    n_kmers += child_kmers if child_alive else 0
+
+        return kernel, n_kmers, alive
+
+

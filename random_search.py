@@ -16,14 +16,13 @@ import svm
 
 class RandomHyperParameterTuningPerKernel(object) :
     
-    def __init__(self,clf,kernel, parameter_grid, X, y, n_sampling, k_fold = 5, kernel_matrix = None) :
+    def __init__(self,clf,kernel, parameter_grid, X, y, n_sampling, k_fold = 5) :
         self.clf = clf
         self.kernel = kernel
         self.parameter_grid = parameter_grid
         self.X = X
         self.y = y
         self.n = n_sampling
-        self.kernel_matrix = kernel_matrix
         self.k_fold = k_fold
         self.kernel_parameters = utils.get_kernel_parameters(self.kernel)
         self.kernels = parameter_grid['kernel']
@@ -45,15 +44,14 @@ class RandomHyperParameterTuningPerKernel(object) :
             self.parameters[parameter_name] = self.parameter_grid[parameter_name].rvs(self.n)
             
         for j in range(self.n) :
-            temp_parameters = {'kernel' : self.kernel, 'kernel_matrix' : self.kernel_matrix}
+            temp_parameters = {'kernel' : self.kernel}
             for parameter_name in self.kernel_parameters :
                 temp_parameters[parameter_name] = self.parameters[parameter_name][j]
             for parameter_name in self.clf_parameters : 
                 temp_parameters[parameter_name] = self.parameters[parameter_name][j]
-            
             temp_clf = self.clf(**temp_parameters)
             temp_clf.fit(self.X,self.y)
-            CV = CrossValidation(self.X, self.y, temp_clf, n_fold = self.k_fold)
+            CV = CrossValidation(self.X, self.y, temp_clf, k_fold = self.k_fold)
             mean_acc, std_acc = CV.mean_acc(), CV.std_acc()
             mean_recall, std_recall = CV.mean_recall_score(), CV.std_recall_score()
             mean_precision, std_precision = CV.mean_precision_score(), CV.std_precision_score()
@@ -71,13 +69,14 @@ class RandomHyperParameterTuningPerKernel(object) :
             
 class RandomHyperParameterTuning(object):
     
-    def __init__(self, classifier, parameter_grid, X, y, n_sampling, criteria = 'accuracy', kernel_matrix = None) : 
+    def __init__(self, classifier, parameter_grid, X, y, n_sampling, criteria = 'accuracy', n_fold = 5) : 
         
         self.clf = classifier
         self.parameter_grid = parameter_grid
         self.X = X
         self.y = y
         self.n = n_sampling
+        self.n_fold = n_fold
         if criteria == 'accuracy' :
             self.criteria = 'mean acc'
         elif criteria == 'recall' :
@@ -87,14 +86,13 @@ class RandomHyperParameterTuning(object):
         elif criteria == 'f1 score' :
             self.criteria = 'mean f1 score'
         self.kernels = parameter_grid['kernel']
-        self.kernel_matrix = kernel_matrix
     
     def fit(self) :
         
         self.accuracy = {}
         self.parameters = {}
         for kernel in self.kernels :
-            temp = RandomHyperParameterTuningPerKernel(self.clf,kernel, self.parameter_grid, self.X, self.y, self.n,kernel_matrix = self.kernel_matrix)
+            temp = RandomHyperParameterTuningPerKernel(self.clf,kernel, self.parameter_grid, self.X, self.y, self.n,k_fold = self.n_fold)
             temp.fit()
             scores = np.array([temp.scores[j][self.criteria] for j in range(len(temp.scores))])
             argmax_parameters = np.argmax(scores)

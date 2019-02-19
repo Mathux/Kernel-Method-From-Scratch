@@ -1,13 +1,13 @@
 import pylab as plt
 import numpy as np 
 import svm
-import kernel_lr
-import utils
+
+from test_data import gen_lin_separable_data
 
 plt.figure(1)
 X1,y1,X2,y2 = gen_lin_separable_data()
 X = np.vstack([X1,X2])
-y = np.hstack([y1,y2]).reshape((len(X),1))
+y = np.hstack([y1,y2]).squeeze()
 #XX = np.hstack([X,y])
 #np.random.shuffle(XX)
 #X = XX[:,:-1]
@@ -47,18 +47,6 @@ for xxx in xx :
 Z = np.array(Z).reshape((50,50))
 plt.contour(XX,YY,Z,0)
 #%%
-
-x_train,y_train = load_train(mat = True)
-x_test = load_test(mat = True)
-train,val,train_labels,val_labels = split_dataset(x_train, y_train)
-
-
-train_0, train_labels_0, test_0, test_labels_0 = train[0].drop('Id',axis = 1).values , train_labels[0]['Bound'].values, val[0].drop('Id',axis = 1).values , val_labels[0]['Bound'].values
-
-a = KernelLogisticRegression(kernel = 'linear',la = 10**-1)
-a.fit(train_0,train_labels_0)
-
-a.score(test_0,test_labels_0)
 
 
 

@@ -26,3 +26,5 @@ path_to_test2_mat = "data/Xte2_mat100.csv"
 path_to_train2 = "data/Xtr2.csv"
 path_to_train2_mat = "data/Xtr2_mat100.csv"
 path_to_train_labels2 = "data/Ytr2.csv"
+
+string_kernels = ['spectral','mismatch','WD']

@@ -10,10 +10,7 @@ import pandas as pd
 from config import *
 import numpy as np
 import sys
-from kernel import Kernel
-import svm
-import kernel_lr
-import kernel_knn 
+import kernel
 
 
 # Load train data
@@ -89,22 +86,6 @@ def split_dataset(data, labels, split_val=0.1, seed=SEED):
     print('Done')
     return train, val, train_labels, val_labels
 
-def split_kfold(data, labels, n_fold, seed=SEED, shuffle = False):
-    np.random.seed(seed)
-    
-    data = np.hstack([data,labels.reshape((len(labels),1))])
-    if shuffle == True :
-       np.random.shuffle(data,axis = 0)
-    n_samples = data.shape[0]
-    indexes = np.linspace(0,n_samples-1,n_fold+1,dtype = 'int')
-    splitted = {}
-    for j in range(n_fold) :
-        temp = data[indexes[j] : indexes[j+1],:]
-        train,labels = temp[:,:-1],temp[:,-1]
-        splitted[j] = (train,labels)
-    return list(splitted.values())        
-    
-
 
 # Tools to give the csv format
 def submission(prediction,test_size = 1000) :  
@@ -121,21 +102,23 @@ def submission(prediction,test_size = 1000) :
     pred.to_csv('predictions.csv',index = False)
     return None
 
-def get_kernel(kernel, gamma = 1, offset = 1, dim = 1) :
-    if kernel == 'linear' : 
-        return Kernel().linear(offset)
-    elif kernel == 'gaussian' :
-        return Kernel().gaussian(gamma)
-    elif kernel == 'sigmoid' :
-        return Kernel().sigmoid(gamma,offset)
-    elif kernel == 'polynomial' :
-        return Kernel().polynomial(dim,offset)
-    elif kernel == 'spectral' :
-        return Kernel().spectral_kernel(3)
-    elif kernel == 'mismatch' :
-        return Kernel().mismatch_kernel(k = 3, m =1)
-    elif kernel == 'laplace' :
-        return Kernel().laplace(gamma)
+def get_kernel(ker, gamma = 1, offset = 1, dim = 1, k = 1, m = 1, d = 1) :
+    if ker == 'linear' : 
+        return kernel.Kernel().linear(offset)
+    elif ker == 'gaussian' :
+        return kernel.Kernel().gaussian(gamma)
+    elif ker == 'sigmoid' :
+        return kernel.Kernel().sigmoid(gamma,offset)
+    elif ker == 'polynomial' :
+        return kernel.Kernel().polynomial(dim,offset)
+    elif ker == 'laplace' :
+        return kernel.Kernel().laplace(gamma)
+    elif ker == 'spectral' :
+        return kernel.SpectralKernel(k)
+    elif ker == 'mismatch' :
+        return kernel.MismatchKernel(k,m)
+    elif ker == 'WD' :
+        return kernel.WDKernel(d)
     else :
         raise Exception('Invalid Kernel')
     
@@ -148,12 +131,14 @@ def get_kernel_parameters(kernel) :
         return ['gamma','offset']
     elif kernel == 'polynomial' :
         return ['offset','dim']
-    elif kernel == 'spectral' :
-        return []
-    elif kernel == 'mismatch' :
-        return []
     elif kernel =='laplace' :
         return ['gamma']
+    elif kernel == 'spectral' :
+        return ['k']
+    elif kernel == 'mismatch' :
+        return ['k','m']
+    elif kernel == 'WD' :
+        return ['d']
     else :
         raise Exception('Invalid Kernel')
 
@@ -166,12 +151,6 @@ def progressBar(value, endvalue, bar_length=50):
     sys.stdout.write("\n Progress: [{0}] {1}%".format(arrow + spaces, int(round(percent * 100))))
     sys.stdout.flush()
 
-def scale(X) :
-    
-    mu = np.mean(X,axis = 1)
-    sigma = np.std(X,axis = 1)
-    
-    return (X-mu.reshape((mu.shape[0],1)))/sigma.reshape((sigma.shape[0],1))
 
 def transform_label(y) :
     if -1 in y :
@@ -199,7 +178,7 @@ def normalize_kernel(kernel):
     return nkernel
 
 if __name__ == "__main__":
-    x_train,y_train = load_train(mat = True)
-    x_test = load_test(mat = True)
+    x_train,y_train = load_train(mat = False)
+    x_test = load_test(mat = False)
     train,val,train_labels,val_labels = split_dataset(x_train, y_train)
     

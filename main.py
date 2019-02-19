@@ -11,22 +11,9 @@ import svm
 import kernel_lr
 import kernel_knn
 import random_search
-import pickle
 import voting_classifier
-
 import scipy.stats
 
-
-''' TO DO :
-             - gerer train matrices et train strings pour le voting classifier
-'''
-
-# Load kernel matrices for the spectral kernel
-
-name = 'spectral_kernel_3.pickle'
-file = open(name,'rb')
-kernel_matrices = pickle.load(file)
-file.close()
 
 # Load the data as embeddings
 
@@ -38,6 +25,7 @@ x_test_mat = utils.load_test(mat = True)
 x_train,y_train = utils.load_train(mat = False)
 x_test = utils.load_test(mat = False)
 
+
 #%%
 
 ## Optimize a svm classifier for train_mat and train with a random hyperparamter search
@@ -45,19 +33,19 @@ x_test = utils.load_test(mat = False)
 # First the embeddings case :
 
 clfs_embeddings = []
-for i in range(1) :
+for i in range(3) :
     
     parameter_grid = { 'kernel' : ['gaussian','polynomial','linear'],
-                       'C' : scipy.stats.uniform(loc = 25, scale = 100),
+                       'C' : scipy.stats.uniform(loc = 0, scale = 100),
                        'gamma' : scipy.stats.uniform(loc = 0,scale = 1),
                        'dim' : scipy.stats.randint(1,5),
                        'offset' : scipy.stats.randint(1,2)
                      }
-    n_sampling = 2
+    n_sampling = 10
 
     clf = svm.SVM
-    X = x_train_mat[i].drop('Id',axis = 1).values
-    y = y_train_mat[i]['Bound'].values
+    X = x_train[i]['seq'].values
+    y = y_train[i]['Bound'].values
     y = utils.transform_label(y)
     random_search_svm = random_search.RandomHyperParameterTuning(clf, parameter_grid, X, y, n_sampling)
     random_search_svm.fit()
@@ -70,25 +58,25 @@ for i in range(1) :
 #%%
 # Then train a SVM with a string adapted kernel
 
-#clfs_strings  =[]
-#for i in range(3) :
-#    
-#    parameter_grid = { 'kernel' : ['spectral'],
-#                       'C' : scipy.stats.uniform(loc = 0, scale = 2),
-#                     }
-#    n_sampling = 1
-#
-#    clf = svm.SVM
-#    X = x_train[i].drop('Id',axis = 1).values
-#    y = y_train[i]['Bound'].values
-#    y = utils.transform_label(y)
-#    K = kernel_matrices[i]
-#    random_search_svm = random_search.RandomHyperParameterTuning(clf, parameter_grid, X, y, n_sampling, kernel_matrix = K)
-#    random_search_svm.fit()
-#
-#    parameters,acc = random_search_svm.best_parameters()
-#    print('Best parameter found for dataset {}:'.format(i), parameters,'with average accuracy :',acc)
-#    clfs_strings.append(svm.SVM(**parameters))
+clfs_strings  =[]
+for i in range(3) :
+    
+    parameter_grid = { 'kernel' : ['spectral'],
+                       'C' : scipy.stats.uniform(loc = 0, scale = 100),
+                       'k' : scipy.stats.randint(2,5)
+                     }
+    n_sampling = 20
+
+    clf = svm.SVM
+    X = x_train[i]['seq'].values
+    y = y_train[i]['Bound'].values
+    y = utils.transform_label(y)
+    random_search_svm = random_search.RandomHyperParameterTuning(clf, parameter_grid, X, y, n_sampling, n_fold = 3)
+    random_search_svm.fit()
+
+    parameters,acc = random_search_svm.best_parameters()
+    print('Best parameter found for dataset {}:'.format(i), parameters,'with average accuracy :',acc)
+    clfs_strings.append(svm.SVM(**parameters))
     
 
 
@@ -117,8 +105,8 @@ for i in range(3) :
 
     clf_klr = kernel_lr.KernelLogisticRegression
     clf_knn = kernel_knn.KernelKNN
-    X = x_train_mat[i].drop('Id',axis = 1).values
-    y = y_train_mat[i]['Bound'].values
+    X = x_train[i]['seq'].values
+    y = y_train[i]['Bound'].values
     y = utils.transform_label(y)
     random_search_klr = random_search.RandomHyperParameterTuning(clf_klr,parameter_grid_klr,X, y, n_sampling)
     random_search_knn = random_search.RandomHyperParameterTuning(clf_knn, parameter_grid_knn, X, y, n_sampling)
@@ -137,10 +125,12 @@ for i in range(3) :
 ## Finally before making final predictions, we average predictions of each tra-
 ##  -ined classifiers and create a submission file
     
+    
+    
 predictions = []
 for i in range(3) :
-    X = x_train_mat[i].drop('Id',axis = 1).values
-    X_test = x_test_mat[i].drop('Id',axis = 1).values
+    X = x_train_mat[i]['seq'].values
+    X_test = x_test_mat[i]['seq'].values
     y = y_train_mat[i]['Bound'].values
     y = utils.transform_label(y)
     clfs_embeddings[i].fit(X,y)
