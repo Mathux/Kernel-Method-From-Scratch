@@ -159,6 +159,30 @@ def transform_label(y) :
         return (2*y - 1).astype('float64')
     else :
         raise Exception('Bad labels')
+
+def process_data(x,y = None) :
+    assert len(x) == 3
+    has_labels = not y is None
+    if has_labels :
+        assert len(y) == 3
+        new_y = []
+        
+    if type(x[0].loc[0][1]) == str :
+        mat = False
+    else : 
+        mat =  True
+    new_x = []
+    for i in range(len(x)) :
+        if mat :
+            new_x.append(x[i].drop('Id',axis = 1).values)
+        else :
+            new_x.append(x[i]['seq'].values)
+        if has_labels :
+            new_y.append(transform_label(y[i]['Bound'].values))
+    if has_labels : 
+        return new_x,new_y
+    else :
+        return new_x
         
 def normalize_kernel(kernel):
     
@@ -177,8 +201,29 @@ def normalize_kernel(kernel):
 
     return nkernel
 
+def plot_pca(data,labels):
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import axes3d, Axes3D
+    from sklearn.decomposition import PCA
+    pca = PCA(n_components=3,whiten = True)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    X_r = pca.fit(data).transform(data)
+    index_0 = (labels == 0)
+    index_1 = (labels == 1)
+    ax.scatter(X_r[index_0][:, 0], X_r[index_0][:, 1], X_r[index_0][:, 2], c='red')
+    ax.scatter(X_r[index_1][:, 0], X_r[index_1][:, 1], X_r[index_1][:, 2], c='blue')
+    plt.show()
+
 if __name__ == "__main__":
     x_train,y_train = load_train(mat = False)
     x_test = load_test(mat = False)
-    train,val,train_labels,val_labels = split_dataset(x_train, y_train)
+    #train,val,train_labels,val_labels = split_dataset(x_train, y_train)
+    #train,train_labels = process_data(train,train_labels)
+    #val,val_labels = process_data(val,val_labels)
+    x,y = process_data(x = x_train,y = y_train)
+    x_test = process_data(x =x_test)
+    #import kernel
+    #K = kernel.MismatchKernel(k = 6,m = 1).get_kernel_matrix(x[0])
+    #plot_pca(K,y[0])
     

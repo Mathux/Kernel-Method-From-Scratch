@@ -2,18 +2,17 @@ import pylab as plt
 import numpy as np 
 import svm
 
-from test_data import gen_lin_separable_data
+from test_data import gen_non_lin_separable_data, gen_lin_separable_data,gen_circular_data,gen_lin_separable_overlap_data
 
 plt.figure(1)
-X1,y1,X2,y2 = gen_lin_separable_data()
+X1,y1,X2,y2 = gen_lin_separable_overlap_data()
 X = np.vstack([X1,X2])
 y = np.hstack([y1,y2]).squeeze()
-#XX = np.hstack([X,y])
-#np.random.shuffle(XX)
-#X = XX[:,:-1]
-#y = XX[:,-1]
-#np.random.shuffle(X)
-a = svm.SVM(kernel = 'linear', C = 1, offset = 10)
+Xst = np.hstack([X,y.reshape((len(y),1))])
+np.random.shuffle(Xst)
+X = Xst[:,:-1]
+y = Xst[:,-1]
+a = svm.SVM(kernel = 'gaussian', C = 2, gamma = 1/4)
 a.fit(X,y)
 
 
@@ -34,7 +33,7 @@ preds = a.predict(X)
 
 alpha = a.alpha
 
-xx,yy = np.linspace(-2,12),np.linspace(-2,12)
+xx,yy = np.linspace(-2,2),np.linspace(-2,2)
 XX,YY = np.meshgrid(xx,yy)
 
 

@@ -25,6 +25,9 @@ x_test_mat = utils.load_test(mat = True)
 x_train,y_train = utils.load_train(mat = False)
 x_test = utils.load_test(mat = False)
 
+x_train,y_train = utils.process_data(x_train,y = y_train)
+x_test = utils.process_data(x_test)
+
 
 #%%
 
@@ -44,9 +47,8 @@ for i in range(3) :
     n_sampling = 10
 
     clf = svm.SVM
-    X = x_train[i]['seq'].values
-    y = y_train[i]['Bound'].values
-    y = utils.transform_label(y)
+    X = x_train[i]
+    y = y_train[i]
     random_search_svm = random_search.RandomHyperParameterTuning(clf, parameter_grid, X, y, n_sampling)
     random_search_svm.fit()
 
@@ -63,14 +65,13 @@ for i in range(3) :
     
     parameter_grid = { 'kernel' : ['spectral'],
                        'C' : scipy.stats.uniform(loc = 0, scale = 100),
-                       'k' : scipy.stats.randint(2,5)
+                       'k' : scipy.stats.randint(3,4)
                      }
-    n_sampling = 20
+    n_sampling = 1
 
     clf = svm.SVM
-    X = x_train[i]['seq'].values
-    y = y_train[i]['Bound'].values
-    y = utils.transform_label(y)
+    X = x_train[i]
+    y = y_train[i]
     random_search_svm = random_search.RandomHyperParameterTuning(clf, parameter_grid, X, y, n_sampling, n_fold = 3)
     random_search_svm.fit()
 
