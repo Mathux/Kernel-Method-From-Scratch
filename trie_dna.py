@@ -1,29 +1,7 @@
-import nose
-import nose.tools
-import numpy.testing
 import numpy as np
 
 
-def normalize_kernel(kernel):
-
-    nkernel = numpy.copy(kernel)
-
-    assert nkernel.ndim == 2
-    assert nkernel.shape[0] == nkernel.shape[1]
-
-    for i in xrange(nkernel.shape[0]):
-        for j in xrange(i + 1, nkernel.shape[0]):
-            q = np.sqrt(nkernel[i, i] * nkernel[j, j])
-            if q > 0:
-                nkernel[i, j] /= q
-                nkernel[j, i] = nkernel[i, j]  # symmetry
-
-    # finally, set diagonal elements to 1
-    np.fill_diagonal(nkernel, 1.)
-
-    return nkernel
-
-
+vocab = {0 : 'A', 1 : 'T', 2 : 'G', 3 : 'C'}
 class Trie(object):
 
     def __init__(self, label=None, parent=None):
@@ -69,40 +47,18 @@ class Trie(object):
 
     def compute_kgrams(self, X, k):
 
-        if not isinstance(X, np.ndarray):
-            X = np.array(X)
-
-        if X.ndim == 1:
-            X = np.array([X])
-
-        assert X.ndim == 2
-
         for index in range(len(X)):
             self.kgrams[index] = np.array([(offset,0) for offset in range(len(X[index]) - k + 1)])
 
     def process_node(self, X, k, m):
 
-        if not isinstance(X, np.ndarray):
-            X = np.array(X)
-        if X.ndim == 1:
-            X = np.array([X])
-
-        assert X.ndim == 2
-
         if self.is_root():
             self.compute_kgrams(X, k)
         else:
             for index, substring_pointers in self.kgrams.items():
-                substring_pointers[..., 1] += (X[index][
-                        substring_pointers[..., 0] + self.level - 1
-                        ] != self.label)
-                self.kgrams[index] = np.delete(substring_pointers,
-                                               np.nonzero(
-                        substring_pointers[..., 1] > m),
-                                               axis=0)
-            self.kgrams = {index: substring_pointers for (
-                    index, substring_pointers) in self.kgrams.items(
-                    ) if len(substring_pointers)}
+                substring_pointers[:, 1] += (np.array(list(X[index]))[substring_pointers[:, 0] + self.level - 1] != self.label)
+                self.kgrams[index] = np.delete(substring_pointers,np.nonzero(substring_pointers[:, 1] > m),axis=0)
+            self.kgrams = {index: substring_pointers for (index, substring_pointers) in self.kgrams.items() if len(substring_pointers)}
 
         return not self.is_empty()
 
@@ -123,7 +79,7 @@ class Trie(object):
                 self.update_kernel(kernel, m)
             else:
                 for j in range(l):
-                    child = Trie(label=j, parent=self)
+                    child = Trie(label=vocab[j], parent=self)
                     kernel, child_kmers, child_alive = child.dfs(X, k - 1, m, kernel=kernel)
                     if child.is_empty():
                         self.delete_child(child)
