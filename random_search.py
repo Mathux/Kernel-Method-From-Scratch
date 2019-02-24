@@ -10,9 +10,6 @@ Created on Sun Feb 10 15:54:55 2019
 import utils
 import numpy as np
 from cross_validation import CrossValidation
-import kernel_knn
-import kernel_lr
-import svm
 
 class RandomHyperParameterTuningPerKernel(object) :
     
@@ -26,11 +23,12 @@ class RandomHyperParameterTuningPerKernel(object) :
         self.k_fold = k_fold
         self.kernel_parameters = utils.get_kernel_parameters(self.kernel)
         self.kernels = parameter_grid['kernel']
-        if isinstance(clf(kernel = kernel),kernel_knn.KernelKNN) :
+        name = clf.__name__
+        if name == 'KernelKNN' :
             self.clf_parameters =  ['n_neighbors']
-        elif isinstance(clf(kernel = kernel),svm.SVM) :
+        elif name == 'SVM' :
             self.clf_parameters = ['C']
-        elif isinstance(clf(kernel = kernel),kernel_lr.KernelLogisticRegression) :
+        elif name == 'KernelLogisticRegression':
             self.clf_parameters =  ['la','n_iter']
         else :
             raise Exception('Wrong classifier')
@@ -49,8 +47,8 @@ class RandomHyperParameterTuningPerKernel(object) :
                 temp_parameters[parameter_name] = self.parameters[parameter_name][j]
             for parameter_name in self.clf_parameters : 
                 temp_parameters[parameter_name] = self.parameters[parameter_name][j]
+            print(temp_parameters)
             temp_clf = self.clf(**temp_parameters)
-            temp_clf.fit(self.X,self.y)
             CV = CrossValidation(self.X, self.y, temp_clf, k_fold = self.k_fold)
             mean_acc, std_acc = CV.mean_acc(), CV.std_acc()
             mean_recall, std_recall = CV.mean_recall_score(), CV.std_recall_score()

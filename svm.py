@@ -21,6 +21,7 @@ class SVM(object) :
         self.C = C
         self.kernel_type = kernel
         self.kernel = utils.get_kernel(kernel, gamma = gamma, dim = dim, offset = offset, k= k, m = m, d = d)
+        self.__name__ = 'SVM'
         
     def fit(self,X, y, tol = 10**-4) :
 
@@ -60,16 +61,12 @@ class SVM(object) :
                     projection[j] += self.alpha[i]*temp_K[i,j]
         return np.sign(projection + self.b).astype('float64')
             
-    def score(self,X,y) :
-        predictions = self.predict(X)
-        return np.sum(y == predictions)/X.shape[0]
-    
-    def recall_and_precision(self,X,y) :
+    def score_recall_precision(self,X,y) :
         predictions = self.predict(X)
         tp = np.sum((predictions == 1.)*(y == 1.))
         fn = np.sum((predictions == -1.)*(y == 1.))
         fp = np.sum((predictions == 1.)*(y == -1.))
-        return tp/(fn+tp),tp/(fp+tp)
+        return np.sum(y == predictions)/X.shape[0],tp/(fn+tp),tp/(fp+tp)
     
     def gram_matrix(self,X) :
         

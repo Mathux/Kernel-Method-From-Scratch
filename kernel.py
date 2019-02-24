@@ -13,6 +13,7 @@ import utils
 from tqdm import tqdm
 from copy import deepcopy
 from scipy.sparse.linalg import eigs
+import trie_dna
 
 def nb_diff(x,y) :
     nb_diff = 0
@@ -80,7 +81,7 @@ class MismatchKernel(object) :
     def __init__(self,k,m) :
         self.k = k
         self.m = m
-        self.mers = mers = [(''.join(c)) for c in product('ACGT', repeat=self.k)]
+        self.mers = [(''.join(c)) for c in product('ACGT', repeat=self.k)]
 
     def kernel(self) :
         def compute_kernel(x,y) :
@@ -214,7 +215,23 @@ def format(x):
     """
     return np.array(list(x.replace('A', '1').replace('C', '2').replace('G', '3').replace('T', '4')), dtype=np.int64)
                    
+if __name__ == '__main__' :
+    
+    X,y = utils.load_train(mat = False)
+    X,y = utils.process_data(X,y)
+    X,y = X[0],y[0]
+    import time
+    debut = time.clock()
+    kernel = MismatchKernel(6,2).get_kernel_matrix(X)
+    fin = time.clock()
+    print('Temps calcul Mismatch Kernel  (3,1) brute force : ',fin - debut, 'secondes')
+    debut = time.clock()
+    t = trie_dna.Trie()
+    kernel,_,_ = t.dfs(X,6,2)
+    fin = time.clock()
+    print('Temps calcul Mismatch Kernel  (3,1) Trie : ',fin - debut, 'secondes')
 
+    
     
 
         

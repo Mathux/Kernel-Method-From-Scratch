@@ -8,7 +8,7 @@ Created on Sat Feb  9 17:00:46 2019
 
 import numpy as np
 import config
-from tqdm import tqdm
+#from tqdm import tqdm
 
 
 class CrossValidation(object):
@@ -19,8 +19,8 @@ class CrossValidation(object):
         self.precision = np.zeros(k_fold)
         self.X,self.y = X,y
         self.splitted_data = self.split_kfold(n_fold = k_fold)
-        for k in tqdm(range(k_fold)) :
-            print('\n Fold {}'.format(k+1))
+        for k in range(k_fold) :
+            print('Fitting Fold {}'.format(k+1),'...')
             data_to_stack = []
             labels_to_stack = []
             for j in range(k_fold) :
@@ -30,9 +30,8 @@ class CrossValidation(object):
             data = np.vstack(data_to_stack)
             labels = np.hstack(labels_to_stack)
             estimator.fit(data.squeeze(),labels)
-            self.accuracy[k] = estimator.score(self.splitted_data[k][0].squeeze(),self.splitted_data[k][1])
-            self.recall[k],self.precision[k] = estimator.recall_and_precision(self.splitted_data[k][0].squeeze(),self.splitted_data[k][1])
-        
+            self.accuracy[k],self.recall[k],self.precision[k] = estimator.score_recall_precision(self.splitted_data[k][0].squeeze(),self.splitted_data[k][1])
+            print('Done')
         self.f1_score = 2*self.precision*self.recall/(self.precision+self.recall)
             
     def split_kfold(self,n_fold = 5, seed=config.SEED, shuffle = False):

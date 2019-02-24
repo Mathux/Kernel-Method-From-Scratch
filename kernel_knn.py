@@ -16,6 +16,7 @@ class KernelKNN(object) :
         self.n_neighbors = n_neighbors
         self.kernel = utils.get_kernel(kernel, gamma = 1, dim = 1, offset = 0, k = m, m = m)
         self.kernel_type = kernel
+        self.__name__ = 'KernelKNN'
     
     def fit(self,X,y) :
         
@@ -66,17 +67,13 @@ class KernelKNN(object) :
             nearest_neighbors.append(hq.heappop(distance)[1])
         return nearest_neighbors
     
-    def score(self,X,y) :
-        predictions = self.predict(X)
-        return np.sum(y == predictions)/X.shape[0]
-    
-    def recall_and_precision(self,X,y) :
+    def score_recall_precision(self,X,y) :
         predictions = self.predict(X)
         tp = np.sum((predictions == 1.)*(y == 1.))
         fn = np.sum((predictions == -1.)*(y == 1.))
         fp = np.sum((predictions == 1.)*(y == -1.))
-        return tp/(fn+tp),tp/(fp+tp)
-            
+        return np.sum(y == predictions)/X.shape[0],tp/(fn+tp),tp/(fp+tp)
+    
         
         
     

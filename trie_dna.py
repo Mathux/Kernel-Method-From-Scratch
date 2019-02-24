@@ -51,12 +51,15 @@ class Trie(object):
             self.kgrams[index] = np.array([(offset,0) for offset in range(len(X[index]) - k + 1)])
 
     def process_node(self, X, k, m):
-
+        
+        if X.ndim == 1 :
+            X = np.array(list(map(lambda x : np.array(list(x)), X)))
+        
         if self.is_root():
             self.compute_kgrams(X, k)
         else:
             for index, substring_pointers in self.kgrams.items():
-                substring_pointers[:, 1] += (np.array(list(X[index]))[substring_pointers[:, 0] + self.level - 1] != self.label)
+                substring_pointers[:, 1] += (X[index][substring_pointers[:, 0] + self.level - 1] != self.label)
                 self.kgrams[index] = np.delete(substring_pointers,np.nonzero(substring_pointers[:, 1] > m),axis=0)
             self.kgrams = {index: substring_pointers for (index, substring_pointers) in self.kgrams.items() if len(substring_pointers)}
 

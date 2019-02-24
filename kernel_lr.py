@@ -32,6 +32,7 @@ class KernelLogisticRegression(object) :
                                        m = m)
         self.kernel_type = kernel
         self.verbose = verbose
+        self.__name__ = 'KernelLogisticRegression'
     
     def fit(self,X,y,tol = 10**-5,eps = 10**-5 ):
         
@@ -99,13 +100,9 @@ class KernelLogisticRegression(object) :
         proba = self.sigmoid(projection)
         return 2.*(proba >= 1/2) - 1.
             
-    def score(self,X,y) :
-        predictions = self.predict(X)
-        return np.sum(y == predictions)/X.shape[0]
-    
-    def recall_and_precision(self,X,y) :
+    def score_recall_precision(self,X,y) :
         predictions = self.predict(X)
         tp = np.sum((predictions == 1.)*(y == 1.))
         fn = np.sum((predictions == -1.)*(y == 1.))
         fp = np.sum((predictions == 1.)*(y == -1.))
-        return tp/(fn+tp),tp/(fp+tp)
+        return np.sum(y == predictions)/X.shape[0],tp/(fn+tp),tp/(fp+tp)
