@@ -14,7 +14,7 @@ import utils
 
 class SimpleMKL() :
     
-    def __init__(self, kernels = [], weights = None, C = 1, gamma = 1, dim = 1, k = 1, m = 1, e = 11, beta = 1, d = 1, tol = 10**-5, n_iter = 100) :
+    def __init__(self, kernels = [], weights = None, C = 1, gamma = 1, dim = 1, k = 1, m = 1, e = 11, beta = 1, d = 1, tol = 10**-10, n_iter = 50) :
         
         self.kernels = kernels
         if weights == None :
@@ -31,9 +31,10 @@ class SimpleMKL() :
         self.C = C
         self.n_iter = n_iter
         self.tol = tol
-        print(self.weights)
-    def fit(self,X,y) :
         
+    def fit(self,X,y, tol_sv = 10**-4) :
+        self.X = X
+        self.y = y
         self.kernels_matrix = self.compute_matrices(X)
         gap = 1
         n = 0
@@ -42,28 +43,38 @@ class SimpleMKL() :
         while gap > self.tol and n < self.n_iter :
             n+=1
             mu = np.argmax(self.weights)
-            J, grad_J, D, _ = self.compute_J_grad_J_D(K, y, mu)
-            print('J = ', J, 'grad_J = ', grad_J, 'D = ', D)
+            J, grad_J, D, _ = self.compute_J_grad_J_D(K, y, mu,self.weights)
             J_cross = 0
-            D_cross = D
-            d_cross = self.weights
+            D_cross = 1*D
+            d_cross = 1*self.weights
+            m = 0
+            print('J = ', J)
             while J_cross < J and m < self.n_iter :
-                m +=1
                 self.weights = d_cross
-                D = D_cross
+                D = 1*D_cross
+                if m > 0 :
+                    J = J_cross
                 temp = 1*self.weights/D
                 mask = (D>=0)
-                temp[mask] =  - np.inf
+                temp[mask] =  -1*np.inf
                 nu = np.argmin(-temp)
-                gamma_max = -self.weights[nu]/D[nu]
-                d_cross = self.weights + gamma_max*D
-                D_cross[mu] = D[mu] - D[nu]
+                gamma_max = -temp[nu]
+                #print('D = ', D, 'gamma = ',gamma_max)
+                d_cross = 1*self.weights + gamma_max*D
                 D_cross[nu] = 0
+                D_cross = self.normalize_D(D_cross,mu)
                 K_cross = self.compute_K(d_cross, self.kernels_matrix)
-                J_cross,_,_,_ = self.compute_J_grad_J_D(K_cross,y,0)
+                #print('D_cross = ',D_cross, 'D = ', D, 'nu = ',nu, 'mu = ',mu)
+                
+                J_cross,_,_,_ = self.compute_J_grad_J_D(K_cross,y,mu,d_cross)
+                #print('J_cross = ', J_cross)
+                #print('J_cross - J = ', J_cross - J, 'J = ', J, 'm = ', m)
+                m +=1
             gamma,alpha = self.line_search(self.weights,D,gamma_max,y)
+            self.alpha = alpha
             self.weights = self.weights + gamma*D
-            self.weights = self.weights/np.sum(self.weights)
+            #print('d = ', np.sum(self.weights))
+            #self.weights = self.weights/np.sum(self.weights)
             K = self.compute_K(self.weights, self.kernels_matrix)
             temp_max = -np.inf
             for i in range(len(self.kernels)) :
@@ -71,7 +82,9 @@ class SimpleMKL() :
                 if temp > temp_max :
                     temp_max = temp
             gap = temp_max - np.dot(alpha,np.dot(K,alpha))
-            print('gap = ', gap, 'nb iterations = ', n)
+        self.sv = np.linspace(0,len(self.alpha) - 1,len(self.alpha),dtype = 'int')[np.abs(self.alpha) > tol_sv]
+        
+            #print('gap = ', gap, 'n = ', n)
                 
     def compute_matrices(self, X) :
         temp = []
@@ -89,27 +102,26 @@ class SimpleMKL() :
             temp.append(M)
         return temp
     
-    def compute_J_grad_J_D(self, K, y, mu, eps = 10**-20) :
+    def normalize_D(self,D,mu) :
+        temp_D = 1*D
+        temp_D[mu] = -np.sum(temp_D)
+        return temp_D
+    
+    def compute_J_grad_J_D(self, K, y, mu, d,eps = 10**-20) :
         clf = svm.SVM(kernel_matrix = K, **self.kernel_parameters)
         clf.fit_kernel(y)
-        alpha = clf.alpha
-        # alpha or y*alpha ? 
+        alpha = clf.alpha 
         J = -1/2*np.dot(alpha,np.dot(K,alpha)) + np.sum(np.dot(np.diag(y),alpha))
         n_kernels = len(self.kernels)
         grad_J = np.zeros(n_kernels)
         for m in range(n_kernels) :
             grad_J[m] = -1/2*np.dot(alpha,np.dot(self.kernels_matrix[m],alpha))
-        D = np.zeros(n_kernels)
-        for m in range(n_kernels) :
-            if np.abs(self.weights[m]) <= eps and (grad_J[m] - grad_J[mu] > 0) :
-                D[m] = 0
-            elif m != mu and self.weights[m] > 0 :
-                D[m] = grad_J[mu] - grad_J[m]
-            elif m == mu :
-                temp = grad_J - grad_J[mu]
-                mask = (self.weights > 0)*(np.linspace(0,n_kernels-1,n_kernels,dtype = 'int') != mu)
-                D[m] = np.sum(temp[mask])
-        return J,grad_J,D,alpha
+        reduced_grad = grad_J - grad_J[mu]
+        mask = (d <= eps)*(reduced_grad>0)
+        reduced_grad[mask] = 0
+        reduced_grad = -reduced_grad
+        reduced_grad[mu] = -np.sum(reduced_grad)
+        return J,grad_J,reduced_grad,alpha
     
     def compute_K(self,d,matrices) :
         K = 0*matrices[0]
@@ -117,24 +129,48 @@ class SimpleMKL() :
             K += dd*M
         return K
             
-    def line_search(self,d, D, gamma_max, y, a = 0.2, b = 0.9, n_iter = 10) :
+    def line_search(self,d, D, gamma_max, y, a = 0.2, b = 0.5, n_iter = 100) :
         n = 0
         gamma = gamma_max
         K = self.compute_K(d,self.kernels_matrix)
-        f0,grad_J,_,_ = self.compute_J_grad_J_D(K, y, 0)
+        f0,grad_J,_,_ = self.compute_J_grad_J_D(K, y, 0,d)
         m = np.dot(grad_J,D)
         K = self.compute_K(d + gamma*D,self.kernels_matrix)
-        f1,_,_,alpha = self.compute_J_grad_J_D(K, y, 0)
+        f1,_,_,alpha = self.compute_J_grad_J_D(K, y, 0,d+gamma*D)
         #print('f0 = ',f0, 'f1 = ', f1, 'n = ', n, 'm = ', m)
         while f1 > f0 + a*gamma*m and n < n_iter :
             gamma = gamma*b
             n +=1
             K = self.compute_K(d + gamma*D,self.kernels_matrix)
-            f1,_,_,alpha = self.compute_J_grad_J_D(K, y, 0)  
+            f1,_,_,alpha = self.compute_J_grad_J_D(K, y, 0,d + gamma*D)  
+        #print(n)
         return gamma,alpha
     
+    def predict(self,X) :
+        
+        f = np.zeros(len(X))
+        for j,x in enumerate(X) :
+            proj = 0
+            for i in self.sv :
+                for m,w in enumerate(self.weights) :
+                    proj += self.alpha[i]*w*utils.get_kernel(self.kernels[m], **self.kernel_parameters)(self.X[i],x)
+            f[j] = proj
+        return np.sign(f)
+                    
 if __name__ == '__main__' :
     kernels = ['gaussian','linear']
-    clf = SimpleMKL(kernels)
+    clf = SimpleMKL(kernels, n_iter = 10)
     clf.fit(X,y)
-                
+    preds = clf.predict(X)
+    import pylab as plt
+    plt.figure(1)
+    plt.scatter(X1[:, 0], X1[:, 1], color='red', marker='o')
+    plt.scatter(X2[:, 0], X2[:, 1], color='blue', marker='^')
+    for j in range(len(preds)) :
+        if preds[j] == 1 :
+            plt.scatter(X[j][0],X[j][1],color = 'magenta',marker = '+')
+        elif preds[j] == -1 :
+            plt.scatter(X[j][0],X[j][1],color = 'cyan',marker = 'x')
+        else :
+            print('pb')
+                    

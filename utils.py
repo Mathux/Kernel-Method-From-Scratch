@@ -172,18 +172,6 @@ def get_kernel_parameters(kernel):
     else:
         raise Exception('Invalid Kernel')
 
-# Give some cool bar when we are waiting
-
-
-def progressBar(value, endvalue, bar_length=50):
-    percent = float(value) / endvalue
-    arrow = '-' * int(round(percent * bar_length) - 1) + '>'
-    spaces = ' ' * (bar_length - len(arrow))
-
-    sys.stdout.write("\n Progress: [{0}] {1}%".format(
-        arrow + spaces, int(round(percent * 100))))
-    sys.stdout.flush()
-
 
 def transform_label(y):
     if -1 in y:
