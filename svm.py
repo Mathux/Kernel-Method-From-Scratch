@@ -12,16 +12,17 @@ import utils
 from kernel import *
 from config import *
 
-solvers.options['show_progress'] = True
+solvers.options['show_progress'] = False
 
 class SVM(object) :
     
-    def __init__(self, kernel = 'linear', C = 1.0, gamma = 1, dim = 0, offset = 1, k = 3, m = 1, d = 1) :
+    def __init__(self, kernel = 'linear', kernel_matrix = None, C = 1.0, gamma = 1, dim = 0, offset = 1, k = 3, m = 1, d = 1, beta = 1, e = 1) :
         
         self.C = C
         self.kernel_type = kernel
         self.kernel = utils.get_kernel(kernel, gamma = gamma, dim = dim, offset = offset, k= k, m = m, d = d)
         self.__name__ = 'SVM'
+        self.kernel_matrix = kernel_matrix
         
     def fit(self,X, y, tol = 10**-4) :
 
@@ -32,7 +33,6 @@ class SVM(object) :
         Q = matrix(self.K)
         p = matrix(-y)
         h = matrix(np.hstack([self.C*np.ones(self.n_samples),np.zeros(self.n_samples)]))
-        self.temp_G = np.vstack([temp,np.diag(-y)])
         G = matrix(np.vstack([temp,-temp]))
         sol=solvers.qp(Q, p, G, h)
         self.alpha = np.ravel(sol['x'])
@@ -44,6 +44,21 @@ class SVM(object) :
             self.b += y[sv]
             self.b -= np.sum(self.alpha[self.support_vectors] * self.K[self.support_vectors,sv])
         self.b /= len(self.alpha)
+        
+    def fit_kernel(self, y, tol = 10**-5) :
+        
+        assert not self.kernel_matrix is None
+        K = self.kernel_matrix
+        n_samples = K.shape[0]
+        temp = np.diag(y)
+        Q = matrix(K)
+        p = matrix(-y)
+        h = matrix(np.hstack([self.C*np.ones(n_samples),np.zeros(n_samples)]))
+        G = matrix(np.vstack([temp,-temp]))
+        sol=solvers.qp(Q, p, G, h)
+        self.alpha = np.ravel(sol['x'])
+        self.support_vectors = np.linspace(0,n_samples-1,n_samples,dtype = 'int')[(np.abs(self.alpha)>tol)]
+        self.alpha = self.alpha
     
     def predict(self,X) :
         n_samples = X.shape[0]

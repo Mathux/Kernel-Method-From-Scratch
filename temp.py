@@ -19,7 +19,7 @@ a.fit(X, y)
 plt.figure(1)
 plt.scatter(X1[:, 0], X1[:, 1], color='red', marker='o')
 plt.scatter(X2[:, 0], X2[:, 1], color='blue', marker='^')
-
+#%%
 preds = a.predict(X)
 #
 # for j in range(len(preds)) :

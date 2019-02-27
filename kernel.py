@@ -54,9 +54,12 @@ class SpectralKernel(object) :
         def compute_kernel(x,y) :
             phi_x = np.zeros(len(self.mers))
             phi_y = np.zeros(len(self.mers))
-            for j,b in enumerate(self.mers) : 
-                phi_x[j] += 1*(b in x)
-                phi_y[j] += 1*(b in y)
+            for i in range(len(x) - self.k +1) :
+                for j,b in enumerate(self.mers) : 
+                    if x[i:i+self.k] == b :
+                        phi_x[j] += 1
+                    if y[i:i+self.k] == b :
+                        phi_y[j] += 1
             return np.dot(phi_x,phi_y)
         return compute_kernel
     
@@ -64,17 +67,19 @@ class SpectralKernel(object) :
         n = len(X)
         K = np.zeros((n,n))
         phis = []
-
         for x in X :
             phi = np.zeros(len(self.mers))
-            for j,mer in enumerate(self.mers) :
-                phi[j] += 1*(mer in x)
+            for i in range(len(x) - self.k +1) :
+                for j,mer in enumerate(self.mers) :
+                    if x[i:i+self.k] == mer :
+                        phi[j] += 1
             phis.append(phi)
         for i in range(n) :
             for j in range(i,n) :
                 K[i,j] = np.dot(phis[i],phis[j])
                 K[j,i] = K[i,j]
-        return utils.normalize_kernel(K)
+        # return utils.normalize_kernel(K)
+        return K
   
 
 class MismatchKernel(object) :
@@ -111,7 +116,8 @@ class MismatchKernel(object) :
             for j in range(i,n) :
                 K[i,j] = np.dot(phis[i],phis[j])
                 K[j,i] = K[i,j]
-        return utils.normalize_kernel(K)
+        #return utils.normalize_kernel(K)
+        return K
         
 
 class WDKernel() :

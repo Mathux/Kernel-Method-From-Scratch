@@ -127,7 +127,7 @@ def submission(prediction, test_size=1000):
     return None
 
 
-def get_kernel(ker, gamma=1, offset=1, dim=1, k=1, m=1, d=1):
+def get_kernel(ker, gamma=1, offset=1, dim=1, k=1, m=1, e = 1, d = 1, beta = 1):
     if ker == 'linear':
         return kernel.Kernel().linear(offset)
     elif ker == 'gaussian':
@@ -144,6 +144,8 @@ def get_kernel(ker, gamma=1, offset=1, dim=1, k=1, m=1, d=1):
         return kernel.MismatchKernel(k, m)
     elif ker == 'WD':
         return kernel.WDKernel(d)
+    elif ker == 'LA' :
+        return kernel.LAKernel(e,d,beta)
     else:
         raise Exception('Invalid Kernel')
 
