@@ -26,10 +26,6 @@ class WKRR(KMethod):
         self._log("Fitting done!")
         return self._alpha
 
-    # old code, explaination
-    # alpha = np.linalg.solve(
-    #    n * self.lam * np.eye(n) + np.dot(W, K), np.dot(W, Z))
-
 
 class KRR(WKRR):
     def __init__(self, kernel, verbose=True):

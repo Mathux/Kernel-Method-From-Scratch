@@ -5,12 +5,27 @@ from src.tools.utils import sigmoid, Logger
 
 
 class Dataset:
-    def __init__(self, data, labels):
+    def __init__(self, data, labels, Id=None):
         self.data = data
         self.labels = labels
+        self.Id = Id
 
 
-class GenClassData(Logger):
+class Data(Logger):
+    def __init__(self):
+        return
+
+    def transform_label(y):
+        if -1 in y:
+            y[y == -1] = 1
+        elif 0 in y:
+            y[y == 0] = -1
+        else:
+            raise Exception('Bad labels')
+        return y  # for convenience
+    
+    
+class GenClassData(Data):
     def __init__(self,
                  n,
                  m,
@@ -88,6 +103,7 @@ class GenClassData(Logger):
     def show_class(self, predict):
         def clas(x):
             return 1 if sigmoid(predict(x)) >= 0.5 else 0
+
         f, (axgt, axpred) = plt.subplots(1, 2)
         for i in range(self.nclasses):
             mask_pred = np.array([clas(x) == i for x in self.data])
@@ -120,7 +136,7 @@ class GenClassData(Logger):
             plt.show()
 
 
-class GenRegData(Logger):
+class GenRegData(Data):
     def __init__(self,
                  n,
                  m,
@@ -170,29 +186,19 @@ class GenRegData(Logger):
         plt.show()
 
 
-class SeqData(Logger):
-    def __init__(self, small=False, verbose=True):
-        from src.tools.utils import load_train, load_test
+class SeqData(Data):
+    def __init__(self, k=0, mat=False, small=False, verbose=True):
         self.verbose = verbose
-        
-        self._log("Load train data..")
-        x_train, y_train = load_train()
-        self._log("Train data loaded!")
 
-        def transform(x, y):
-            X = x[0]["seq"].values
-            Y = y[0]["Bound"].values
-            if small:
-                X = X[:100]
-                Y = Y[:100]
-            return Dataset(X, Y)
+        self._log("Load train data (k=" + str(k) + ")")
+        self.train, names = load_data(
+            "train", k=k, mat=mat, small=small, givename=True)
+        self._log("Train data loaded! (" + names[0] + " and " + names[1] + ")")
 
-        self.train = transform(x_train, y_train)
-        self._log("Load test data..")
-        x_test = load_test()
-        self._log("Test data loaded!")
-        
-        self.test = Dataset(x_test, None)
+        self._log("Load test data (k=" + str(k) + ")")
+        self.test, names = load_data(
+            "test", k=k, mat=mat, small=small, givename=True)
+        self._log("Test data loaded! (" + names + ")")
 
         self.nclasses = 2
 
@@ -216,6 +222,50 @@ class SeqData(Logger):
         plt.show()
 
 
+# Loading data
+def load_data(name, k=0, mat=False, small=False, nsmall=100, givename=False):
+    from os.path import join as pjoin
+    import pandas as pd
+    st = "tr" if name == "train" else "te" if name == "test" else None
+    assert (st is not None)
+
+    datafilename = "X" + st + str(k) + conf.ext
+    dataPath = pjoin(conf.dataPath, datafilename)
+    data = pd.read_csv(dataPath, sep=',')
+
+    def shrink(x):
+        return x[:nsmall] if small else x
+
+    Id = shrink(data["Id"])
+
+    if mat:
+        datafilename = "X" + st + str(k) + "_mat100" + conf.ext
+        dataPath = pjoin(conf.dataPath, datafilename)
+
+        datamat = pd.read_csv(dataPath, sep=' ', dtype='float64', header=None)
+        data = datamat.values
+    else:
+        data = data["seq"].values
+
+    data = shrink(data)
+
+    if name == "train":
+        labelfilename = "Y" + st + str(k) + conf.ext
+        labelPath = pjoin(conf.dataPath, labelfilename)
+        labels = pd.read_csv(labelPath)
+        labels = shrink(labels["Bound"].values)
+        # convert
+        Data.transform_label(labels)
+        if givename:
+            return Dataset(data, labels, Id), (datafilename, labelfilename)
+        else:
+            return Dataset(data, labels, Id)
+    else:
+        if givename:
+            return data, datafilename
+        else:
+            return Dataset(data, None, Id)
+
+
 if __name__ == '__main__':
-    # data = SeqData()
-    data = GenClassData(1200, 3, nclasses=2, mode="gauss")
+    data = SeqData(k=0, mat=False, small=False, verbose=True)

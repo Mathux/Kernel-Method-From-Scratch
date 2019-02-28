@@ -27,7 +27,6 @@ class KMethod(Logger):
         K_xi = self.kernel.predict(x)
         return self.alpha.dot(K_xi)
         # return 1 if sigmoid(self.alpha.dot(K_xi)) >= 0.5 else -1
-        # return 1 if self.alpha.dot(K_xi) >= 0.5 else 0
         
     def score_recall_precision(self, X, y):
         predictions = self.predict(X)
