@@ -171,18 +171,23 @@ class GenRegData(Logger):
 
 
 class SeqData(Logger):
-    def __init__(self, verbose=True):
+    def __init__(self, small=False, verbose=True):
         from src.tools.utils import load_train, load_test
+        self.verbose = verbose
         
         self._log("Load train data..")
         x_train, y_train = load_train()
         self._log("Done!")
-        
+
         def transform(x, y):
-            return Dataset(x[0]["seq"].values, y[0]["Bound"].values)
+            X = x[0]["seq"].values
+            Y = y[0]["Bound"].values
+            if small:
+                X = X[:100]
+                Y = Y[:100]
+            return Dataset(X, Y)
 
         self.train = transform(x_train, y_train)
-
         self._log("Load test data..")
         x_test = load_test()
         self._log("Done!")
@@ -192,6 +197,7 @@ class SeqData(Logger):
         self.nclasses = 2
 
     def show_pca(self, proj, dim):
+        proj = proj.real
         if dim == 2:
             for i in range(self.nclasses):
                 mask = self.train.labels == i

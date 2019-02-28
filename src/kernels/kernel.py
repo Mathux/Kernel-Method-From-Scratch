@@ -51,7 +51,7 @@ class Kernel(Logger):
         self.reset()
         # Init some values
         self._n = value.data.shape[0]
-        self._m = value.data.shape[1]
+        self._m = value.data.shape[1] if len(value.data.shape) > 1 else None
 
     @property
     def n(self):
@@ -78,7 +78,7 @@ class Kernel(Logger):
         # Check if KC is computed before
         if self._KC is None:
             # Compute the centered gram matrix
-            self._compute_centered_gram
+            self._compute_centered_gram()
         return self._K
 
     def _compute_gram(self):
@@ -91,10 +91,12 @@ class Kernel(Logger):
         self._log("Gram matrix computed!")
 
     def _compute_centered_gram(self):
+        self._log("Center the gram matrix..")
         K = self.K
         n = self.n
         oneN = (1 / n) * np.ones((n, n))
         self._KC = K - oneN.dot(K) - K.dot(oneN) + oneN.dot(K.dot(oneN))
+        self._log("Gram matrix centered!")
 
     def predict(self, x):
         return np.array([self.kernel(xi, x) for xi in self.data])

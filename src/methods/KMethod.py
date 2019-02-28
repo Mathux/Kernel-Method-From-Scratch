@@ -8,28 +8,6 @@ class KMethod(Logger):
         self.verbose = verbose
         self._alpha = None
         self.kernel = kernel
-        
-    @property
-    def alpha(self):
-        if self._alpha is None:
-            raise Exception("Model is not trained yet")
-        return self._alpha
-
-    @property
-    def dataset(self):
-        return self.kernel.dataset
-
-    @property
-    def data(self):
-        return self.kernel.data
-
-    @property
-    def n(self):
-        return self.kernel.n
-
-    @property
-    def m(self):
-        return self.kernel.m
 
     # Load the dataset (if there are one) in the kernel
     # or just load the labels
@@ -59,3 +37,25 @@ class KMethod(Logger):
         recall = tp / (fn + tp)
         precision = tp / (fp + tp)
         return np.sum(y == predictions) / X.shape[0], recall, precision
+            
+    @property
+    def alpha(self):
+        if self._alpha is None:
+            raise Exception("Model is not trained yet")
+        return self._alpha
+
+    @property
+    def dataset(self):
+        return self.kernel.dataset
+
+    @property
+    def data(self):
+        return self.kernel.data
+
+    @property
+    def n(self):
+        return self.kernel.n
+
+    @property
+    def m(self):
+        return self.kernel.m
