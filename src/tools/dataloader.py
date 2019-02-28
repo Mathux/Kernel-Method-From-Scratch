@@ -177,7 +177,7 @@ class SeqData(Logger):
         
         self._log("Load train data..")
         x_train, y_train = load_train()
-        self._log("Done!")
+        self._log("Train data loaded!")
 
         def transform(x, y):
             X = x[0]["seq"].values
@@ -190,20 +190,20 @@ class SeqData(Logger):
         self.train = transform(x_train, y_train)
         self._log("Load test data..")
         x_test = load_test()
-        self._log("Done!")
+        self._log("Test data loaded!")
         
         self.test = Dataset(x_test, None)
 
         self.nclasses = 2
 
     def show_pca(self, proj, dim):
+        import matplotlib.pyplot as plt
         proj = proj.real
         if dim == 2:
             for i in range(self.nclasses):
                 mask = self.train.labels == i
                 plt.scatter(proj[mask][:, 0], proj[mask][:, 1])
         elif dim == 3:
-            import matplotlib.pyplot as plt
             from mpl_toolkits.mplot3d import Axes3D
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')

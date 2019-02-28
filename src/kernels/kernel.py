@@ -1,5 +1,4 @@
 import numpy as np
-from src.kernels.utils import normalize_kernel
 from src.tools.utils import Logger
 
 
@@ -91,8 +90,8 @@ class Kernel(Logger):
         self._log("Gram matrix computed!")
 
     def _compute_centered_gram(self):
-        self._log("Center the gram matrix..")
         K = self.K
+        self._log("Center the gram matrix..")
         n = self.n
         oneN = (1 / n) * np.ones((n, n))
         self._KC = K - oneN.dot(K) - K.dot(oneN) + oneN.dot(K.dot(oneN))
@@ -103,7 +102,7 @@ class Kernel(Logger):
 
     def addconfig(self, name, value):
         self.config[name] = value
-
+    
 
 class StringKernel(Kernel):
     def __init__(self, dataset=None, name="string", verbose=True):
@@ -125,18 +124,30 @@ class StringKernel(Kernel):
         return np.array([np.dot(phix, phi) for phi in self.phis])
 
     def _compute_gram(self):
-        self._log("Computing the gram matrix..")
-
         K = np.zeros((self.n, self.n))
         phis = self.phis
 
+        self._log("Computing the gram matrix..")
         for i in self.vrange(self.n):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = np.dot(phis[i], phis[j])
 
         self._log("Gram matrix computed!")
-        self._K = normalize_kernel(K)
+        self._normalized_kernel(K)
 
+    # Normalise the kernel (divide by the variance)
+    def _normalized_kernel(self, K):
+        self._log("Normalise the kernel..")
+        for i in self.vrange(K.shape[0]):
+            for j in range(i + 1, K.shape[0]):
+                q = np.sqrt(K[i, i] * K[j, j])
+                if q > 0:
+                    K[i, j] /= q
+                    K[j, i] = K[i, j]
+        np.fill_diagonal(K, 1.)
+        self._log("Kernel normalized!")
+        self._K = K
+        
     def kernel(self, x, y):
         return np.dot(self._compute_phi(x), self._compute_phi(y))
 

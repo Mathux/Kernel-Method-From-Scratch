@@ -8,13 +8,14 @@ class WKRR(KMethod):
         self.lam = lam
 
     def fit(self, dataset=None, labels=None, w=None):
-        self._log("Fitting weighted kernel ridge regression...")
         self.load_dataset(dataset, labels)
         n = self.n
         if w is None:
             w = np.ones(n)
         # Gram matrix
         K = self.kernel.K
+        
+        self._log("Fitting weighted kernel ridge regression...")
         # Prepare data
         W_half = np.diag(np.sqrt(w))
 
