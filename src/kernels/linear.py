@@ -1,17 +1,15 @@
-from src.kernels.kernel import Kernel
+from src.kernels.kernel import Kernel, EasyCreate
 
 
-class LinearKernel(Kernel):
-    def __init__(self, dataset=None, verbose=True):
-        super(LinearKernel, self).__init__(
-            dataset=dataset, name="linear", verbose=verbose)
-
+class LinearKernel(Kernel, metaclass=EasyCreate):
+    defaultParameters = {"offset": 0}
+    
     def kernel(self, x, y):
-        return x.dot(y)
+        return x.dot(y) + self.param.offset
 
 
 if __name__ == "__main__":
-    from src.tools.dataloader import GenClassData
+    from src.data.synthetic import GenClassData
     data = GenClassData(300, 3, nclasses=2, mode="gauss")
-    kernel = LinearKernel(data.train)
+    kernel = LinearKernel(data)
     K = kernel.K

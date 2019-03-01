@@ -1,20 +1,16 @@
 import numpy as np
-from src.kernels.kernel import Kernel
+from src.kernels.kernel import Kernel, EasyCreate
 
 
-class GaussianKernel(Kernel):
-    def __init__(self, dataset=None, sigma=1, verbose=True):
-        super(GaussianKernel, self).__init__(
-            dataset=dataset, name="gaussian", verbose=verbose)
-
-        self.sigma = sigma
-
+class GaussianKernel(Kernel, metaclass=EasyCreate):
+    defaultParameters = {"sigma": 1}
+        
     def kernel(self, x, y):
-        return np.exp(-np.linalg.norm(x - y)**2) / self.sigma**2
+        return np.exp(-np.linalg.norm(x - y)**2) / self.param.sigma**2
 
 
 if __name__ == "__main__":
-    from src.tools.dataloader import GenClassData
+    from src.data.synthetic import GenClassData
     data = GenClassData(300, 3, nclasses=2, mode="gauss")
-    kernel = GaussianKernel(data.train, sigma=1, verbose=True)
+    kernel = GaussianKernel(data)
     K = kernel.K

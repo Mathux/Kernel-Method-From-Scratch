@@ -1,16 +1,9 @@
-from itertools import product
-
 import numpy as np
+from src.kernels.kernel import StringKernel, EasyCreate
 
-from src.kernels.kernel import StringKernel
 
-
-class SpectralKernel(StringKernel):
-    def __init__(self, dataset=None, k=6, verbose=True):
-        super(SpectralKernel, self).__init__(
-            dataset=dataset, name="spectral", verbose=verbose)
-        self.k = k
-        self.mers = [(''.join(c)) for c in product('ACGT', repeat=self.k)]
+class SpectralKernel(StringKernel, metaclass=EasyCreate):
+    defaultParameters = {"k": 3}
 
     def _compute_phi(self, x):
         phi = np.zeros(len(self.mers))
@@ -20,7 +13,7 @@ class SpectralKernel(StringKernel):
 
 
 if __name__ == "__main__":
-    from src.tools.dataloader import SeqData
-    data = SeqData()
-    kernel = SpectralKernel(data.train, k=3, verbose=True)
+    from src.data.seq import SeqData
+    data = SeqData(small=True)
+    kernel = SpectralKernel(data)
     K = kernel.K

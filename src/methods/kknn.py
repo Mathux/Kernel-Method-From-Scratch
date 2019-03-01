@@ -34,7 +34,7 @@ class KKNN(KMethod):
     def nearest_neighbors(self, x, j):
         K = self.kernel.K
         preds = self.kernel.predict(x)
-        kxx = self.kernel.kernel(x, x)
+        kxx = self.kernel(x, x)
 
         distance = []
         for i in range(self.n):

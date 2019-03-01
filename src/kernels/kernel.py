@@ -1,21 +1,42 @@
 import numpy as np
-from src.tools.utils import Logger
+from src.tools.utils import Parameters, Logger
+
+
+class EasyCreate(type):
+    def __init__(cls, clsname, superclasses, attributedict):
+        def init(self, dataset=None, parameters=None, verbose=True):
+            super(cls, self).__init__(
+                dataset=dataset,
+                name=clsname,
+                parameters=parameters,
+                verbose=verbose,
+                cls=cls)
+
+        cls.__init__ = init
 
 
 class Kernel(Logger):
     def __init__(self,
                  dataset=None,
-                 name="NONAME",
-                 isString=False,
-                 verbose=True):
+                 name="Kernel",
+                 parameters=None,
+                 verbose=True,
+                 cls=None):
         self.verbose = verbose
         if dataset is not None:
             self.dataset = dataset
         else:
             self.reset()
-        self.config = {}
-        self.isString = isString
+
+        if parameters is None:
+            parameters = cls.defaultParameters
+
+        self.param = Parameters(parameters)
+
         self.__name__ = name
+
+    def __call__(self, x, y):
+        return self.kernel(x, y)
 
     def reset(self):
         self._K = None
@@ -23,7 +44,7 @@ class Kernel(Logger):
         self._n = None
         self._m = None
         self._phis = None
-        
+
     @property
     def data(self):
         if self._data is None:
@@ -102,13 +123,23 @@ class Kernel(Logger):
 
     def addconfig(self, name, value):
         self.config[name] = value
-    
+
 
 class StringKernel(Kernel):
-    def __init__(self, dataset=None, name="string", verbose=True):
+    def __init__(self,
+                 dataset=None,
+                 name="StringKernel",
+                 parameters=None,
+                 verbose=True,
+                 cls=None):
         super(StringKernel, self).__init__(
-            dataset=dataset, name=name, isString=True, verbose=verbose)
+            dataset=dataset,
+            name=name,
+            parameters=parameters,
+            verbose=verbose,
+            cls=cls)
         self._phis = None
+        self._mers = None
 
     def _compute_phis(self):
         self._log("Computing phis..")
@@ -147,7 +178,7 @@ class StringKernel(Kernel):
         np.fill_diagonal(K, 1.)
         self._log("Kernel normalized!")
         self._K = K
-        
+
     def kernel(self, x, y):
         return np.dot(self._compute_phi(x), self._compute_phi(y))
 
@@ -158,3 +189,11 @@ class StringKernel(Kernel):
             # Compute phis
             self._compute_phis()
         return self._phis
+
+    @property
+    def mers(self):
+        from itertools import product
+        if self._mers is None:
+            self._mers = [(''.join(c))
+                          for c in product('ACGT', repeat=self.param.k)]
+        return self._mers
