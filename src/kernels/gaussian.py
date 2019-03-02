@@ -6,7 +6,7 @@ class GaussianKernel(Kernel, metaclass=KernelCreate):
     defaultParameters = {"sigma": 1}
 
     def kernel(self, x, y):
-        return np.exp(-np.linalg.norm(x - y)**2) / self.param.sigma**2
+        return np.exp(-np.linalg.norm(x - y)**2) / (2*self.param.sigma**2)
 
 
 if __name__ == "__main__":
