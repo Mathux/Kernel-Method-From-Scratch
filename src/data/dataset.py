@@ -97,7 +97,7 @@ class Dataset(Logger):
             raise Exception("Bad labels")
 
     # Show project of data
-    def show_pca(self, proj, dim):
+    def show_pca(self, proj, dim=3):
         import matplotlib.pyplot as plt
         proj = proj.real
         if self.nclasses == 2:

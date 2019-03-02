@@ -10,7 +10,7 @@ def GenClassData(n,
                  split_val=0.1,
                  seed=conf.SEED,
                  verbose=True,
-                 mode="gauss"):
+                 mode="circle"):
     data = gen_class_data(n, m, mode=mode, nclasses=nclasses)
     Logger.log(verbose, "Synthetic data class generated")
     dataset = Dataset(

@@ -10,6 +10,11 @@ class QuadKernel(Kernel, metaclass=KernelCreate):
 
 if __name__ == "__main__":
     from src.data.synthetic import GenClassData
-    data = GenClassData(300, 3, nclasses=2, mode="gauss")
-    kernel = QuadKernel(data, verbose=True)
-    K = kernel.K
+    data = GenClassData(300, 3, nclasses=2)
+    kernel = QuadKernel(data)
+
+    from src.methods.kpca import KPCA
+    kpca = KPCA(kernel)
+    proj = kpca.project()
+
+    data.show_pca(proj)

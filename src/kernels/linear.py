@@ -10,6 +10,11 @@ class LinearKernel(Kernel, metaclass=KernelCreate):
 
 if __name__ == "__main__":
     from src.data.synthetic import GenClassData
-    data = GenClassData(300, 3, nclasses=2, mode="gauss")
+    data = GenClassData(300, 3, nclasses=2)
     kernel = LinearKernel(data)
-    K = kernel.K
+
+    from src.methods.kpca import KPCA
+    kpca = KPCA(kernel)
+    proj = kpca.project()
+
+    data.show_pca(proj)

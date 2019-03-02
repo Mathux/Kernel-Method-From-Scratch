@@ -54,9 +54,15 @@ class LAKernel(Kernel, metaclass=KernelCreate):
 
 if __name__ == "__main__":
     from src.data.seq import SeqData
-    data = SeqData(small=True)
-    kernel = LAKernel(data, parameters={"mode": "smith"})
-    K = kernel.K
+    data = SeqData(small=True, nsmall=50)
+        
+    kernel = LAKernel(data)
+
+    from src.methods.kpca import KPCA
+    kpca = KPCA(kernel)
+    proj = kpca.project()
+
+    data.show_pca(proj)
 
 
 DISCUSS = """

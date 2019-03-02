@@ -22,6 +22,12 @@ class WDKernel(Kernel, metaclass=KernelCreate):
 
 if __name__ == "__main__":
     from src.data.seq import SeqData
-    data = SeqData(small=True)
+    data = SeqData(small=True, nsmall=500)
+        
     kernel = WDKernel(data)
-    K = kernel.K
+
+    from src.methods.kpca import KPCA
+    kpca = KPCA(kernel)
+    proj = kpca.project()
+
+    data.show_pca(proj)
