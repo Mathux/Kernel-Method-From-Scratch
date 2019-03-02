@@ -11,19 +11,21 @@ class Dataset(Logger):
                  shuffle=True,
                  seed=SEED,
                  verbose=True,
-                 labels_change=False):
+                 labels_change=True):
         self.verbose = verbose
         self.data = data
         self.labels = labels
         self.Id = Id
+        
         self.n = data.shape[0]
+        self.m = data.shape[1] if len(data.shape) > 1 else None
         # Shuffle the dataset
         if shuffle:
             self._log("Dataset shuffled")
             self.shuffle(seed)
         if labels_change and labels is not None:
             self.transform_label()
-
+    
     # Shuffle the dataset
     def shuffle(self, seed=SEED):
         np.random.seed(seed)
@@ -90,6 +92,7 @@ class Dataset(Logger):
                 y = np.copy(y)
             y[y == v1] = v2
             return y
+
         y = self.labels
         if -1 in y:
             y = replace(-1, 0, y)
@@ -98,10 +101,39 @@ class Dataset(Logger):
         else:
             raise Exception("Bad labels")
 
+    # Show project of data
+    def show_pca(self, proj, dim):
+        import matplotlib.pyplot as plt
+        proj = proj.real
+        if self.nclasses == 2:
+            it = [-1, 1]
+        else:
+            it = range(self.nclasses)
+        if dim == 2:
+            for i in it:
+                mask = self.labels == i
+                plt.scatter(proj[mask][:, 0], proj[mask][:, 1])
+        elif dim == 3:
+            from mpl_toolkits.mplot3d import Axes3D
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            for i in it:
+                mask = self.labels == i
+                ax.scatter(proj[mask][:, 0], proj[mask][:, 1],
+                           proj[mask][:, 2])
+
+        plt.title("KPCA")
+        plt.show()
+
     # Invert labels signification
     def __invert__(self):
         # if no label, just quit
         if self.labels is None:
             raise Exception("Can't revert empty labels")
         labels = self.transform_label(inplace=False)
+        # Not very good: cls can be deferent: todo
         return Dataset(self.data, labels, self.Id)
+
+    def __str__(self):
+        size = "(" + str(self.n) + ", " + str(self.m) + ")"
+        return "Dataset object of size " + size

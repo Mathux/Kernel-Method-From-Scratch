@@ -102,14 +102,12 @@ class Kernel(Logger):
         return self._K
 
     def _compute_gram(self):
-        self._log("Computing the gram matrix..")
-        K = np.zeros((self.n, self.n))
-        for i in self.vrange(self.n):
+        K = np.zeros((self.n, self.n))    
+        for i in self.vrange(self.n, "Gram matrix"):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = self.kernel(self.data[i], self.data[j])
         self._K = K
-        self._log("Gram matrix computed!")
-
+        
     def _compute_centered_gram(self):
         K = self.K
         self._log("Center the gram matrix..")
@@ -142,13 +140,11 @@ class StringKernel(Kernel):
         self._mers = None
 
     def _compute_phis(self):
-        self._log("Computing phis..")
         phis = []
-        for x in self.viterator(self.data):
+        for x in self.viterator(self.data, "Phis"):
             phi = self._compute_phi(x)
             phis.append(phi)
         self._phis = np.array(phis)
-        self._log("phis computed!")
 
     def predict(self, x):
         phix = self._compute_phi(x)
@@ -158,25 +154,21 @@ class StringKernel(Kernel):
         K = np.zeros((self.n, self.n))
         phis = self.phis
 
-        self._log("Computing the gram matrix..")
-        for i in self.vrange(self.n):
+        for i in self.vrange(self.n, desc="Gram matrix"):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = np.dot(phis[i], phis[j])
 
-        self._log("Gram matrix computed!")
         self._normalized_kernel(K)
 
     # Normalise the kernel (divide by the variance)
     def _normalized_kernel(self, K):
-        self._log("Normalise the kernel..")
-        for i in self.vrange(K.shape[0]):
+        for i in self.vrange(K.shape[0], "Normalise kernel"):
             for j in range(i + 1, K.shape[0]):
                 q = np.sqrt(K[i, i] * K[j, j])
                 if q > 0:
                     K[i, j] /= q
                     K[j, i] = K[i, j]
         np.fill_diagonal(K, 1.)
-        self._log("Kernel normalized!")
         self._K = K
 
     def kernel(self, x, y):

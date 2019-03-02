@@ -33,16 +33,16 @@ class KPCA(KMethod):
             self.project()
         return self._projections
         
-        
+
 if __name__ == "__main__":
-    from src.tools.dataloader import SeqData
-    data = SeqData()
-    from src.kernels.spectral import SpectralKernel
-    kernel = SpectralKernel()
+    from src.data.synthetic import GenClassData
+    data = GenClassData(500, 2, mode="circle")
+
+    from src.kernels.quad import QuadKernel
+    kernel = QuadKernel(data)
 
     DIM = 3
-    
     kpca = KPCA(kernel, dim=DIM)
-    proj = kpca.project(data.train)
-
+    proj = kpca.project()
+    
     data.show_pca(proj, dim=DIM)

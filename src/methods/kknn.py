@@ -14,15 +14,14 @@ class KKNN(KMethod):
         # Load the dataset (if there are one) in the kernel
         self.load_dataset(dataset, labels)
 
-    def predict(self, x, j):
-        return self.majority_vote(x, j)
+    def predict(self, j):
+        return lambda x : self.majority_vote(x, j)
     
     def majority_vote(self, x, j):
         nn = self.nearest_neighbors(x, j)
-        N = len(self.labels)
         # Count the numbers of 1
         nb1 = np.sum(self.labels[nn] == 1)
-        nb0 = N - nb1
+        nb0 = j - nb1
         if nb1 > nb0:
             return 1
         elif nb1 < nb0:
@@ -46,12 +45,13 @@ class KKNN(KMethod):
 
 
 if __name__ == "__main__":
-    from src.tools.dataloader import SeqData
-    data = SeqData(small=True)
+    from src.data.synthetic import GenClassData
+    data = GenClassData(500, 2, mode="circle")
 
-    from src.kernels.spectral import SpectralKernel
-    kernel = SpectralKernel(data.train)
+    from src.kernels.gaussian import GaussianKernel
+    kernel = GaussianKernel(data)
     kknn = KKNN(kernel)
+    # optional here
     kknn.fit()
     
-    # data.show_class(klr.predict)
+    data.show_class(kknn.predict(1))

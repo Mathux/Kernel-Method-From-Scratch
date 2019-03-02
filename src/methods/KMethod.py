@@ -8,25 +8,25 @@ class KMethod(Logger):
         self.verbose = verbose
         self._alpha = None
         self.kernel = kernel
-
+        self._labels = None
+        
     # Load the dataset (if there are one) in the kernel
     # or just load the labels
     def load_dataset(self, dataset=None, labels=None):
         if dataset is None:
             if labels is None:
                 self._log("Taking data from the kernel directly")
-                self.labels = self.kernel.labels
+                self._labels = self.kernel.labels
             else:
-                self.labels = labels
+                self._labels = labels
         else:
             self._log("Load the data in the kernel")
             self.kernel.dataset = dataset
-            self.labels = dataset.labels
+            self._labels = None # take the kernel one
         
     def predict(self, x):
         K_xi = self.kernel.predict(x)
         return self.alpha.dot(K_xi)
-        # return 1 if sigmoid(self.alpha.dot(K_xi)) >= 0.5 else -1
         
     def score_recall_precision(self, X, y):
         predictions = self.predict(X)
@@ -50,6 +50,12 @@ class KMethod(Logger):
     @property
     def data(self):
         return self.kernel.data
+
+    @property
+    def labels(self):
+        if self._labels is None:
+            return self.kernel.labels
+        return self._labels
 
     @property
     def n(self):

@@ -31,25 +31,6 @@ class SeqData(Dataset):
         super(SeqData, self).__init__(
             *data, shuffle=shuffle, seed=SEED, verbose=verbose)
 
-    def show_pca(self, proj, dim):
-        import matplotlib.pyplot as plt
-        proj = proj.real
-        if dim == 2:
-            for i in range(self.nclasses):
-                mask = self.train.labels == i
-                plt.scatter(proj[mask][:, 0], proj[mask][:, 1])
-        elif dim == 3:
-            from mpl_toolkits.mplot3d import Axes3D
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            for i in range(self.nclasses):
-                mask = self.train.labels == i
-                ax.scatter(proj[mask][:, 0], proj[mask][:, 1],
-                           proj[mask][:, 2])
-
-        plt.title("PCA on seq data")
-        plt.show()
-
 
 # Loading data
 def load_data(name, k=0, mat=False, small=False, nsmall=100, givename=False):

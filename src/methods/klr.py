@@ -41,11 +41,11 @@ class KLR(KMethod):
 
 
 if __name__ == "__main__":
-    from src.tools.dataloader import GenClassData
-    data = GenClassData(500, 2)
+    from src.data.synthetic import GenClassData
+    data = GenClassData(500, 2, mode="circle")
 
-    from src.kernels.linear import LinearKernel
-    kernel = LinearKernel(data.train)
+    from src.kernels.gaussian import GaussianKernel
+    kernel = GaussianKernel(data)
     klr = KLR(kernel)
     klr.fit()
 

@@ -2,6 +2,8 @@ from cvxopt import matrix, solvers
 import numpy as np
 from src.methods.KMethod import KMethod
 
+solvers.options['show_progress'] = False
+
 # Solve the QP Problem:
 #  minimize    1/2 x^T*P*x + q^T*x
 #  subject to  G*x <= h
@@ -25,7 +27,7 @@ class KSVM(KMethod):
         # Load the dataset (if there are one) in the kernel
         self.load_dataset(dataset, labels)
         self._log("Fitting kernel svm..")
-
+        
         n = self.n
         y = self.labels
         K = self.kernel.K
@@ -43,13 +45,14 @@ class KSVM(KMethod):
 
 
 if __name__ == "__main__":
-    from src.tools.dataloader import GenClassData
-    data = GenClassData(100, 2)
+    from src.data.synthetic import GenClassData
+    data = GenClassData(500, 2, mode="circle")
 
-    from src.kernels.gaussian import GaussianKernel
-    kernel = GaussianKernel(data.train)
-
+    from src.kernels.quad import QuadKernel
+    kernel = QuadKernel(data)
+    
     ksvm = KSVM(kernel)
     ksvm.fit()
 
-    data.show_class(ksvm.predict)
+    f = (lambda x: ksvm.predict(x)*2 - 1)
+    data.show_class(f)

@@ -34,12 +34,13 @@ class KRR(WKRR):
 
 
 if __name__ == "__main__":
-    from src.tools.dataloader import GenRegData
+    from src.data.synthetic import GenRegData
     data = GenRegData(500, 2)
 
-    # from kernel import LinearKernel
     from src.kernels.gaussian import GaussianKernel
-    kernel = GaussianKernel(data.train)
-    klr = KRR(kernel)
-    klr.fit()
-    data.show_reg(klr.predict)
+    kernel = GaussianKernel(data)
+    
+    krr = KRR(kernel)
+    krr.fit()
+
+    data.show_reg(krr.predict)
