@@ -1,12 +1,9 @@
 import numpy as np
-from src.methods.KMethod import KMethod
+from src.methods.KMethod import KMethod, KMethodCreate
 
 
-class KPCA(KMethod):
-    def __init__(self, kernel, dim=2, verbose=True):
-        super(KPCA, self).__init__(kernel=kernel, name="KPCA", verbose=verbose)
-        self.dim = dim
-        self._projections = None
+class KPCA(KMethod, metaclass=KMethodCreate):
+    defaultParameters = {"dim": 3}
 
     def project(self, dataset=None, labels=None):
         self.load_dataset(dataset, labels)
@@ -20,7 +17,7 @@ class KPCA(KMethod):
         delta, U = np.linalg.eig(K)
         self._log("Eigenvalues computed..")
         projections = [
-            K.dot(U.T[i] / np.sqrt(delta[i])) for i in range(self.dim)
+            K.dot(U.T[i] / np.sqrt(delta[i])) for i in range(self.param.dim)
         ]
         self._log("Fitting done!")
 
@@ -41,8 +38,15 @@ if __name__ == "__main__":
     from src.kernels.quad import QuadKernel
     kernel = QuadKernel(data)
 
-    DIM = 3
-    kpca = KPCA(kernel, dim=DIM)
-    proj = kpca.project()
+    # from src.data.seq import SeqData
+    # data = SeqData(small=True, nsmall=500)
     
+    # from src.kernels.wd import WDKernel
+    # kernel = WDKernel(data, parameters={"d": 5})
+    
+    DIM = 3
+    parameters = {"dim": DIM}
+    kpca = KPCA(kernel, parameters=parameters)
+    proj = kpca.project()
+
     data.show_pca(proj, dim=DIM)

@@ -1,8 +1,8 @@
 import numpy as np
-from src.kernels.kernel import StringKernel, EasyCreate
+from src.kernels.kernel import StringKernel, KernelCreate
 
 
-class SpectralKernel(StringKernel, metaclass=EasyCreate):
+class SpectralKernel(StringKernel, metaclass=KernelCreate):
     defaultParameters = {"k": 3}
 
     def _compute_phi(self, x):

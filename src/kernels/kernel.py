@@ -2,7 +2,7 @@ import numpy as np
 from src.tools.utils import Parameters, Logger
 
 
-class EasyCreate(type):
+class KernelCreate(type):
     def __init__(cls, clsname, superclasses, attributedict):
         def init(self, dataset=None, parameters=None, verbose=True):
             super(cls, self).__init__(
@@ -28,10 +28,7 @@ class Kernel(Logger):
         else:
             self.reset()
 
-        if parameters is None:
-            parameters = cls.defaultParameters
-
-        self.param = Parameters(parameters)
+        self.param = Parameters(parameters, cls.defaultParameters)
 
         self.__name__ = name
 

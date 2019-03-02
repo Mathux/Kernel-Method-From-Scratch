@@ -1,9 +1,9 @@
 import numpy as np
-from src.kernels.kernel import Kernel, EasyCreate
+from src.kernels.kernel import Kernel, KernelCreate
 
 
 # The local alignement kernel
-class LAKernel(Kernel, metaclass=EasyCreate):
+class LAKernel(Kernel, metaclass=KernelCreate):
     S = np.array([[4, 0, 0, 0], [0, 9, -3, -1], [0, -3, 6, 2], [0, -1, -2, 5]])
     defaultParameters = {"e": 11, "d": 1, "beta": 0.5, "S": S, "mode": "smith"}
 
@@ -16,13 +16,11 @@ class LAKernel(Kernel, metaclass=EasyCreate):
         e = self.param.e
         d = self.param.d
         beta = self.param.beta
-        S = self.param.S
 
         def S(x, y):
-            # raise NotImplementedError
-            return 1
+            return self.param.S[x, y]
 
-        # x, y = format(x) - 1, format(y) - 1
+        x, y = LAKernel.format(x), LAKernel.format(y)
         nx, ny = len(x), len(y)
         M, X, Y, X2, Y2 = [np.zeros((nx + 1, ny + 1)) for _ in range(5)]
         for i in range(1, nx):
@@ -44,12 +42,22 @@ class LAKernel(Kernel, metaclass=EasyCreate):
                 
         return (1 / beta) * np.log(op([1, X2[nx, ny], Y2[nx, ny], M[nx, ny]]))
 
+    @staticmethod
+    def format(x):
+        """
+        Transform string 'AGCT' to list [0, 2, 1, 3]
+        :param x: string, DNA sequence
+        :return: np.array, array of ints with 'A':0, 'C':1, 'G':2, 'T':3
+        """
+        return np.array(list(x.replace('A', '0').replace('C', '1').replace('G', '2').replace('T', '3')), dtype=np.int64)
+
 
 if __name__ == "__main__":
     from src.data.seq import SeqData
-    data = SeqData(small=False)
-    kernel = LAKernel(data)
-    # K = kernel.K
+    data = SeqData(small=True)
+    kernel = LAKernel(data, parameters={"mode": "smith"})
+    K = kernel.K
+
 
 DISCUSS = """
     def get_LA_K(self, X, e=11, d=1, beta=0.5, smith=0, eig=1):

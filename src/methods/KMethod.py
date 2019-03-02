@@ -1,14 +1,41 @@
-from src.tools.utils import Logger
+from src.tools.utils import Logger, Parameters
 import numpy as np
 
 
+class KMethodCreate(type):
+    def __init__(cls, clsname, superclasses, attributedict):
+        def init(self, kernel=None, parameters=None, verbose=True):
+            super(cls, self).__init__(
+                kernel=kernel,
+                name=clsname,
+                parameters=parameters,
+                verbose=verbose,
+                cls=cls)
+
+        cls.__init__ = init
+
+
 class KMethod(Logger):
-    def __init__(self, kernel, name="NO NAME", verbose=True):
+    def __init__(self,
+                 kernel,
+                 name="KMethod",
+                 parameters=None,
+                 verbose=True,
+                 cls=None):
+        
+        self.verbose = verbose
+        self.kernel = kernel
+
+        self.param = Parameters(parameters, cls.defaultParameters)
+        
         self.__name__ = name
         self.verbose = verbose
         self._alpha = None
         self.kernel = kernel
         self._labels = None
+        
+        # For the KPCA
+        self._projections = None
         
     # Load the dataset (if there are one) in the kernel
     # or just load the labels
@@ -27,9 +54,23 @@ class KMethod(Logger):
     def predict(self, x):
         K_xi = self.kernel.predict(x)
         return self.alpha.dot(K_xi)
+
+    def bin_predict(self, x):
+        return -1 if self.predict(x) < 0 else 1
+    
+    def predict_array(self, X, binaire=True):
+        if binaire:
+            fonc = self.bin_predict
+        else:
+            fonc = self.predict
+            
+        return np.array([fonc(x) for x in X])
         
-    def score_recall_precision(self, X, y):
-        predictions = self.predict(X)
+    def score_recall_precision(self, dataset):
+        X, y = dataset.data, dataset.labels
+        
+        predictions = self.predict_array(X, binaire=True)
+
         tp = np.sum((predictions == 1.) * (y == 1.))
         fn = np.sum((predictions == -1.) * (y == 1.))
         fp = np.sum((predictions == 1.) * (y == -1.))

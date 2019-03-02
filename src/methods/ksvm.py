@@ -1,6 +1,6 @@
 from cvxopt import matrix, solvers
 import numpy as np
-from src.methods.KMethod import KMethod
+from src.methods.KMethod import KMethod, KMethodCreate
 
 solvers.options['show_progress'] = False
 
@@ -10,18 +10,14 @@ solvers.options['show_progress'] = False
 #              A*x <= b
 # solvers.qp(P, q, G, h)
 
-# Our SVM problem is:
-#  minimize    (1/2)*x^T*K*x - y^T*x
-#  subject to  0 <= yi*xi <= C
-# The last inequaliy can be seen as:
-#  diag(y)^T x <= (C, .., C)
-# -diag(y)^T x <= (0, .., 0)
 
-
-class KSVM(KMethod):
-    def __init__(self, kernel, C=10**10, verbose=True):
-        super(KSVM, self).__init__(kernel=kernel, name="KLR", verbose=verbose)
-        self.C = C
+class KSVM(KMethod, metaclass=KMethodCreate):
+    """Documentation for ClassName
+    Solve the KSVM problem:
+        minimize    (1/2)*x^T*K*x - y^T*x
+        subject to  0 <= yi*xi <= C
+    """
+    defaultParameters = {"C": 10**10}
 
     def fit(self, dataset=None, labels=None, verbose=False):
         # Load the dataset (if there are one) in the kernel
@@ -31,7 +27,7 @@ class KSVM(KMethod):
         n = self.n
         y = self.labels
         K = self.kernel.K
-        C = self.C
+        C = self.param.C
 
         P = matrix(K, (n, n), "d")
         q = matrix(-y, (n, 1), "d")
@@ -55,4 +51,4 @@ if __name__ == "__main__":
     ksvm.fit()
 
     f = (lambda x: ksvm.predict(x)*2 - 1)
-    data.show_class(f)
+    data._show_gen_class_predicted(f)

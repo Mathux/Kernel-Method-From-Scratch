@@ -1,10 +1,10 @@
 import numpy as np
 
-from src.kernels.kernel import StringKernel, EasyCreate
+from src.kernels.kernel import StringKernel, KernelCreate
 from src.kernels.utils import nb_diff
 
 
-class MismatchKernel(StringKernel, metaclass=EasyCreate):
+class MismatchKernel(StringKernel, metaclass=KernelCreate):
     defaultParameters = {"k": 3, "m": 1}
 
     def _compute_phi(self, x):

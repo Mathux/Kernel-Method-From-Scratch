@@ -14,11 +14,11 @@ from tqdm import tqdm
 class Serializable:
     def __init__(self, name, dic):
         self.__name__ = name
-        
+
     def to_json(self):
         import json
         return json.dumps(self.__dict__, sort_keys=True, indent=4)
-        
+
     def __str__(self):
         return str(self.dic)
 
@@ -29,19 +29,45 @@ class Serializable:
     def dic(self):
         dic = self.__dict__
         return {i: dic[i] for i in dic if i != "__name__"}
-             
-        
+
+
 class Parameters(Serializable):
-    def __init__(self, param):
+    def __init__(self, param, defaultparam=None):
         super(Parameters, self).__init__("Parameters", self.__dict__)
+        if defaultparam is not None:
+            if param is not None:
+                self.dic_to_param_with_default(param, defaultparam)
+            else:
+                self.dic_to_param(defaultparam)
+        else:
+            self.dic_to_param(param)
+
+    def dic_to_param(self, param):
         for (name, value) in param.items():
             self.__dict__[name] = value
 
+    def dic_to_param_with_default(self, param, defaultparam):
+        for (name, value) in defaultparam.items():
+            self.__dict__[name] = value
+
+        for (name, value) in param.items():
+            if name not in defaultparam.keys():
+                print(
+                    "WARNING: '" + name +
+                    "' is not a valid parameter (it is discarded), here are the valid ones: "
+                    + str(list(defaultparam.keys())))
+            else:
+                self.__dict__[name] = value
+
 
 class Logger:
-    def _log(self, *args):
-        if self.verbose:
+    @staticmethod
+    def log(verbose, *args):
+        if verbose:
             print(*args)
+    
+    def _log(self, *args):
+        Logger.log(self.verbose, *args)
 
     def vrange(self, n, desc=""):
         if type(n) == int:
@@ -81,7 +107,7 @@ def submit(prediction, test_size=1000):
     pred.to_csv('predictions.csv', index=False)
     return None
 
-    
+
 if __name__ == "__main__":
     param = {'z': 4, 'r': 5}
     p = Parameters(param)

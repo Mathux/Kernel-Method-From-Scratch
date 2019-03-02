@@ -1,7 +1,7 @@
-from src.kernels.kernel import Kernel, EasyCreate
+from src.kernels.kernel import Kernel, KernelCreate
 
 
-class LinearKernel(Kernel, metaclass=EasyCreate):
+class LinearKernel(Kernel, metaclass=KernelCreate):
     defaultParameters = {"offset": 0}
     
     def kernel(self, x, y):

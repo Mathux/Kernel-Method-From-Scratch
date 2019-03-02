@@ -1,8 +1,8 @@
 import numpy as np
-from src.kernels.kernel import Kernel, EasyCreate
+from src.kernels.kernel import Kernel, KernelCreate
 
 
-class GaussianKernel(Kernel, metaclass=EasyCreate):
+class GaussianKernel(Kernel, metaclass=KernelCreate):
     defaultParameters = {"sigma": 1}
 
     def kernel(self, x, y):

@@ -1,35 +1,39 @@
 import src.config as conf
 from src.config import SEED
 from src.data.dataset import Dataset
+from src.tools.utils import Logger
 
 
-class SeqData(Dataset):
-    def __init__(self,
-                 k=0,
-                 mat=False,
-                 small=False,
-                 verbose=True,
-                 shuffle=True,
-                 dataname="train"):
-        assert (dataname in ["train", "test"])
-        self.verbose = verbose
-        
-        if dataname == "train":
-            self._log("Load train data (k=" + str(k) + ")")
-            data, names = load_data(
-                "train", k=k, mat=mat, small=small, givename=True)
-            self._log("Train data loaded! (" + names[0] + " and " + names[1] +
-                      ")")
-        elif dataname == "test":
-            self._log("Load test data (k=" + str(k) + ")")
-            data, names = load_data(
-                "test", k=k, mat=mat, small=small, givename=True)
-            self._log("Test data loaded! (" + names + ")")
+def SeqData(k=0,
+            mat=False,
+            small=False,
+            verbose=True,
+            shuffle=True,
+            dataname="train",
+            nsmall=100):
+    assert (dataname in ["train", "test"])
 
-        self.nclasses = 2
+    if dataname == "train":
+        Logger.log(verbose, "Load train data (k=" + str(k) + ")")
+        data, names = load_data(
+            "train", k=k, mat=mat, small=small, nsmall=nsmall, givename=True)
+        Logger.log(
+            verbose,
+            "Train data loaded! (" + names[0] + " and " + names[1] + ")")
+    elif dataname == "test":
+        Logger.log(verbose, "Load test data (k=" + str(k) + ")")
+        data, names = load_data(
+            "test", k=k, mat=mat, small=small, nsmall=nsmall, givename=True)
+        Logger.log(verbose, "Test data loaded! (" + names + ")")
 
-        super(SeqData, self).__init__(
-            *data, shuffle=shuffle, seed=SEED, verbose=verbose)
+    dataset = Dataset(
+        *data,
+        shuffle=shuffle,
+        seed=SEED,
+        verbose=verbose,
+        labels_change=True,
+        name="sequential ADN")
+    return dataset
 
 
 # Loading data

@@ -1,12 +1,10 @@
 import numpy as np
-from src.methods.KMethod import KMethod
+from src.methods.KMethod import KMethod, KMethodCreate
 
 
-class WKRR(KMethod):
-    def __init__(self, kernel, lam=0.1, name="WKRR", verbose=False):
-        super(WKRR, self).__init__(kernel=kernel, name=name, verbose=verbose)
-        self.lam = lam
-
+class WKRR(KMethod, metaclass=KMethodCreate):
+    defaultParameters = {"lam": 1}
+    
     def fit(self, dataset=None, labels=None, w=None):
         self.load_dataset(dataset, labels)
         n = self.n
@@ -20,7 +18,7 @@ class WKRR(KMethod):
         W_half = np.diag(np.sqrt(w))
 
         inv = np.linalg.inv(
-            W_half.dot(K.dot(W_half)) + n * self.lam * np.eye(n))
+            W_half.dot(K.dot(W_half)) + n * self.param.lam * np.eye(n))
         # Solve for alpha
         self._alpha = W_half.dot(inv.dot(W_half.dot(self.labels)))
         self._log("Fitting done!")
