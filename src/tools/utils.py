@@ -96,6 +96,14 @@ def quad(K, alpha):
     return np.dot(alpha, np.dot(K, alpha))
 
 
+def nb_diff(x, y):
+    nb_diff = 0
+    for char1, char2 in zip(x, y):
+        if char1 != char2:
+            nb_diff += 1
+    return nb_diff
+
+
 # Tools to give the csv format
 def submit(prediction, test_size=1000):
     pred = pd.DataFrame(columns=['Id', 'Bound'])

@@ -10,7 +10,7 @@ def SeqData(k=0,
             verbose=True,
             shuffle=True,
             dataname="train",
-            nsmall=100):
+            nsmall=200):
     assert (dataname in ["train", "test"])
 
     if dataname == "train":
@@ -30,7 +30,7 @@ def SeqData(k=0,
         seed=SEED,
         verbose=verbose,
         labels_change=True,
-        name="sequential ADN")
+        name="seq")
     return dataset
 
 

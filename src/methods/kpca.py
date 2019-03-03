@@ -37,12 +37,6 @@ if __name__ == "__main__":
 
     from src.kernels.quad import QuadKernel
     kernel = QuadKernel(data)
-
-    # from src.data.seq import SeqData
-    # data = SeqData(small=True, nsmall=500)
-    
-    # from src.kernels.wd import WDKernel
-    # kernel = WDKernel(data, parameters={"d": 5})
     
     DIM = 3
     parameters = {"dim": DIM}

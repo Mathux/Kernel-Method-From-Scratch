@@ -6,7 +6,7 @@ class KernelCreate(type):
     def __init__(cls, clsname, superclasses, attributedict):
         if "toreset" not in cls.__dict__:
             cls.toreset = superclasses[0].toreset
-            
+
         def init(self, dataset=None, parameters=None, verbose=True):
             super(cls, self).__init__(
                 dataset=dataset,
@@ -138,7 +138,7 @@ class GenKernel(Kernel):
                  parameters=None,
                  verbose=True,
                  cls=None):
-        assert("toreset" in cls.__dict__)
+        assert ("toreset" in cls.__dict__)
         toreset = cls.toreset
         super(GenKernel, self).__init__(
             dataset=dataset,
@@ -147,7 +147,7 @@ class GenKernel(Kernel):
             verbose=verbose,
             toreset=toreset,
             cls=cls)
-        
+
 
 class DataKernel(GenKernel):
     toreset = ["_K", "_KC", "_n", "_m"]
@@ -168,13 +168,13 @@ class DataKernel(GenKernel):
 
 class StringKernel(GenKernel):
     toreset = ["_K", "_KC", "_n", "_m", "_phis", "_mers"]
-    
+
     def __init__(self,
                  dataset=None,
                  name="StringKernel",
                  parameters=None,
                  verbose=True,
-                 cls=None):            
+                 cls=None):
         super(StringKernel, self).__init__(
             dataset=dataset,
             name=name,
@@ -238,8 +238,11 @@ def AllStringKernels():
     from src.kernels.spectral import SpectralKernel
     from src.kernels.mismatch import MismatchKernel
     from src.kernels.wd import WDKernel
+    from src.kernels.la import LAKernel
 
-    return [MismatchKernel, SpectralKernel, WDKernel]
+    kernels = [MismatchKernel, SpectralKernel, WDKernel, LAKernel]
+    names = ["mismatch", "spectral", "wd", "la"]
+    return kernels, names
 
 
 def AllDataKernels():
@@ -251,7 +254,17 @@ def AllDataKernels():
     from src.kernels.quad import QuadKernel
     from src.kernels.sigmoid import SigmoidKernel
 
-    return [
+    kernels = [
         ExponentialKernel, GaussianKernel, LaplacianKernel, LinearKernel,
         PolynomialKernel, QuadKernel, SigmoidKernel
     ]
+    names = [
+        "exp", "gaussian", "laplacian", "linear", "poly", "quad", "sigmoid"
+    ]
+    return kernels, names
+
+
+def AllKernels():
+    k1, n1 = AllStringKernels()
+    k2, n2 = AllDataKernels()
+    return k1 + k2, n1 + n2

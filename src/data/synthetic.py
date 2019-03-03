@@ -4,8 +4,8 @@ import src.config as conf
 import numpy as np
 
 
-def GenClassData(n,
-                 m,
+def GenClassData(n=500,
+                 m=2,
                  nclasses=2,
                  split_val=0.1,
                  seed=conf.SEED,
@@ -20,7 +20,7 @@ def GenClassData(n,
         nclasses=nclasses,
         verbose=verbose,
         labels_change=True,
-        name="synthetic classification")
+        name="synth")
     return dataset
 
 
@@ -33,7 +33,7 @@ def GenRegData(n, m, seed=conf.SEED, verbose=True):
         seed=conf.SEED,
         nclasses=1,
         verbose=verbose,
-        name="synthetic regression")
+        name="synth")
     return dataset
 
 

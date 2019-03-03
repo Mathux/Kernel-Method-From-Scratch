@@ -97,29 +97,53 @@ class Dataset(Logger):
             raise Exception("Bad labels")
 
     # Show project of data
-    def show_pca(self, proj, dim=3):
+    def show_pca(self, proj, predict=None, dim=3):
         import matplotlib.pyplot as plt
+        if predict is not None:
+
+            predictions = np.array([predict(x) for x in self.data])
+            
+            if dim == 2:
+                fig, (axgt, axpred) = plt.subplots(1, 2)
+                
+            elif dim == 3:
+                from mpl_toolkits.mplot3d import Axes3D
+                fig = plt.figure()
+                axgt = fig.add_subplot(121, projection='3d')
+                axpred = fig.add_subplot(122, projection='3d')
+
+            axgt.set_title("Ground truth")
+            axpred.set_title("Prediction")
+            axes = [axgt, axpred]
+            labels = [self.labels, predictions]
+
+        else:
+            if dim == 2:
+                fig, axgt = plt.subplots(1, 1)
+                
+            elif dim == 3:
+                from mpl_toolkits.mplot3d import Axes3D
+                fig = plt.figure()
+                axgt = fig.add_subplot(111, projection='3d')
+
+            axgt.set_title("Ground truth")
+            axes = [axgt]
+            labels = [self.labels]
+            
         proj = proj.real
         if self.nclasses == 2:
             it = [-1, 1]
         else:
             it = range(self.nclasses)
 
-        if dim == 2:
-            for i in it:
-                mask = self.labels == i
-                plt.scatter(proj[mask][:, 0], proj[mask][:, 1])
-
-        elif dim == 3:
-            from mpl_toolkits.mplot3d import Axes3D
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            for i in it:
-                mask = self.labels == i
-                ax.scatter(proj[mask][:, 0], proj[mask][:, 1],
-                           proj[mask][:, 2])
-
-        plt.title("KPCA")
+        def scatter(ax, mask):
+            args = [proj[mask][:, i] for i in range(dim)]
+            ax.scatter(*args)
+        
+        for i in it:
+            for ax, label in zip(axes, labels):
+                mask = label == i
+                scatter(ax, mask)
         plt.show()
 
     def _show_gen_class_data(self):
@@ -150,8 +174,6 @@ class Dataset(Logger):
             axpred.scatter(self.data[mask_pred][:, 0],
                            self.data[mask_pred][:, 1])
             axgt.scatter(self.data[mask_gt][:, 0], self.data[mask_gt][:, 1])
-        axpred.set_title("Prediction")
-        axgt.set_title("Ground truth")
         plt.show()
 
     def _show_gen_reg_data(self):
@@ -206,3 +228,11 @@ class KFold(Logger):
     @staticmethod
     def merge_folds(folds, j):
         return np.sum([fold for i, fold in enumerate(folds) if not i == j])
+
+
+def AllClassData():
+    from src.data.seq import SeqData
+    from src.data.synthetic import GenClassData
+
+    return [SeqData, GenClassData], ["seq", "synth"]
+    

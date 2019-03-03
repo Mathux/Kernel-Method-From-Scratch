@@ -1,5 +1,6 @@
 from src.tools.utils import Logger, Parameters
 import numpy as np
+from src.tools.utils import sigmoid
 
 
 class KMethodCreate(type):
@@ -55,8 +56,8 @@ class KMethod(Logger):
         K_xi = self.kernel.predict(x)
         return self.alpha.dot(K_xi)
 
-    def bin_predict(self, x):
-        return -1 if self.predict(x) < 0 else 1
+    def predictBin(self, x):
+        return -1 if sigmoid(2*self.predict(x)-1) < 0.5 else 1
     
     def predict_array(self, X, binaire=True):
         if binaire:
@@ -105,3 +106,17 @@ class KMethod(Logger):
     @property
     def m(self):
         return self.kernel.m
+
+    def __str__(self):
+        return self.__name__
+
+    def __repr__(self):
+        return self.__name__
+
+
+def AllClassMethods():
+    from src.methods.kknn import KKNN
+    from src.methods.klr import KLR
+    from src.methods.ksvm import KSVM
+
+    return [KKNN, KLR, KSVM], ["kknn", "klr", "ksvm"]

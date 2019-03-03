@@ -1,9 +1,9 @@
 import numpy as np
-from src.kernels.kernel import Kernel, KernelCreate
+from src.kernels.kernel import DataKernel, KernelCreate
 
 
 # The local alignement kernel
-class LAKernel(Kernel, metaclass=KernelCreate):
+class LAKernel(DataKernel, metaclass=KernelCreate):
     S = np.array([[4, 0, 0, 0], [0, 9, -3, -1], [0, -3, 6, 2], [0, -1, -2, 5]])
     defaultParameters = {"e": 11, "d": 1, "beta": 0.5, "S": S, "mode": "smith"}
 

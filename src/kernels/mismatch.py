@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.kernels.kernel import StringKernel, KernelCreate
-from src.kernels.utils import nb_diff
+from src.tools.utils import nb_diff
 
 
 class MismatchKernel(StringKernel, metaclass=KernelCreate):
