@@ -71,11 +71,16 @@ class CrossValidation(Logger):
         "std_precision", "mean_f1", "std_f1"
     ]
 
-    def __str__(self):
+    @property
+    def stats(self):
         res = {
             stat: eval("self." + stat, {"self": self})
             for stat in CrossValidation.SHOW
         }
+        return res
+    
+    def __str__(self):
+        res = self.stats
         return 'CrossValidation: ' + str(res)
 
     def __repr__(self):
@@ -83,17 +88,23 @@ class CrossValidation(Logger):
 
 
 if __name__ == '__main__':
-    # from src.data.seq import SeqData
-    # data = SeqData(k=0, dataname="train", mat=False, small=False, verbose=True)
+    from src.data.seq import SeqData
+    data = SeqData(k=0, dataname="train", small=False, verbose=True)
 
-    from src.data.synthetic import GenClassData
-    data = GenClassData(500, 2, mode="circle")
+    from src.kernels.mismatch import MismatchKernel
+    kernel = MismatchKernel(data, verbose=True)
+    
+    # from src.data.synthetic import GenClassData
+    # data = GenClassData(500, 2, mode="circle")
 
-    from src.kernels.gaussian import GaussianKernel
-    kernel = GaussianKernel(data, verbose=False)
+    # from src.kernels.gaussian import GaussianKernel
+    # kernel = GaussianKernel(data, verbose=False)
 
     from src.methods.klr import KLR
     klr = KLR(kernel, verbose=False)
 
-    crossval = CrossValidation(data, estimator=klr, kfolds=2, verbose=True)
+    from src.methods.ksvm import KSVM
+    ksvm = KSVM(kernel, verbose=False)
+
+    crossval = CrossValidation(data, estimator=ksvm, kfolds=2, verbose=True)
     print(crossval)

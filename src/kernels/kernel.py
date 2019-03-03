@@ -99,12 +99,12 @@ class Kernel(Logger):
         return self._K
 
     def _compute_gram(self):
-        K = np.zeros((self.n, self.n))    
+        K = np.zeros((self.n, self.n))
         for i in self.vrange(self.n, "Gram matrix"):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = self.kernel(self.data[i], self.data[j])
         self._K = K
-        
+
     def _compute_centered_gram(self):
         K = self.K
         self._log("Center the gram matrix..")
@@ -118,6 +118,12 @@ class Kernel(Logger):
 
     def addconfig(self, name, value):
         self.config[name] = value
+
+    def __str__(self):
+        return self.__name__
+
+    def __repr__(self):
+        return self.__name__
 
 
 class StringKernel(Kernel):
@@ -186,3 +192,26 @@ class StringKernel(Kernel):
             self._mers = [(''.join(c))
                           for c in product('ACGT', repeat=self.param.k)]
         return self._mers
+
+
+def AllStringKernels():
+    from src.kernels.spectral import SpectralKernel
+    from src.kernels.mismatch import MismatchKernel
+    from src.kernels.wd import WDKernel
+
+    return [MismatchKernel, SpectralKernel, WDKernel]
+
+
+def AllDataKernels():
+    from src.kernels.exponential import ExponentialKernel
+    from src.kernels.gaussian import GaussianKernel
+    from src.kernels.laplacian import LaplacianKernel
+    from src.kernels.linear import LinearKernel
+    from src.kernels.polynomial import PolynomialKernel
+    from src.kernels.quad import QuadKernel
+    from src.kernels.sigmoid import SigmoidKernel
+
+    return [
+        ExponentialKernel, GaussianKernel, LaplacianKernel, LinearKernel,
+        PolynomialKernel, QuadKernel, SigmoidKernel
+    ]

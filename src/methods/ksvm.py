@@ -19,7 +19,7 @@ class KSVM(KMethod, metaclass=KMethodCreate):
     """
     defaultParameters = {"C": 10**10}
 
-    def fit(self, dataset=None, labels=None, verbose=False):
+    def fit(self, dataset=None, labels=None):
         # Load the dataset (if there are one) in the kernel
         self.load_dataset(dataset, labels)
         self._log("Fitting kernel svm..")
