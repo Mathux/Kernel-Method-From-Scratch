@@ -1,7 +1,7 @@
-from src.kernels.kernel import Kernel, KernelCreate
+from src.kernels.kernel import DataKernel, KernelCreate
 
 
-class PolynomialKernel(Kernel, metaclass=KernelCreate):
+class PolynomialKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"offset": 0, "dim": 4}
 
     def kernel(self, x, y):

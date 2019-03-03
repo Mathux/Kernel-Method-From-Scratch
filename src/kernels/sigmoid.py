@@ -1,8 +1,8 @@
-from src.kernels.kernel import Kernel, KernelCreate
+from src.kernels.kernel import DataKernel, KernelCreate
 from numpy import tanh
 
 
-class SigmoidKernel(Kernel, metaclass=KernelCreate):
+class SigmoidKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"offset": 0, "alpha": 1}
 
     def kernel(self, x, y):

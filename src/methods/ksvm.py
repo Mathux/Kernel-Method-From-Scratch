@@ -19,14 +19,17 @@ class KSVM(KMethod, metaclass=KMethodCreate):
     """
     defaultParameters = {"C": 10**10}
 
-    def fit(self, dataset=None, labels=None):
+    def fit(self, dataset=None, labels=None, K=None):
         # Load the dataset (if there are one) in the kernel
         self.load_dataset(dataset, labels)
         self._log("Fitting kernel svm..")
         
         n = self.n
         y = self.labels
-        K = self.kernel.K
+        
+        if K is None:
+            K = self.kernel.K
+
         C = self.param.C
 
         P = matrix(K, (n, n), "d")

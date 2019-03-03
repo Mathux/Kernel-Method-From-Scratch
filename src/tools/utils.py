@@ -69,17 +69,17 @@ class Logger:
     def _log(self, *args):
         Logger.log(self.verbose, *args)
 
-    def vrange(self, n, desc=""):
+    def vrange(self, n, desc="", leave=False):
         if type(n) == int:
             n = (0, n)
         if self.verbose:
-            return tqdm(range(*n), desc=desc)
+            return tqdm(range(*n), desc=desc, leave=leave)
         else:
             return range(*n)
 
-    def viterator(self, it, desc=""):
+    def viterator(self, it, desc="", leave=False):
         if self.verbose:
-            return tqdm(it, desc=desc)
+            return tqdm(it, desc=desc, leave=leave)
         else:
             return it
 
@@ -90,6 +90,10 @@ def sigmoid(x):
 
 
 sigmoid = np.vectorize(sigmoid)
+
+
+def quad(K, alpha):
+    return np.dot(alpha, np.dot(K, alpha))
 
 
 # Tools to give the csv format

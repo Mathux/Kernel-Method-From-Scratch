@@ -1,7 +1,7 @@
-from src.kernels.kernel import Kernel, KernelCreate
+from src.kernels.kernel import DataKernel, KernelCreate
 
 
-class QuadKernel(Kernel, metaclass=KernelCreate):
+class QuadKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"offset": 0}
 
     def kernel(self, x, y):

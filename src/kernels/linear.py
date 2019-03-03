@@ -1,9 +1,9 @@
-from src.kernels.kernel import Kernel, KernelCreate
+from src.kernels.kernel import DataKernel, KernelCreate
 
 
-class LinearKernel(Kernel, metaclass=KernelCreate):
+class LinearKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"offset": 0}
-    
+
     def kernel(self, x, y):
         return x.dot(y) + self.param.offset
 

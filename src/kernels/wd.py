@@ -1,8 +1,8 @@
 import numpy as np
-from src.kernels.kernel import Kernel, KernelCreate
+from src.kernels.kernel import DataKernel, KernelCreate
 
 
-class WDKernel(Kernel, metaclass=KernelCreate):
+class WDKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"d": 3}
 
     def kernel(self, x, y):

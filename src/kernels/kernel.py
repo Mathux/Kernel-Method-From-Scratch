@@ -4,6 +4,9 @@ from src.tools.utils import Parameters, Logger
 
 class KernelCreate(type):
     def __init__(cls, clsname, superclasses, attributedict):
+        if "toreset" not in cls.__dict__:
+            cls.toreset = superclasses[0].toreset
+            
         def init(self, dataset=None, parameters=None, verbose=True):
             super(cls, self).__init__(
                 dataset=dataset,
@@ -21,14 +24,18 @@ class Kernel(Logger):
                  name="Kernel",
                  parameters=None,
                  verbose=True,
+                 toreset=["_K", "_KC", "_n", "_m"],
                  cls=None):
         self.verbose = verbose
+
+        self._toreset = toreset
+
+        self.param = Parameters(parameters, cls.defaultParameters)
+
         if dataset is not None:
             self.dataset = dataset
         else:
             self.reset()
-
-        self.param = Parameters(parameters, cls.defaultParameters)
 
         self.__name__ = name
 
@@ -36,11 +43,9 @@ class Kernel(Logger):
         return self.kernel(x, y)
 
     def reset(self):
-        self._K = None
-        self._KC = None
-        self._n = None
-        self._m = None
-        self._phis = None
+        dic = self.__dict__
+        for el in self._toreset:
+            dic[el] = None
 
     @property
     def data(self):
@@ -96,11 +101,11 @@ class Kernel(Logger):
         if self._KC is None:
             # Compute the centered gram matrix
             self._compute_centered_gram()
-        return self._K
+        return self._KC
 
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
-        for i in self.vrange(self.n, "Gram matrix"):
+        for i in self.vrange(self.n, "Gram matrix of " + self.__name__):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = self.kernel(self.data[i], self.data[j])
         self._K = K
@@ -126,25 +131,60 @@ class Kernel(Logger):
         return self.__name__
 
 
-class StringKernel(Kernel):
+class GenKernel(Kernel):
+    def __init__(self,
+                 dataset=None,
+                 name="GenKernel",
+                 parameters=None,
+                 verbose=True,
+                 cls=None):
+        assert("toreset" in cls.__dict__)
+        toreset = cls.toreset
+        super(GenKernel, self).__init__(
+            dataset=dataset,
+            name=name,
+            parameters=parameters,
+            verbose=verbose,
+            toreset=toreset,
+            cls=cls)
+        
+
+class DataKernel(GenKernel):
+    toreset = ["_K", "_KC", "_n", "_m"]
+
+    def __init__(self,
+                 dataset=None,
+                 name="DataKernel",
+                 parameters=None,
+                 verbose=True,
+                 cls=None):
+        super(DataKernel, self).__init__(
+            dataset=dataset,
+            name=name,
+            parameters=parameters,
+            verbose=verbose,
+            cls=cls)
+
+
+class StringKernel(GenKernel):
+    toreset = ["_K", "_KC", "_n", "_m", "_phis", "_mers"]
+    
     def __init__(self,
                  dataset=None,
                  name="StringKernel",
                  parameters=None,
                  verbose=True,
-                 cls=None):
+                 cls=None):            
         super(StringKernel, self).__init__(
             dataset=dataset,
             name=name,
             parameters=parameters,
             verbose=verbose,
             cls=cls)
-        self._phis = None
-        self._mers = None
 
     def _compute_phis(self):
         phis = []
-        for x in self.viterator(self.data, "Phis"):
+        for x in self.viterator(self.data, "Phis of " + self.__name__):
             phi = self._compute_phi(x)
             phis.append(phi)
         self._phis = np.array(phis)
@@ -157,7 +197,7 @@ class StringKernel(Kernel):
         K = np.zeros((self.n, self.n))
         phis = self.phis
 
-        for i in self.vrange(self.n, desc="Gram matrix"):
+        for i in self.vrange(self.n, desc="Gram matrix of " + self.__name__):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = np.dot(phis[i], phis[j])
 

@@ -14,14 +14,12 @@ def SeqData(k=0,
     assert (dataname in ["train", "test"])
 
     if dataname == "train":
-        Logger.log(verbose, "Load train data (k=" + str(k) + ")")
         data, names = load_data(
             "train", k=k, mat=mat, small=small, nsmall=nsmall, givename=True)
         Logger.log(
             verbose,
             "Train data loaded! (" + names[0] + " and " + names[1] + ")")
     elif dataname == "test":
-        Logger.log(verbose, "Load test data (k=" + str(k) + ")")
         data, names = load_data(
             "test", k=k, mat=mat, small=small, nsmall=nsmall, givename=True)
         Logger.log(verbose, "Test data loaded! (" + names + ")")

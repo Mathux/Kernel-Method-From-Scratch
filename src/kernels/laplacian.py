@@ -1,8 +1,8 @@
-from src.kernels.kernel import Kernel, KernelCreate
+from src.kernels.kernel import DataKernel, KernelCreate
 import numpy as np
 
 
-class LaplacianKernel(Kernel, metaclass=KernelCreate):
+class LaplacianKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"sigma": 1}
 
     def kernel(self, x, y):

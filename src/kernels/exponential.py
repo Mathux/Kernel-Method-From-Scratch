@@ -1,8 +1,8 @@
-from src.kernels.kernel import Kernel, KernelCreate
+from src.kernels.kernel import DataKernel, KernelCreate
 import numpy as np
 
 
-class ExponentialKernel(Kernel, metaclass=KernelCreate):
+class ExponentialKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"sigma": 1}
 
     def kernel(self, x, y):
