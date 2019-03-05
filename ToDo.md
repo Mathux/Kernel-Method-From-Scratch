@@ -1,4 +1,5 @@
 To do : 
-  - commenter le code 
-  - melange de kernel
+  - Fonction suavegarder kernel and load dans class kernel.py
+  - Tester les methodes avec les kernel strings 
+ 
   
