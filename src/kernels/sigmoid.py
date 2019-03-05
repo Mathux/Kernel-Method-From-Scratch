@@ -5,7 +5,7 @@ from numpy import tanh
 class SigmoidKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"offset": 0, "alpha": 1}
 
-    def kernel(self, x, y):
+    def _kernel(self, x, y):
         return tanh(self.param.alpha * x.dot(y) + self.param.offset)
 
 

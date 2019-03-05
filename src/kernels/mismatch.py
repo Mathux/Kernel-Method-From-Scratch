@@ -19,7 +19,7 @@ class MismatchKernel(StringKernel, metaclass=KernelCreate):
 if __name__ == "__main__":
     from src.data.seq import SeqData
     data = SeqData(small=True, nsmall=500)
-        
+
     kernel = MismatchKernel(data)
 
     from src.methods.kpca import KPCA

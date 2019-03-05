@@ -17,7 +17,7 @@ class KSVM(KMethod, metaclass=KMethodCreate):
         minimize    (1/2)*x^T*K*x - y^T*x
         subject to  0 <= yi*xi <= C
     """
-    defaultParameters = {"C": 10**10}
+    defaultParameters = {"C": 1, "tol": 10**-4}
 
     def fit(self, dataset=None, labels=None, K=None):
         # Load the dataset (if there are one) in the kernel
@@ -37,8 +37,11 @@ class KSVM(KMethod, metaclass=KMethodCreate):
         G = matrix(np.concatenate((np.diag(y), np.diag(-y))), (2 * n, n), "d")
         h = matrix(
             np.concatenate((C * np.ones(n), np.zeros(n))), (2 * n, 1), "d")
-        self._alpha = np.array(solvers.qp(P, q, G, h)["x"]).reshape(-1)
+        alpha = np.array(solvers.qp(P, q, G, h)["x"]).reshape(-1)
 
+        # support_vectors = np.where(np.abs(alpha) > self.param.tol)
+
+        self._alpha = alpha        
         self._log("Fitting done!")
         return self._alpha
 

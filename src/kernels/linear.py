@@ -4,7 +4,7 @@ from src.kernels.kernel import DataKernel, KernelCreate
 class LinearKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"offset": 0}
 
-    def kernel(self, x, y):
+    def _kernel(self, x, y):
         return x.dot(y) + self.param.offset
 
 

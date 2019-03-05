@@ -23,10 +23,10 @@ class LAKernel(DataKernel, metaclass=KernelCreate):
         x, y = LAKernel.format(x), LAKernel.format(y)
         nx, ny = len(x), len(y)
         M, X, Y, X2, Y2 = [np.zeros((nx + 1, ny + 1)) for _ in range(5)]
-        for i in range(1, nx):
-            for j in range(1, ny):
+        for i in range(1, nx+1):
+            for j in range(1, ny+1):
                 c = (i - 1, j - 1)
-                M[i, j] = np.exp(beta * S(x[i], y[j]))
+                M[i, j] = np.exp(beta * S(x[i-1], y[j-1]))
                 M[i, j] *= op([1, X[c], Y[c], M[c]])
 
                 BD = np.exp(beta * d)
@@ -63,29 +63,3 @@ if __name__ == "__main__":
     proj = kpca.project()
 
     data.show_pca(proj)
-
-
-DISCUSS = """
-    def get_LA_K(self, X, e=11, d=1, beta=0.5, smith=0, eig=1):
-        n = X.shape[0]
-        K = np.zeros((n, n))
-        for i, x in self.viterator(
-                enumerate(X.loc[:, 'seq']), desc='Building kernel'):
-            for j, y in enumerate(X.loc[:, 'seq']):
-                if j >= i:
-                    K[i, j] = self.Smith_Waterman(
-                        x, y, e, d, beta) if smith else self.affine_align(
-                            x, y)
-                    K[j, i] = K[i, j]
-        K1 = deepcopy(K)
-        if eig == 1:
-            vp = np.min(np.real(eigs(K1)[0]))
-            s = vp if vp < 0 else 0
-            np.fill_diagonal(K1, np.diag(K1) - s * np.ones(n))
-        else:
-            for i in tqdm(range(K1.shape[0]), desc='Empirical kernel'):
-                for j in range(i, n):
-                    K1[i, j] = np.dot(K[i], K[j])
-                    K1[j, i] = K1[i, j]
-        return K
-"""

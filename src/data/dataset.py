@@ -70,7 +70,7 @@ class Dataset(Logger):
     # To add two Dataset together
     def __add__(self, other):
         assert (type(other) == Dataset)
-        assert (self.__name__ == other.__name__ )
+        assert (self.__name__ == other.__name__)
         name = self.__name__
         data = np.concatenate((self.data, other.data))
         labels = np.concatenate((self.labels, other.labels))
@@ -102,10 +102,10 @@ class Dataset(Logger):
         if predict is not None:
 
             predictions = np.array([predict(x) for x in self.data])
-            
+
             if dim == 2:
                 fig, (axgt, axpred) = plt.subplots(1, 2)
-                
+
             elif dim == 3:
                 from mpl_toolkits.mplot3d import Axes3D
                 fig = plt.figure()
@@ -120,7 +120,7 @@ class Dataset(Logger):
         else:
             if dim == 2:
                 fig, axgt = plt.subplots(1, 1)
-                
+
             elif dim == 3:
                 from mpl_toolkits.mplot3d import Axes3D
                 fig = plt.figure()
@@ -129,7 +129,7 @@ class Dataset(Logger):
             axgt.set_title("Ground truth")
             axes = [axgt]
             labels = [self.labels]
-            
+
         proj = proj.real
         if self.nclasses == 2:
             it = [-1, 1]
@@ -139,7 +139,7 @@ class Dataset(Logger):
         def scatter(ax, mask):
             args = [proj[mask][:, i] for i in range(dim)]
             ax.scatter(*args)
-        
+
         for i in it:
             for ax, label in zip(axes, labels):
                 mask = label == i
@@ -203,7 +203,7 @@ class Dataset(Logger):
         return "Dataset object of size " + size + " with " + self.__name__ + " data"
 
     def __repr__(self):
-        return self. __str__()
+        return self.__str__()
 
 
 class KFold(Logger):
@@ -235,4 +235,3 @@ def AllClassData():
     from src.data.synthetic import GenClassData
 
     return [SeqData, GenClassData], ["seq", "synth"]
-    

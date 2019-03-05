@@ -23,21 +23,21 @@ class KMethod(Logger):
                  parameters=None,
                  verbose=True,
                  cls=None):
-        
+
         self.verbose = verbose
         self.kernel = kernel
 
         self.param = Parameters(parameters, cls.defaultParameters)
-        
+
         self.__name__ = name
         self.verbose = verbose
         self._alpha = None
         self.kernel = kernel
         self._labels = None
-        
+
         # For the KPCA
         self._projections = None
-        
+
     # Load the dataset (if there are one) in the kernel
     # or just load the labels
     def load_dataset(self, dataset=None, labels=None):
@@ -50,26 +50,27 @@ class KMethod(Logger):
         else:
             self._log("Load the data in the kernel")
             self.kernel.dataset = dataset
-            self._labels = None # take the kernel one
-        
+            self._labels = None  # take the kernel one
+
     def predict(self, x):
         K_xi = self.kernel.predict(x)
         return self.alpha.dot(K_xi)
 
     def predictBin(self, x):
-        return -1 if sigmoid(2*self.predict(x)-1) < 0.5 else 1
-    
+        pred = self.predict(x)
+        return 1 if pred > 0 else -1
+
     def predict_array(self, X, binaire=True):
         if binaire:
-            fonc = self.bin_predict
+            fonc = self.predictBin
         else:
             fonc = self.predict
-            
+
         return np.array([fonc(x) for x in X])
-        
+
     def score_recall_precision(self, dataset):
         X, y = dataset.data, dataset.labels
-        
+
         predictions = self.predict_array(X, binaire=True)
 
         tp = np.sum((predictions == 1.) * (y == 1.))
@@ -78,7 +79,7 @@ class KMethod(Logger):
         recall = tp / (fn + tp)
         precision = tp / (fp + tp)
         return np.sum(y == predictions) / X.shape[0], recall, precision
-            
+
     @property
     def alpha(self):
         if self._alpha is None:

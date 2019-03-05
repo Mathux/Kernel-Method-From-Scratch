@@ -118,6 +118,9 @@ class Kernel(Logger):
         self._KC = K - oneN.dot(K) - K.dot(oneN) + oneN.dot(K.dot(oneN))
         self._log("Gram matrix centered!")
 
+    def kernel(self, x, y):
+        return self._kernel(x, y) + 1
+    
     def predict(self, x):
         return np.array([self.kernel(xi, x) for xi in self.data])
 
@@ -215,7 +218,7 @@ class StringKernel(GenKernel):
         self._K = K
 
     def kernel(self, x, y):
-        return np.dot(self._compute_phi(x), self._compute_phi(y))
+        return np.dot(self._compute_phi(x), self._compute_phi(y)) + 1
 
     @property
     def phis(self):

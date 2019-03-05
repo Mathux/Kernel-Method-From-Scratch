@@ -5,7 +5,7 @@ import numpy as np
 class LaplacianKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"sigma": 1}
 
-    def kernel(self, x, y):
+    def _kernel(self, x, y):
         return np.exp(-np.linalg.norm(x-y)/self.param.sigma)
 
 

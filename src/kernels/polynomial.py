@@ -4,7 +4,7 @@ from src.kernels.kernel import DataKernel, KernelCreate
 class PolynomialKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"offset": 0, "dim": 4}
 
-    def kernel(self, x, y):
+    def _kernel(self, x, y):
         return (self.param.offset + x.dot(y))**self.param.dim
 
 

@@ -2,9 +2,9 @@ from src.kernels.kernel import DataKernel, KernelCreate
 
 
 class QuadKernel(DataKernel, metaclass=KernelCreate):
-    defaultParameters = {"offset": 0}
-
-    def kernel(self, x, y):
+    defaultParameters = {"offset": 10}
+    
+    def _kernel(self, x, y):
         return (x.dot(y) + self.param.offset)**2
 
 

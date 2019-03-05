@@ -38,6 +38,7 @@ def GenRegData(n, m, seed=conf.SEED, verbose=True):
 
 
 def gen_class_data(n, m, mode="circle", nclasses=2):
+    assert(nclasses == 2)
     if mode == "gauss":
         data1 = np.random.normal(
             2 * np.ones(m), scale=np.arange(1, m + 1), size=(n // 2, m))
@@ -48,8 +49,8 @@ def gen_class_data(n, m, mode="circle", nclasses=2):
         np.random.shuffle(shuffle)
 
         data = np.concatenate((data1, data2))[shuffle]
-        labels = np.concatenate((np.ones(n // 2, dtype=int),
-                                 np.zeros(n - n // 2, dtype=int)))[shuffle]
+        labels = np.concatenate((np.zeros(n // 2, dtype=int),
+                                 np.ones(n - n // 2, dtype=int)))[shuffle]
     elif mode == "circle":
         npp = n // nclasses
         angles = [np.random.rand(npp) * 2 * np.pi for _ in range(nclasses)]
@@ -66,10 +67,8 @@ def gen_class_data(n, m, mode="circle", nclasses=2):
         shuffle = np.arange(npp * nclasses)
         np.random.shuffle(shuffle)
         data = data[shuffle]
-        labels = np.concatenate(
-            (np.zeros(n // nclasses,
-                      dtype=int), 1 * np.ones(n // nclasses, dtype=int),
-             2 * np.ones(n // nclasses, dtype=int)))[shuffle]
+        labels = np.concatenate((np.zeros(n // 2, dtype=int),
+                                 np.ones(n - n // 2, dtype=int)))[shuffle]
 
     return (data, labels, None)
 

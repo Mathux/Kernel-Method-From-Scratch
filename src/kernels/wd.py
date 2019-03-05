@@ -5,7 +5,7 @@ from src.kernels.kernel import DataKernel, KernelCreate
 class WDKernel(DataKernel, metaclass=KernelCreate):
     defaultParameters = {"d": 3}
 
-    def kernel(self, x, y):
+    def _kernel(self, x, y):
         beta = 2 * np.linspace(
             1, self.param.d, self.param.d,
             dtype='int')[::-1] / (self.param.d * (self.param.d + 1))

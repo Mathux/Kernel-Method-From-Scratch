@@ -3,7 +3,7 @@ from src.kernels.kernel import StringKernel, KernelCreate
 
 
 class SpectralKernel(StringKernel, metaclass=KernelCreate):
-    defaultParameters = {"k": 3}
+    defaultParameters = {"k": 6}
 
     def _compute_phi(self, x):
         phi = np.zeros(len(self.mers))

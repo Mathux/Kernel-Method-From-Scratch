@@ -16,7 +16,7 @@ class SimpleMKL(KMethod, metaclass=KMethodCreate):
     defaultParameters = {
         "C": 10**10,
         "a": 0.2,
-        "b": 0.5,
+        "b": 0.9,
         "weights": None,
         "n_iter_fit": 30,
         "n_iter_linesearch": 100,
@@ -38,6 +38,8 @@ class SimpleMKL(KMethod, metaclass=KMethodCreate):
         desc = "Fitting the simple MKL"
         for n in self.vrange(self.param.n_iter_fit, desc=desc, leave=True):
             mu = np.argmax(weights)
+            print("weights:", weights)
+            K = self.kernel.Kw(weights)
             J, grad_J, D, _ = self.compute_J_grad_J_D(K, mu, weights)
             J_os = 0
             D_os = 1 * D
@@ -52,17 +54,22 @@ class SimpleMKL(KMethod, metaclass=KMethodCreate):
                 mask = D < 0
                 temp[mask] = -weights[mask] / D[mask]
 
+                # Assure that mu != nu
+                # temp[mu] = np.inf + 1
                 nu = np.argmin(temp)
-
                 gamma_max = temp[nu]
 
                 d_os = weights + gamma_max * D
 
-                D_os[mu] = D[mu] - D[nu]
-                D_os[nu] = 0
+                # Replace 
+                # D_os[mu] = D[mu] - D[nu]
+                # D_os[nu] = 0
 
+                D_os[nu] = 0
+                D_os = self.normalize_D(D_os, mu)
                 K_os = self.kernel.Kw(d_os)
 
+                print("D_os:", D_os)
                 J_os, _, _, _ = self.compute_J_grad_J_D(K_os, mu, d_os)
 
                 if J_os >= J:
@@ -72,7 +79,6 @@ class SimpleMKL(KMethod, metaclass=KMethodCreate):
             gamma, alpha = self.line_search(weights, D, gamma_max, desc=desc)
             self._alpha = alpha
             weights = weights + gamma * D
-
             K = self.kernel.Kw(weights)
             quad_max = np.max(
                 [quad(self.kernel[i], alpha) for i in range(size)])
@@ -93,19 +99,24 @@ class SimpleMKL(KMethod, metaclass=KMethodCreate):
         temp_D[mu] = -np.sum(temp_D)
         return temp_D
 
-    def compute_J_grad_J_D(self, K, mu, d, eps=10**-20):
+    def compute_J_grad_J_D(self, K, mu, d, eps=10**-15):
         ksvm = KSVM(self.kernel, verbose=False)
         alpha = ksvm.fit(K=K)
         labels = self.dataset.labels
         J = -0.5 * quad(K, alpha) + labels.dot(alpha)
         grad_J = -0.5 * np.array([quad(K, alpha) for K in self.kernel.Ks])
 
+        norm_grad = grad_J.dot(grad_J)
+        reduced_grad = (grad_J*1.0)/(norm_grad)
+        
         reduced_grad = grad_J - grad_J[mu]
-
+        print("DEBUT reduced_graph", reduced_grad)
+        print("d:", d)
         mask = (d <= eps) * (reduced_grad > 0)
         reduced_grad[mask] = 0
         reduced_grad = -reduced_grad
         reduced_grad[mu] = -np.sum(reduced_grad)
+        print("FIN reduced_graph", reduced_grad)
         return J, grad_J, reduced_grad, alpha
 
     def line_search(self, weights, D, gamma, desc="Line search"):
@@ -127,6 +138,7 @@ class SimpleMKL(KMethod, metaclass=KMethodCreate):
                                                       weights + gamma * D)
             if f1 <= f0 + a * gamma * np.dot(grad_J, D):
                 break
+        print("number line", n)
         return gamma, alpha
 
     def predict(self, X):
@@ -150,10 +162,10 @@ if __name__ == '__main__':
         from src.kernels.wd import WDKernel
         from src.kernels.mismatch import MismatchKernel
 
-        kernels = SpectralKernel, WDKernel, MismatchKernel
+        kernels = SpectralKernel, MismatchKernel, WDKernel
             
         from src.data.seq import SeqData
-        data = SeqData(small=True, nsmall=200)
+        data = SeqData(small=True, nsmall=300)
     
     elif data == "synth":
         from src.kernels.gaussian import GaussianKernel
