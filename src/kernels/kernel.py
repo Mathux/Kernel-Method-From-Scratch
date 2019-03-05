@@ -86,7 +86,7 @@ class Kernel(Logger):
         if self._m is None:
             raise ValueError("This kernel didn't have any data, so no shape")
         return self._m
-
+    
     @property
     def K(self):
         # Check if K is computed before
@@ -102,7 +102,7 @@ class Kernel(Logger):
             # Compute the centered gram matrix
             self._compute_centered_gram()
         return self._KC
-
+    
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
         for i in self.vrange(self.n, "Gram matrix of " + self.__name__):

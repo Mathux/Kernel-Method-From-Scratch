@@ -88,23 +88,24 @@ class CrossValidation(Logger):
 
 
 if __name__ == '__main__':
-    # from src.data.seq import SeqData
-    # data = SeqData(k=0, dataname="train", small=False, verbose=True)
-
-    # from src.kernels.mismatch import MismatchKernel
-    # kernel = MismatchKernel(data, verbose=True)
+     from src.data.seq import SeqData
+     data = SeqData(k=0, dataname="train", small=False, verbose=True)
     
-    from src.data.synthetic import GenClassData
-    data = GenClassData(500, 2, mode="circle")
-
-    from src.kernels.gaussian import GaussianKernel
-    kernel = GaussianKernel(data, verbose=False)
+     from src.kernels.mismatch import MismatchKernel
+     kernel = MismatchKernel(data, verbose=True, parameters = {'k' : 6, 'm' : 1})
+    
+#    from src.data.synthetic import GenClassData
+#    data = GenClassData(500, 2, mode="circle")
+#
+#    from src.kernels.gaussian import GaussianKernel
+#    kernel = GaussianKernel(data, verbose=False)
 
     from src.methods.klr import KLR
     klr = KLR(kernel, verbose=False)
-
+    
     from src.methods.ksvm import KSVM
     ksvm = KSVM(kernel, verbose=False)
-
-    crossval = CrossValidation(data, estimator=ksvm, kfolds=2, verbose=True)
+    
+    crossval_svm = CrossValidation(data, estimator=ksvm, kfolds=3, verbose=True)
+    crossval_klr = CrossValidation(data, estimator=klr, kfolds=3, verbose=True)
     print(crossval)
