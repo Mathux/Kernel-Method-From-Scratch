@@ -1,5 +1,6 @@
 import numpy as np
 from src.tools.utils import Parameters, Logger
+import pickle
 
 
 class KernelCreate(type):
@@ -94,6 +95,10 @@ class Kernel(Logger):
             # Compute the gram matrix
             self._compute_gram()
         return self._K
+    
+    def save_K(self) :
+        pass
+        
 
     @property
     def KC(self):
