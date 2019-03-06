@@ -136,7 +136,7 @@ if __name__ == '__main__':
     data = SeqData(k=0, dataname="train", mat=False, small=False, verbose=True)
 
     parameter_grid = {'kernel': [MismatchKernel],
-                      'k': randint(low=3, high=7),
+                      'k': randint(low=5, high=7),
                       'm': randint(low=1, high=3),
                       'C': uniform(loc=0.1, scale=10)
                       }

@@ -17,7 +17,6 @@ if __name__ == "__main__":
     data = SeqData(small=True, nsmall=500)
         
     kernel = SpectralKernel(data, parameters = {'k' : 3, 'm' : 2})
-
     from src.methods.kpca import KPCA
     kpca = KPCA(kernel)
     proj = kpca.project()
