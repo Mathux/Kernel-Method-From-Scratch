@@ -131,15 +131,22 @@ if __name__ == '__main__':
     from scipy.stats import randint
     from src.kernels.mismatch import MismatchKernel
     from src.kernels.spectral import SpectralKernel
+    from src.kernels.wd import WDKernel
+    from src.kernels.la import LAKernel
     from src.methods.ksvm import KSVM
+    from src.methods.klr import KLR
 
     data = SeqData(k=0, dataname="train", mat=False, small=False, verbose=True)
 
-    parameter_grid = {'kernel': [MismatchKernel],
-                      'k': randint(low=5, high=7),
-                      'm': randint(low=1, high=3),
-                      'C': uniform(loc=0.1, scale=10)
+    parameter_grid = {'kernel': [WDKernel,
+                                 SpectralKernel,
+                                 MismatchKernel               
+                                 ],
+                      'k': randint(low=3, high=9),
+                      'm': randint(low=1, high=4),
+                      'C': uniform(loc=0.1, scale=100),
+                      'd': randint(low=3, high=12)
                       }
-    rand = RandomHyperParameterTuning(KSVM, data, 1, parameter_grid, kfold= 2)
-    rand.fit()
-    print(rand.best_parameters())
+    rand_svm = RandomHyperParameterTuning(KSVM, data, 20, parameter_grid, kfold= 2)
+    rand_svm.fit()
+    print(rand_svm.best_parameters())
