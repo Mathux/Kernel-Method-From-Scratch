@@ -11,5 +11,5 @@ SEED = 42
 
 dataPath = "data/"
 ext = ".csv"
-matricesPath = 'GramMatrices/'
-matricesExt = '.pickle'
+kernelSavePath = 'src/GramMatrices/'
+kernelSaveExt = '.pickle'

@@ -14,7 +14,7 @@ from src.kernels.sigmoid import SigmoidKernel
 import pickle 
 from src.config import kernelSavePath, kernelSaveExt
 from os.path import join as pjoin
-from src.tools.utils import create_dir
+#from src.tools.utils import create_dir
 
 
 def load(path):
@@ -29,7 +29,7 @@ def save(kernel) :
         dataName += '_' + str(key) + '_' + str(values)
     dataName = dataName + '_' + kernel.dataset.__name__ + kernelSaveExt
 
-    create_dir(kernelSavePath)
+    #create_dir(kernelSavePath)
     path = pjoin(kernelSavePath, dataName)
 
     kernel._log("The kernel in saved in " + path)

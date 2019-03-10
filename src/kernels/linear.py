@@ -18,3 +18,6 @@ if __name__ == "__main__":
     proj = kpca.project()
 
     data.show_pca(proj)
+    
+    from src.data.kernelLoader import save
+    save(kernel)
