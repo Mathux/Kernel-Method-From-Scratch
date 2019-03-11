@@ -15,7 +15,8 @@ def parse_args():
     parser.add_argument("--kernel", choices=kernelsNames)
     parser.add_argument("--data", choices=datasNames)
     parser.add_argument("--dim", type=int, choices=[2, 3], default=3)
-    parser.add_argument("--show", type=bool, choices=[False, True], default=True)
+    parser.add_argument(
+        "--show", type=bool, choices=[False, True], default=True)
     return parser.parse_args()
 
 
@@ -29,16 +30,19 @@ if __name__ == "__main__":
     print("Kernel: " + args.kernel)
     print("Data: " + args.data)
 
-    parameters = {"k": 2, "m": 1}
+    parameters = {"k": 6}
     # default parameter everywhere
     data = datas[find(args.data, datasNames)]()
     kernel = kernels[find(args.kernel, kernelsNames)](
         data, parameters=parameters)
-    method = methods[find(args.method, methodsNames)](kernel)
+
+    parameters = {"C": 0.6}
+    method = methods[find(args.method, methodsNames)](
+        kernel, parameters=parameters)
     method.fit()
 
     arr = method.predict_array(data.data, binaire=False)
-    
+
     # show
     if args.show:
         dim = args.dim

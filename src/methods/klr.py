@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     from src.kernels.gaussian import GaussianKernel
     kernel = GaussianKernel(data)
-    klr = KLR(kernel)
+    klr = KLR(kernel, parameters={"lam": 2})
     klr.fit()
     
     # data._show_gen_class_predicted(klr.predict)

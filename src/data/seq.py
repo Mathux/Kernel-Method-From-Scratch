@@ -78,5 +78,26 @@ def load_data(name, k=0, mat=False, small=False, nsmall=100, givename=False):
             return (data, None, Id)
 
 
+def AllSeqData():
+    datasets = []
+    for i in range(3):
+        train = SeqData(k=i,
+                        mat=False,
+                        small=False,
+                        verbose=True,
+                        shuffle=False,
+                        dataname="train")
+
+        test = SeqData(k=i,
+                       mat=False,
+                       small=False,
+                       verbose=True,
+                       shuffle=False,
+                       dataname="test")
+        
+        datasets.append({"train": train, "test": test})
+    return datasets
+
+
 if __name__ == '__main__':
-    data = SeqData(k=0, dataname="train", mat=False, small=False, verbose=True)
+    datasets = AllSeqData()

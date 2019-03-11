@@ -105,21 +105,16 @@ def nb_diff(x, y):
     return nb_diff
 
 
-# Tools to give the csv format
-def submit(prediction, test_size=1000):
-    pred = pd.DataFrame(columns=['Id', 'Bound'])
-    for i in range(len(prediction)):
-        predictions = 2 * prediction[i] - 1
-        temp = pd.DataFrame(data=predictions, columns=['Bound'])
-        temp['Id'] = np.linspace(
-            i * test_size, (i + 1) * test_size - 1, test_size, dtype='int')
-        temp = temp.reindex(columns=['Id', 'Bound'])
-        pred = pred.append(temp)
-    pred.reset_index(inplace=True)
-    pred = pred.drop('index', axis=1)
-    pred.to_csv('predictions.csv', index=False)
-    return None
+# Tool to give the csv format
+def submit(predictions, ids, csvname):
+    Id = pd.DataFrame(pd.concat([id for id in ids], ignore_index=True))
 
+    Pred = [pd.DataFrame(pred, columns=['Bound']) for pred in predictions]
+    Pred = pd.concat(Pred, ignore_index=True)
+
+    table = Id.join(Pred)
+    table.to_csv(csvname, index=False)
+        
 
 # Create a directory if it doesn't exit
 def create_dir(directory):

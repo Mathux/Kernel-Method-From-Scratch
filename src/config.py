@@ -13,3 +13,5 @@ dataPath = "data/"
 ext = ".csv"
 kernelSavePath = 'GramMatrices/'
 kernelSaveExt = '.pickle'
+
+expPath = "experiments"
