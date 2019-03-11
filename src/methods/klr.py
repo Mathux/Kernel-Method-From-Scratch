@@ -49,4 +49,4 @@ if __name__ == "__main__":
     klr = KLR(kernel)
     klr.fit()
     
-    data._show_gen_class_predicted(klr.predict)
+    # data._show_gen_class_predicted(klr.predict)

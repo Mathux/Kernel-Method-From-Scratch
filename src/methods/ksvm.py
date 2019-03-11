@@ -55,5 +55,4 @@ if __name__ == "__main__":
     
     ksvm = KSVM(kernel)
     ksvm.fit()
-    f = (lambda x: ksvm.predict(x)*2 - 1)
-    data._show_gen_class_predicted(f)
+    

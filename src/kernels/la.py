@@ -7,7 +7,7 @@ class LAKernel(DataKernel, metaclass=KernelCreate):
     S = np.array([[4, 0, 0, 0], [0, 9, -3, -1], [0, -3, 6, 2], [0, -1, -2, 5]])
     defaultParameters = {"e": 11, "d": 1, "beta": 0.5, "S": S, "mode": "smith"}
 
-    def kernel(self, x, y):
+    def _kernel(self, x, y):
         if self.param.mode == "smith":
             op = max
         elif self.param.mode == "affine_align":
