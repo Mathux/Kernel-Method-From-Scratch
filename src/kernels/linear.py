@@ -18,3 +18,7 @@ if __name__ == "__main__":
     proj = kpca.project()
 
     data.show_pca(proj)
+    import src.data.kernelLoader as kernelLoader
+    pathKernel = kernelLoader.save(kernel)
+    
+    test = kernelLoader.load(pathKernel)

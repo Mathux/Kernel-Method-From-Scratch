@@ -8,7 +8,7 @@ def SeqData(k=0,
             mat=False,
             small=False,
             verbose=True,
-            shuffle=True,
+            shuffle=False,
             dataname="train",
             nsmall=200):
     assert (dataname in ["train", "test"])

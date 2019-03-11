@@ -9,6 +9,7 @@ Created on Thu Feb  7 22:50:40 2019
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
+import os
 
 
 class Serializable:
@@ -118,6 +119,12 @@ def submit(prediction, test_size=1000):
     pred = pred.drop('index', axis=1)
     pred.to_csv('predictions.csv', index=False)
     return None
+
+
+# Create a directory if it doesn't exit
+def create_dir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 
 if __name__ == "__main__":

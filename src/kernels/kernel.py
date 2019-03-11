@@ -1,8 +1,5 @@
 import numpy as np
 from src.tools.utils import Parameters, Logger
-import pickle
-from os.path import join as pjoin
-from src.config import matricesPath, matricesExt
 
 
 class KernelCreate(type):
@@ -97,18 +94,6 @@ class Kernel(Logger):
             # Compute the gram matrix
             self._compute_gram()
         return self._K
-    
-    def save_K(self) :
-        
-        dataName = self.__name__
-        params = self.param.dic
-        for key,values in params.items() :
-            dataName += '_' + str(key) + '_' + str(values)
-        dataName = dataName + matricesExt
-        matrixPath = pjoin(matricesPath, dataName)
-        print(matrixPath)
-        with open(matrixPath, 'wb') as handle:
-            pickle.dump(self.K, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
     @property
     def KC(self):
