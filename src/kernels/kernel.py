@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar 12 15:30:29 2019
+
+@author: evrardgarcelon
+"""
+
 import numpy as np
 from src.tools.utils import Parameters, Logger
 
@@ -170,7 +178,7 @@ class DataKernel(GenKernel):
 
 
 class StringKernel(GenKernel):
-    toreset = ["_K", "_KC", "_n", "_m", "_phis", "_mers"]
+    toreset = ["_K", "_KC", "_n", "_m", "_phis", "_mers", '_mers_wildcard']
 
     def __init__(self,
                  dataset=None,
@@ -235,6 +243,18 @@ class StringKernel(GenKernel):
             self._mers = [(''.join(c))
                           for c in product('ACGT', repeat=self.param.k)]
         return self._mers
+    
+    @property
+    def mers_wildcard(self):
+        from itertools import product
+        if self._mers_wildcard is None:
+            self._mers_wildcard = [(''.join(c))
+                          for c in product('ACGT*', repeat=self.param.k)]
+            
+        func = lambda x : np.sum(np.array(list(x) == '*')) <= self.param.m
+        vfunc = np.vectorize(func)
+        self._mers_wildcard = np.array(self._mers_wildcard)[vfunc(self._mers_wildcard)]
+        return self._mers_wildcard
 
 
 def AllStringKernels():
@@ -242,9 +262,10 @@ def AllStringKernels():
     from src.kernels.mismatch import MismatchKernel
     from src.kernels.wd import WDKernel
     from src.kernels.la import LAKernel
+    from src.kernels.wildcard import WildcardKernel
 
-    kernels = [MismatchKernel, SpectralKernel, WDKernel, LAKernel]
-    names = ["mismatch", "spectral", "wd", "la"]
+    kernels = [MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel]
+    names = ["mismatch", "spectral", "wd", "la", "wildcard"]
     return kernels, names
 
 
