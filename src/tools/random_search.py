@@ -146,13 +146,15 @@ if __name__ == '__main__':
     from src.kernels.spectral import SpectralKernel
     from src.kernels.wd import WDKernel
     from src.kernels.la import LAKernel
+    from src.kernels.wildcard import WildcardKernel
     from src.methods.ksvm import KSVM
     from src.methods.klr import KLR
 
     data = SeqData(k=0, dataname="train", mat=False, small=False, verbose=True)
 
-    parameter_grid = {'kernel': [WDKernel],
-                      'd': randint(low=5, high=10),
+    parameter_grid = {'kernel': [WildcardKernel],
+                      'k': randint(low=4, high=6),
+                      'm' : randint(low=1, high=2),
                       'lam': uniform(loc=0.1, scale=15),
                       }
     rand_klr = RandomHyperParameterTuning(KLR, data, 5, parameter_grid, kfold= 2)
