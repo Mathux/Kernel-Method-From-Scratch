@@ -94,7 +94,7 @@ class Kernel(Logger):
         if self._m is None:
             raise ValueError("This kernel didn't have any data, so no shape")
         return self._m
-    
+
     @property
     def K(self):
         # Check if K is computed before
@@ -102,7 +102,7 @@ class Kernel(Logger):
             # Compute the gram matrix
             self._compute_gram()
         return self._K
-        
+
     @property
     def KC(self):
         # Check if KC is computed before
@@ -110,7 +110,7 @@ class Kernel(Logger):
             # Compute the centered gram matrix
             self._compute_centered_gram()
         return self._KC
-    
+
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
         for i in self.vrange(self.n, "Gram matrix of " + self.__name__):
@@ -128,7 +128,7 @@ class Kernel(Logger):
 
     def kernel(self, x, y):
         return self._kernel(x, y) + 1
-    
+
     def predict(self, x):
         return np.array([self.kernel(xi, x) for xi in self.data])
 
@@ -243,17 +243,19 @@ class StringKernel(GenKernel):
             self._mers = [(''.join(c))
                           for c in product('ACGT', repeat=self.param.k)]
         return self._mers
-    
+
     @property
     def mers_wildcard(self):
         from itertools import product
         if self._mers_wildcard is None:
-            self._mers_wildcard = [(''.join(c))
-                          for c in product('ACGT*', repeat=self.param.k)]
-            
-        func = lambda x : np.sum(np.array(list(x) == '*')) <= self.param.m
+            self._mers_wildcard = [
+                (''.join(c)) for c in product('ACGT*', repeat=self.param.k)
+            ]
+
+        func = lambda x: np.sum(np.array(list(x) == '*')) <= self.param.m
         vfunc = np.vectorize(func)
-        self._mers_wildcard = np.array(self._mers_wildcard)[vfunc(self._mers_wildcard)]
+        self._mers_wildcard = np.array(self._mers_wildcard)[vfunc(
+            self._mers_wildcard)]
         return self._mers_wildcard
 
 
@@ -264,7 +266,9 @@ def AllStringKernels():
     from src.kernels.la import LAKernel
     from src.kernels.wildcard import WildcardKernel
 
-    kernels = [MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel]
+    kernels = [
+        MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel
+    ]
     names = ["mismatch", "spectral", "wd", "la", "wildcard"]
     return kernels, names
 

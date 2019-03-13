@@ -1,22 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar 12 15:30:40 2019
-
-@author: evrardgarcelon
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 11 18:44:31 2019
-
-@author: evrardgarcelon
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
 Created on Sun Feb 10 15:54:55 2019
 
 @author: evrardgarcelon, mathispetrovich
@@ -151,13 +135,10 @@ if __name__ == '__main__':
 
     data = SeqData(k=0, dataname="train", mat=False, small=False, verbose=True)
 
-    parameter_grid = {'kernel': [WDKernel],
+    parameter_grid = {'kernel': [SpectralKernel],
                       'd': randint(low=5, high=10),
                       'lam': uniform(loc=0.1, scale=15),
                       }
-    rand_klr = RandomHyperParameterTuning(KLR, data, 5, parameter_grid, kfold= 2)
+    rand_klr = RandomHyperParameterTuning(KLR, data, 2, parameter_grid, kfold=2)
     rand_klr.fit()
     print(rand_klr.best_parameters())
-    
-    
-    

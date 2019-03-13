@@ -9,21 +9,19 @@ Created on Mon Mar 11 20:04:38 2019
 import numpy as np
 
 from src.kernels.kernel import StringKernel, KernelCreate
-#from src.tools.utils import nb_diff
-from itertools import product
 
 
 class WildcardKernel(StringKernel, metaclass=KernelCreate):
-    defaultParameters = {"k": 5, "m": 1, 'la' : 1}
+    defaultParameters = {"k": 5, "m": 1, 'la': 1}
 
     def _compute_phi(self, x):
-
         phi = np.zeros(len(self.mers_wildcard))
         for i in range(len(x) - self.param.k + 1):
             x_kmer = x[i:i + self.param.k]
             for j, b in enumerate(self.mers_wildcard):
-                
-                phi[j] += self.param.la**(b.count('*')) * (x_kmer == b.replace('*',''))
+
+                phi[j] += self.param.la**(b.count('*')) * (x_kmer == b.replace(
+                    '*', ''))
         return phi
 
 
