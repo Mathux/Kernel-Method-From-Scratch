@@ -46,13 +46,14 @@ class KSVM(KMethod, metaclass=KMethodCreate):
         return self._alpha
 
 
-if __name__ == "__else__":
+if __name__ == "__main__":
     from src.data.synthetic import GenClassData
     data = GenClassData(500, 2, mode="circle")
-
+    
     from src.kernels.quad import QuadKernel
     kernel = QuadKernel(data)
     
     ksvm = KSVM(kernel)
     ksvm.fit()
+    data._show_gen_class_predicted(ksvm.predict)
     

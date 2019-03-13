@@ -8,6 +8,7 @@ Created on Tue Mar 12 15:30:29 2019
 
 import numpy as np
 from src.tools.utils import Parameters, Logger
+from src.data.trie_dna import Trie
 
 
 class KernelCreate(type):
@@ -94,7 +95,7 @@ class Kernel(Logger):
         if self._m is None:
             raise ValueError("This kernel didn't have any data, so no shape")
         return self._m
-    
+
     @property
     def K(self):
         # Check if K is computed before
@@ -102,7 +103,17 @@ class Kernel(Logger):
             # Compute the gram matrix
             self._compute_gram()
         return self._K
-        
+
+    def _normalized_kernel(self, K):
+        for i in self.vrange(K.shape[0], "Normalise kernel"):
+            for j in range(i + 1, K.shape[0]):
+                q = np.sqrt(K[i, i] * K[j, j])
+                if q > 0:
+                    K[i, j] /= q
+                    K[j, i] = K[i, j]
+        np.fill_diagonal(K, 1.)
+        self._K = K + 1
+
     @property
     def KC(self):
         # Check if KC is computed before
@@ -110,13 +121,13 @@ class Kernel(Logger):
             # Compute the centered gram matrix
             self._compute_centered_gram()
         return self._KC
-    
+
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
         for i in self.vrange(self.n, "Gram matrix of " + self.__name__):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = self.kernel(self.data[i], self.data[j])
-        self._K = K
+        self._normalized_kernel(K)
 
     def _compute_centered_gram(self):
         K = self.K
@@ -127,10 +138,11 @@ class Kernel(Logger):
         self._log("Gram matrix centered!")
 
     def kernel(self, x, y):
-        return self._kernel(x, y) + 1
-    
+        return self._kernel(x, y)
+
     def predict(self, x):
-        return np.array([self.kernel(xi, x) for xi in self.data])
+        return np.array([self.kernel(xi, x) / np.sqrt(self.kernel(xi, xi)
+                                                      * self.kernel(x, x)) + 1 for xi in self.data])
 
     def addconfig(self, name, value):
         self.config[name] = value
@@ -202,7 +214,9 @@ class StringKernel(GenKernel):
 
     def predict(self, x):
         phix = self._compute_phi(x)
-        return np.array([np.dot(phix, phi) for phi in self.phis])
+        k_xx = np.dot(phix, phix)
+        return np.array(
+            [np.dot(phix, phi) / np.sqrt(phi * k_xx) + 1 for phi in self.phis])
 
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
@@ -214,19 +228,8 @@ class StringKernel(GenKernel):
 
         self._normalized_kernel(K)
 
-    # Normalise the kernel (divide by the variance)
-    def _normalized_kernel(self, K):
-        for i in self.vrange(K.shape[0], "Normalise kernel"):
-            for j in range(i + 1, K.shape[0]):
-                q = np.sqrt(K[i, i] * K[j, j])
-                if q > 0:
-                    K[i, j] /= q
-                    K[j, i] = K[i, j]
-        np.fill_diagonal(K, 1.)
-        self._K = K
-
     def kernel(self, x, y):
-        return np.dot(self._compute_phi(x), self._compute_phi(y)) + 1
+        return np.dot(self._compute_phi(x), self._compute_phi(y))
 
     @property
     def phis(self):
@@ -243,19 +246,95 @@ class StringKernel(GenKernel):
             self._mers = [(''.join(c))
                           for c in product('ACGT', repeat=self.param.k)]
         return self._mers
-    
+
     @property
     def mers_wildcard(self):
         from itertools import product
         if self._mers_wildcard is None:
             self._mers_wildcard = [(''.join(c))
-                          for c in product('ACGT*', repeat=self.param.k)]
-            
-        func = lambda x : np.sum(np.array(list(x) == '*')) <= self.param.m
-        vfunc = np.vectorize(func)
-        self._mers_wildcard = np.array(self._mers_wildcard)[vfunc(self._mers_wildcard)]
-        return self._mers_wildcard
+                                   for c in product('ACGT*', repeat=self.param.k)]
 
+        def func(x): return np.sum(np.array(list(x)) == '*') <= self.param.m
+        vfunc = np.vectorize(func)
+        self._mers_wildcard = np.array(self._mers_wildcard)[
+            vfunc(self._mers_wildcard)]
+        return self._mers_wildcard
+    
+    
+class TrieKernel(GenKernel):
+    toreset = ["_K", "_KC", "_n"]
+    def __init__(self,
+                 dataset=None,
+                 name="TrieKernel",
+                 parameters=None,
+                 verbose=True,
+                 cls=None):
+        super(TrieKernel, self).__init__(
+            dataset=dataset,
+            name=name,
+            parameters=parameters,
+            verbose=verbose,
+            cls=cls)
+    
+    def unique_kmers(self,x) :
+        x = list(x)
+        ukmers = []
+        offset = 0
+        seen_kmers = []
+        for offset in range(len(x) - self.param.k + 1):
+            kmer = x[offset:offset + self.param.k]
+            if not kmer in seen_kmers:
+                seen_kmers.append(kmer)
+            count = 1
+            for _offset in range(offset + 1, len(x) - self.param.k + 1):
+                if np.all(x[_offset:_offset + self.param.k] == kmer):
+                    count += 1
+            ukmers.append((kmer, count))
+        return ukmers
+    
+    def get_leaf_nodes(self, node):
+            leafs = []
+            self._collect_leaf_nodes(node, leafs)
+            return leafs
+    
+    def _collect_leaf_nodes(self,node, leafs):
+        if node is not None:
+            if len(node.children) == 0:
+                leafs.append(node)
+            for k,v in node.children.items():
+                self._collect_leaf_nodes(v, leafs)
+
+    def k_value(self, x):
+        
+        leafs = self.get_leaf_nodes(self.trie)
+        self.leaf_kgrams_ = dict((leaf.full_label,
+                                      dict((index, (len(kgs),leaf.full_label.count('*'))) for 
+                                      index, kgs
+                                           in leaf.kgrams.items()))
+                                     for leaf in leafs)
+        k_x = np.zeros(len(self.data))
+        for kmer, count1 in self.unique_kmers(x, self.param.k):
+            if kmer in self.leaf_kgrams_.keys():
+                for j in range(len(self.data.data)):
+                    if j in self.leaf_kgrams_[kmer].keys():
+
+                        kgrams, nb_wildcard = self.leaf_kgrams_[kmer][j]
+                        k_x[j] += self.param.la**nb_wildcard*(count1 * kgrams)
+
+        return k_x
+
+    def predict(self, x):
+        t = Trie(la = self.param.la)
+        k_xx,_,_ = t.dfs(np.array([x]),self.param.k, self.param.m)
+        k_xx = k_xx.squeeze()
+        k_v = self.k_value(x)
+        return np.array([k_v[i]/ np.sqrt(self.K[i,i]* k_xx) + 1 for i in range(len(self.K))])
+
+    def _compute_gram(self):
+        K = np.zeros((self.n, self.n))
+        self.trie = Trie(la = self.param.la)
+        K, _,_ = self.trie.dfs(self.data.data,k = self.param.k, m = self.param.m)
+        self._normalized_kernel(K)
 
 def AllStringKernels():
     from src.kernels.spectral import SpectralKernel
@@ -264,7 +343,12 @@ def AllStringKernels():
     from src.kernels.la import LAKernel
     from src.kernels.wildcard import WildcardKernel
 
-    kernels = [MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel]
+    kernels = [
+        MismatchKernel,
+        SpectralKernel,
+        WDKernel,
+        LAKernel,
+        WildcardKernel]
     names = ["mismatch", "spectral", "wd", "la", "wildcard"]
     return kernels, names
 

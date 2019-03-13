@@ -10,11 +10,17 @@ import numpy as np
 
 from src.kernels.kernel import StringKernel, KernelCreate
 #from src.tools.utils import nb_diff
-from itertools import product
 
+def wildcard_match(x,y) :
+    result = True
+    for i in range(len(x)) :
+        if x[i] != y[i] and y[i] != '*' :
+            result = False
+            break
+    return result
 
 class WildcardKernel(StringKernel, metaclass=KernelCreate):
-    defaultParameters = {"k": 5, "m": 1, 'la' : 1}
+    defaultParameters = {"k": 2, "m": 1, 'la' : 1}
 
     def _compute_phi(self, x):
 
@@ -22,17 +28,20 @@ class WildcardKernel(StringKernel, metaclass=KernelCreate):
         for i in range(len(x) - self.param.k + 1):
             x_kmer = x[i:i + self.param.k]
             for j, b in enumerate(self.mers_wildcard):
-                
-                phi[j] += self.param.la**(b.count('*')) * (x_kmer == b.replace('*',''))
+                phi[j] += self.param.la**(b.count('*')) * wildcard_match(x_kmer, b)
         return phi
+    
 
 
 if __name__ == "__main__":
     from src.data.seq import SeqData
     data = SeqData(small=False)
-
-    kernel = WildcardKernel(data)
-
+    data.data = np.array([data.data[0]])
+    import time
+    debut = time.clock()
+    kernel = WildcardKernel(data, parameters= {'k' : 5, 'm' : 1, 'la' : 1})
+    fin = time.clock()
+    print(fin - debut)
     from src.methods.kpca import KPCA
     kpca = KPCA(kernel)
     proj = kpca.project()
