@@ -141,8 +141,11 @@ class Kernel(Logger):
         return self._kernel(x, y)
 
     def predict(self, x):
-        return np.array([self.kernel(xi, x) / np.sqrt(self.kernel(xi, xi)
-                                                      * self.kernel(x, x)) + 1 for xi in self.data])
+        return np.array([
+            self.kernel(xi, x) / np.sqrt(
+                self.kernel(xi, xi) * self.kernel(x, x)) + 1
+            for xi in self.data
+        ])
 
     def addconfig(self, name, value):
         self.config[name] = value
@@ -251,18 +254,22 @@ class StringKernel(GenKernel):
     def mers_wildcard(self):
         from itertools import product
         if self._mers_wildcard is None:
-            self._mers_wildcard = [(''.join(c))
-                                   for c in product('ACGT*', repeat=self.param.k)]
+            self._mers_wildcard = [
+                (''.join(c)) for c in product('ACGT*', repeat=self.param.k)
+            ]
 
-        def func(x): return np.sum(np.array(list(x)) == '*') <= self.param.m
+        def func(x):
+            return np.sum(np.array(list(x)) == '*') <= self.param.m
+
         vfunc = np.vectorize(func)
-        self._mers_wildcard = np.array(self._mers_wildcard)[
-            vfunc(self._mers_wildcard)]
+        self._mers_wildcard = np.array(self._mers_wildcard)[vfunc(
+            self._mers_wildcard)]
         return self._mers_wildcard
-    
-    
+
+
 class TrieKernel(GenKernel):
     toreset = ["_K", "_KC", "_n"]
+
     def __init__(self,
                  dataset=None,
                  name="TrieKernel",
@@ -275,15 +282,15 @@ class TrieKernel(GenKernel):
             parameters=parameters,
             verbose=verbose,
             cls=cls)
-    
-    def unique_kmers(self,x) :
+
+    def unique_kmers(self, x):
         x = list(x)
         ukmers = []
         offset = 0
         seen_kmers = []
         for offset in range(len(x) - self.param.k + 1):
             kmer = x[offset:offset + self.param.k]
-            if not kmer in seen_kmers:
+            if kmer not in seen_kmers:
                 seen_kmers.append(kmer)
             count = 1
             for _offset in range(offset + 1, len(x) - self.param.k + 1):
@@ -291,27 +298,27 @@ class TrieKernel(GenKernel):
                     count += 1
             ukmers.append((kmer, count))
         return ukmers
-    
+
     def get_leaf_nodes(self, node):
-            leafs = []
-            self._collect_leaf_nodes(node, leafs)
-            return leafs
-    
-    def _collect_leaf_nodes(self,node, leafs):
+        leafs = []
+        self._collect_leaf_nodes(node, leafs)
+        return leafs
+
+    def _collect_leaf_nodes(self, node, leafs):
         if node is not None:
             if len(node.children) == 0:
                 leafs.append(node)
-            for k,v in node.children.items():
+            for k, v in node.children.items():
                 self._collect_leaf_nodes(v, leafs)
 
     def k_value(self, x):
-        
+
         leafs = self.get_leaf_nodes(self.trie)
         self.leaf_kgrams_ = dict((leaf.full_label,
-                                      dict((index, (len(kgs),leaf.full_label.count('*'))) for 
-                                      index, kgs
-                                           in leaf.kgrams.items()))
-                                     for leaf in leafs)
+                                  dict((index, (len(kgs),
+                                                leaf.full_label.count('*')))
+                                       for index, kgs in leaf.kgrams.items()))
+                                 for leaf in leafs)
         k_x = np.zeros(len(self.data))
         for kmer, count1 in self.unique_kmers(x, self.param.k):
             if kmer in self.leaf_kgrams_.keys():
@@ -319,22 +326,27 @@ class TrieKernel(GenKernel):
                     if j in self.leaf_kgrams_[kmer].keys():
 
                         kgrams, nb_wildcard = self.leaf_kgrams_[kmer][j]
-                        k_x[j] += self.param.la**nb_wildcard*(count1 * kgrams)
+                        k_x[j] += self.param.la**nb_wildcard * (
+                            count1 * kgrams)
 
         return k_x
 
     def predict(self, x):
-        t = Trie(la = self.param.la)
-        k_xx,_,_ = t.dfs(np.array([x]),self.param.k, self.param.m)
+        t = Trie(la=self.param.la)
+        k_xx, _, _ = t.dfs(np.array([x]), self.param.k, self.param.m)
         k_xx = k_xx.squeeze()
         k_v = self.k_value(x)
-        return np.array([k_v[i]/ np.sqrt(self.K[i,i]* k_xx) + 1 for i in range(len(self.K))])
+        return np.array([
+            k_v[i] / np.sqrt(self.K[i, i] * k_xx) + 1
+            for i in range(len(self.K))
+        ])
 
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
-        self.trie = Trie(la = self.param.la)
-        K, _,_ = self.trie.dfs(self.data.data,k = self.param.k, m = self.param.m)
+        self.trie = Trie(la=self.param.la)
+        K, _, _ = self.trie.dfs(self.data.data, k=self.param.k, m=self.param.m)
         self._normalized_kernel(K)
+
 
 def AllStringKernels():
     from src.kernels.spectral import SpectralKernel
@@ -344,11 +356,8 @@ def AllStringKernels():
     from src.kernels.wildcard import WildcardKernel
 
     kernels = [
-        MismatchKernel,
-        SpectralKernel,
-        WDKernel,
-        LAKernel,
-        WildcardKernel]
+        MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel
+    ]
     names = ["mismatch", "spectral", "wd", "la", "wildcard"]
     return kernels, names
 
