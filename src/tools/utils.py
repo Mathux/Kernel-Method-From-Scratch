@@ -85,8 +85,20 @@ class Logger:
             return it
 
 
-# Sigmoid function
 def sigmoid(x):
+    """Return the sigmoid of x
+
+    Parameters
+    ----------
+    x : float
+        input value
+
+    Returns
+    -------
+    float
+	The sigmoid of the input
+
+    """
     return 1 / (1 + np.exp(-x))
 
 
@@ -94,6 +106,21 @@ sigmoid = np.vectorize(sigmoid)
 
 
 def quad(K, alpha):
+    """Compute a quadratic form
+
+    Parameters
+    ----------
+    K : array
+        Matrix at the middle
+    alpha : array
+        Vector
+
+    Returns
+    -------
+    array
+	alpha^T K alpha
+
+    """
     return np.dot(alpha, np.dot(K, alpha))
 
 
@@ -105,8 +132,19 @@ def nb_diff(x, y):
     return nb_diff
 
 
-# Tool to give the csv format
 def submit(predictions, ids, csvname):
+    """Create the csvfile to submit a solution
+    
+    Parameters
+    ----------
+    predictions : (labels array) list
+        3 lists of predictions
+    ids : (int array) list
+        3 lists of ids
+    csvname : (string)
+        Path of the csv file to write
+    
+    """
     Id = pd.DataFrame(pd.concat([id for id in ids], ignore_index=True))
 
     Pred = [pd.DataFrame(pred, columns=['Bound']) for pred in predictions]
@@ -116,8 +154,15 @@ def submit(predictions, ids, csvname):
     table.to_csv(csvname, index=False)
         
 
-# Create a directory if it doesn't exit
 def create_dir(directory):
+    """Create a directory if it doesn't exit
+
+    Parameters
+    ----------
+    directory : string
+        Path of the folder
+
+    """
     if not os.path.exists(directory):
         os.makedirs(directory)
 
