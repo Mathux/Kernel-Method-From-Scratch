@@ -304,24 +304,6 @@ class TrieKernel(GenKernel):
             for k,v in node.children.items():
                 self._collect_leaf_nodes(v, leafs)
 
-    def k_value(self, x):
-        
-        leafs = self.get_leaf_nodes(self.trie)
-        self.leaf_kgrams_ = dict((leaf.full_label,
-                                      dict((index, (len(kgs),leaf.full_label.count('*'))) for 
-                                      index, kgs
-                                           in leaf.kgrams.items()))
-                                     for leaf in leafs)
-        k_x = np.zeros(len(self.data))
-        for kmer, count1 in self.unique_kmers(x, self.param.k):
-            if kmer in self.leaf_kgrams_.keys():
-                for j in range(len(self.data.data)):
-                    if j in self.leaf_kgrams_[kmer].keys():
-
-                        kgrams, nb_wildcard = self.leaf_kgrams_[kmer][j]
-                        k_x[j] += self.param.la**nb_wildcard*(count1 * kgrams)
-
-        return k_x
 
     def predict(self, x):
         t = Trie(la = self.param.la)
@@ -333,7 +315,7 @@ class TrieKernel(GenKernel):
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
         self.trie = Trie(la = self.param.la)
-        K, _,_ = self.trie.dfs(self.data.data,k = self.param.k, m = self.param.m)
+        K, _,_ = (self.trie).dfs(self.dataset.data, k = self.param.k, m = self.param.m)
         self._normalized_kernel(K)
 
 def AllStringKernels():

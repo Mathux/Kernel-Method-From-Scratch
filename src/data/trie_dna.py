@@ -66,7 +66,10 @@ class Trie(object):
     def process_node(self, X, k, m):
 
         if X.ndim == 1:
-            X = np.array(list(map(lambda x: np.array(list(x)), X)))
+            XX = []
+            for i in range(X.shape[0]) :
+                XX.append(np.array(list(X[i])))
+            X = 1*XX
 
         if self.is_root():
             self.compute_kgrams(X, k)
@@ -114,7 +117,7 @@ class Trie(object):
                 self.update_kernel(kernel)
             else:
                 for j in (range(l)):
-                    child = Trie(label=vocab[j], parent=self)
+                    child = Trie(la = self.la, label=vocab[j], parent=self)
                     kernel, child_kmers, child_alive = child.dfs(
                              X, k - 1, m, kernel=kernel)
                     if child.is_empty():
@@ -137,13 +140,12 @@ def normalized_kernel(K):
 
 if __name__ == '__main__' :
     from src.data.seq import SeqData
-    #data = SeqData(small=True)
-    #data = data.data[::5]
-    data = np.array(['ATTA','AAAA'])
+    data = SeqData(small=True)
+#    data = np.array(['ATTA','AAAA'])
     import time
     debut = time.clock()
     t = Trie()
-    ker, n_kmers, _ = t.dfs(data, 2, 0)
+    ker, n_kmers, _ = t.dfs(data.data, 2, 0)
     fin = time.clock()
     print('temps = ', fin -debut)
     
