@@ -1,7 +1,6 @@
 from cvxopt import matrix, solvers
 import numpy as np
-from src.methods.KMethod import KMethod, KMethodCreate
-from src.tools.utils import Logger
+from src.methods.KMethod import KMethod, KMethodCreate, klogger
 
 solvers.options['show_progress'] = False
 
@@ -20,17 +19,11 @@ class KSVM(KMethod, metaclass=KMethodCreate):
     """
     name = "ksvm"
     defaultParameters = {"C": 1, "tol": 10**-4}
-
-    def fit(self, dataset=None, labels=None, K=None):
-        self._log("Fitting kernel svm..")
-        Logger.indent()
-        self.load_dataset(dataset, labels)
+    
+    @klogger("Kernel Support Vector Machine")
+    def fit(self, K):
         n = self.n
         y = self.labels
-        
-        if K is None:
-            K = self.kernel.K
-
         C = self.param.C
 
         P = matrix(K, (n, n), "d")
@@ -43,8 +36,6 @@ class KSVM(KMethod, metaclass=KMethodCreate):
         # support_vectors = np.where(np.abs(alpha) > self.param.tol)
 
         self._alpha = alpha
-        Logger.dindent()
-        self._log("Fitting done!\n")
         return self._alpha
 
 
@@ -52,3 +43,6 @@ if __name__ == "__main__":
     from src.tools.test import EasyTest
     dparams = {"small": True, "nsmall": 300}
     EasyTest(kernel="spectral", data="seq", method="ksvm", dparams=dparams)
+    
+    # from src.kernels.wildcard_trie import WildcardTrieKernel
+    # kernel = WildcardTrieKernel(data)

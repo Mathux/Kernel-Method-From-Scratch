@@ -1,4 +1,4 @@
-from src.tools.utils import Logger, Parameters
+from src.tools.utils import Logger, Parameters, Timer
 import numpy as np
 from src.tools.utils import Score
 
@@ -14,6 +14,32 @@ class KMethodCreate(type):
                 cls=cls)
 
         cls.__init__ = init
+
+
+def klogger(name, pca=False):
+    def wrap(fitfunc):
+        def f(self, dataset=None, labels=None, K=None):
+            t = Timer()
+            self._log("Fitting {}..".format(name))
+            Logger.indent()
+            t.start()
+            
+            self.load_dataset(dataset, labels)
+
+            if pca:
+                K = self.kernel.KC
+            elif K is None:
+                K = self.kernel.K
+
+            result = fitfunc(self, K)
+            
+            t.stop()
+            Logger.dindent()
+            self._log("Fitting done! (computed in {})\n".format(t))
+
+            return result
+        return f
+    return wrap
 
 
 class KMethod(Logger):
@@ -60,19 +86,28 @@ class KMethod(Logger):
         pred = self.predict(x)
         return 1 if pred > 0 else -1
 
-    def predict_array(self, X, binaire=True):
+    def predict_array(self, X, binaire=True, desc="Predictions"):
         if binaire:
             fonc = self.predictBin
         else:
             fonc = self.predict
 
-        return np.array([fonc(x) for x in X])
+        results = []
+        for i in self.vrange(len(X), desc) :
+            results.append(fonc(X[i]))
+        return np.array(results)
 
     def score_recall_precision(self, dataset):
+        t = Timer()
+        t.start()
         predictions = self.predict_array(dataset.data, binaire=True)
         score = Score(predictions, dataset)
+        t.stop()
+        self._log("Results of the training set (computed in {})".format(t))
+        Logger.indent()
         self._log(score)
-        self._log()
+        Logger.dindent()
+        self._log("")
         return score
 
     def sanity_check(self):

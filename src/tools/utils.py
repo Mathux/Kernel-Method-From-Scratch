@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import os
+import time
 
 
 class Serializable:
@@ -101,6 +102,28 @@ class Logger:
         else:
             return it
 
+
+class Timer:
+    def __init__(self):
+        self.start()
+        self.stop()
+
+    def start(self):
+        self.begin = time.perf_counter()
+
+    def stop(self):
+        self.end = time.perf_counter()
+
+    @property
+    def value(self):
+        return self.end - self.begin
+
+    def __str__(self):
+        return "{}s".format(int(self.value*100)/100)
+
+    def __repr__(self):
+        return self.__str__()
+    
 
 class Score:
     """Score object to evaluate a method
@@ -211,3 +234,5 @@ def create_dir(directory):
 if __name__ == "__main__":
     param = {'z': 4, 'r': 5}
     p = Parameters(param)
+
+    t = Timer()

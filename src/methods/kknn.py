@@ -1,23 +1,15 @@
 import numpy as np
 import heapq as hq
-from src.methods.KMethod import KMethod, KMethodCreate
-from src.tools.utils import Logger
+from src.methods.KMethod import KMethod, KMethodCreate, klogger
 
 
 class KKNN(KMethod, metaclass=KMethodCreate):
     name = "kknn"
     defaultParameters = {"knn": 3}
 
-    def fit(self, dataset=None, labels=None):
-        self._log("Fitting kknn..")
-        Logger.indent()
-        # Load the dataset (if there are one) in the kernel
-        self.load_dataset(dataset, labels)
-        # Compute K here
-        self.kernel.K
-
-        Logger.dindent()
-        self._log("Fitting done!\n")
+    @klogger("Kernel k nearest neighbors")
+    def fit(self, K):
+        return None
 
     def predict(self, x):
         return self.majority_vote(x)

@@ -89,12 +89,9 @@ class Dataset(Logger):
             raise Exception("Bad labels")
 
     # Show project of data
-    def show_pca(self, proj, predict=None, dim=3):
+    def show_pca(self, proj, predictions=None, dim=3):
         import matplotlib.pyplot as plt
-        if predict is not None:
-
-            predictions = np.array([predict(x) for x in self.data])
-
+        if predictions is not None:
             if dim == 2:
                 fig, (axgt, axpred) = plt.subplots(1, 2)
 

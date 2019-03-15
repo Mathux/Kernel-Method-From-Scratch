@@ -37,6 +37,8 @@ def parse_args():
         "--show", type=bool, default=True, help="True to draw the pca")
     parser.add_argument(
         "--csvname", default=None, help="Path to the csv file to write")
+    parser.add_argument(
+        "--submit", type=bool, default=False, help="Submit a csv or not")
     return parser.parse_args()
 
 
@@ -143,8 +145,8 @@ def EasyTest(kernel,
             
             kpca = KPCA(kernel, parameters={"dim": pcadim})
             proj = kpca.project()
-            
-            predict = method.predictBin
+            predict = method.predict_array(train.data, desc="Projections")
+
             Logger.dindent()
             kernel.dataset.show_pca(proj, predict, dim=pcadim)
 
@@ -190,11 +192,10 @@ if __name__ == "__main__":
             sd + sk + sm + ".csv")
     else:
         csvname = args.csvname
-
-    print("Results will be saved in: " + csvname)
-    print()
-
-    dopredictions = False
+    
+    if args.submit:
+        print("Results will be saved in: " + csvname)
+        print()
     
     scores = EasyTest(
         kernel=args.kernel,
@@ -208,6 +209,6 @@ if __name__ == "__main__":
         dopredictions=False,
         verbose=True)
 
-    if dopredictions:
+    if args.submit:
         scores, predictions, Ids = scores
         submit(predictions, Ids, csvname)

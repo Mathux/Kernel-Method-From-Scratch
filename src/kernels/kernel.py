@@ -3,7 +3,7 @@
 """
 Created on Tue Mar 12 15:30:29 2019
 
-@author: evrardgarcelon
+@author: evrardgarcelon, mathispetrovich
 """
 
 import numpy as np
@@ -160,7 +160,7 @@ class Kernel(Logger):
         kpca = KPCA(self, parameters={"dim": dim})
         proj = kpca.project()
         self.data.show_pca(proj, pred, dim=dim)
-        
+
 
 class GenKernel(Kernel):
     def __init__(self,
@@ -223,8 +223,10 @@ class StringKernel(GenKernel):
     def predict(self, x):
         phix = self._compute_phi(x)
         k_xx = np.dot(phix, phix)
-        return np.array(
-            [np.dot(phix, phi) / np.sqrt(np.dot(phi, phi) * k_xx) + 1 for phi in self.phis])
+        return np.array([
+            np.dot(phix, phi) / np.sqrt(np.dot(phi, phi) * k_xx) + 1
+            for phi in self.phis
+        ])
 
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
@@ -301,7 +303,7 @@ class TrieKernel(GenKernel):
             for _offset in range(offset + 1, len(x) - self.param.k + 1):
                 if np.all(x[_offset:_offset + self.param.k] == kmer):
                     count += 1
-            ukmers.append((kmer, count))
+            ukmers.append((''.join(kmer), count))
         return ukmers
 
     def get_leaf_nodes(self, node):
@@ -348,7 +350,8 @@ class TrieKernel(GenKernel):
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
         self.trie = Trie(la=self.param.la)
-        K, _, _ = self.trie.dfs(self.data.data, k=self.param.k, m=self.param.m)
+        K, _, _ = (self.trie).dfs(
+            self.dataset.data, k=self.param.k, m=self.param.m)
         self._normalized_kernel(K)
 
 
