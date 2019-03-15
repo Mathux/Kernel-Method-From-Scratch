@@ -1,6 +1,7 @@
 from src.tools.utils import Logger, Parameters
 import numpy as np
 from src.tools.utils import sigmoid
+from tqdm import tqdm
 
 
 class KMethodCreate(type):
@@ -66,7 +67,11 @@ class KMethod(Logger):
         else:
             fonc = self.predict
 
-        return np.array([fonc(x) for x in X])
+        results = []
+        for i in tqdm(range(len(X))) :
+            results.append(fonc(X[i]))
+        return np.array(results)
+        #return np.array([fonc(x) for x in X])
 
     def score_recall_precision(self, dataset):
         X, y = dataset.data, dataset.labels

@@ -47,13 +47,19 @@ class KSVM(KMethod, metaclass=KMethodCreate):
 
 
 if __name__ == "__main__":
-    from src.data.synthetic import GenClassData
-    data = GenClassData(500, 2, mode="circle")
+#    from src.data.synthetic import GenClassData
+#    data = GenClassData(500, 2, mode="circle")
+#    
+#    from src.kernels.quad import QuadKernel
+#    kernel = QuadKernel(data)
     
-    from src.kernels.quad import QuadKernel
-    kernel = QuadKernel(data)
+    from src.data.seq import SeqData
     
+    data = SeqData(k=0, dataname="train", mat=False, small=True, verbose=True)
+    
+    from src.kernels.wildcard_trie import WildcardTrieKernel
+    kernel = WildcardTrieKernel(data)
     ksvm = KSVM(kernel)
     ksvm.fit()
-    data._show_gen_class_predicted(ksvm.predict)
+    #data._show_gen_class_predicted(ksvm.predict)
     

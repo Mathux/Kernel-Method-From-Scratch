@@ -296,7 +296,7 @@ class TrieKernel(GenKernel):
             for _offset in range(offset + 1, len(x) - self.param.k + 1):
                 if np.all(x[_offset:_offset + self.param.k] == kmer):
                     count += 1
-            ukmers.append((kmer, count))
+            ukmers.append((''.join(kmer), count))
         return ukmers
 
     def get_leaf_nodes(self, node):

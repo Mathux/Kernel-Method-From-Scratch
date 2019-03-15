@@ -133,15 +133,16 @@ if __name__ == '__main__':
     from src.kernels.wildcard import WildcardKernel
     from src.methods.ksvm import KSVM
     from src.methods.klr import KLR
+    from src.kernels.wildcard_trie import WildcardTrieKernel
 
-    data = SeqData(k=0, dataname="train", mat=False, small=False, verbose=True)
+    data = SeqData(k=0, dataname="train", mat=False, small=True, verbose=True)
 
 
-    parameter_grid = {'kernel': [WildcardKernel],
-                      'k': randint(low=4, high=6),
+    parameter_grid = {'kernel': [WildcardTrieKernel],
+                      'k': randint(low=4, high = 8),
                       'm' : randint(low=1, high=2),
                       'lam': uniform(loc=0.1, scale=15),
                       }
-    rand_klr = RandomHyperParameterTuning(KLR, data, 2, parameter_grid, kfold=2)
+    rand_klr = RandomHyperParameterTuning(KLR, data, 5, parameter_grid, kfold=4)
     rand_klr.fit()
     print(rand_klr.best_parameters())

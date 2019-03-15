@@ -11,7 +11,7 @@ from src.kernels.kernel import TrieKernel, KernelCreate
 
 
 class WildcardTrieKernel(TrieKernel, metaclass=KernelCreate):
-    defaultParameters = {"k": 2, 'm' : 1, 'la' : 1}
+    defaultParameters = {"k": 5, 'm' : 1, 'la' : 1}
     
     def k_value(self, x):
         
@@ -22,11 +22,10 @@ class WildcardTrieKernel(TrieKernel, metaclass=KernelCreate):
                                            in leaf.kgrams.items()))
                                      for leaf in leafs)
         k_x = np.zeros(len(self.data))
-        for kmer, count1 in self.unique_kmers(x, self.param.k):
-            if kmer in self.leaf_kgrams_.keys():
+        for kmer, count1 in self.unique_kmers(x):    
+            if kmer in list(self.leaf_kgrams_.keys()):
                 for j in range(len(self.data.data)):
-                    if j in self.leaf_kgrams_[kmer].keys():
-
+                    if j in list(self.leaf_kgrams_[kmer].keys()):
                         kgrams, nb_wildcard = self.leaf_kgrams_[kmer][j]
                         k_x[j] += self.param.la**nb_wildcard*(count1 * kgrams)
 
