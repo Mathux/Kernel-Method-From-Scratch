@@ -225,9 +225,12 @@ if __name__ == "__main__":
         mparams=mparams,
         pcadim=args.pcadim,
         show=True,
-        dopredictions=False,
+        dopredictions=args.submit,
         verbose=True)
 
     if args.submit:
         scores, predictions, Ids = scores
         submit(predictions, Ids, csvname)
+        
+        print("Results saved in: " + csvname)
+

@@ -18,7 +18,7 @@ class KSVM(KMethod, metaclass=KMethodCreate):
         subject to  0 <= yi*xi <= C
     """
     name = "ksvm"
-    defaultParameters = {"C": 1, "tol": 10**-4}
+    defaultParameters = {"C": 1.0, "tol": 10**-4}
     
     @klogger("Kernel Support Vector Machine")
     def fit(self, K):
@@ -41,7 +41,7 @@ class KSVM(KMethod, metaclass=KMethodCreate):
 
 if __name__ == "__main__":
     from src.tools.test import EasyTest
-    dparams = {"small": True, "nsmall": 300}
+    dparams = {"small": False, "nsmall": 300}
     EasyTest(kernel="spectral", data="seq", method="ksvm", dparams=dparams)
     
     # from src.kernels.wildcard_trie import WildcardTrieKernel
