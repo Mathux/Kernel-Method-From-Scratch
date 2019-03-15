@@ -24,9 +24,9 @@ def parse_args():
     parser.add_argument("kernel", choices=kernelsNames, help="kernel name")
     parser.add_argument("method", choices=methodsNames, help="method name")
     parser.add_argument("data", choices=datasNames, help="data name")
-    parser.add_argument("--kparams", default="", help="kernel parameters")
-    parser.add_argument("--mparams", default="", help="method parameters")
-    parser.add_argument("--dparams", default="", help="data parameters")
+    parser.add_argument("--kparams", default=None, help="kernel parameters")
+    parser.add_argument("--mparams", default=None, help="method parameters")
+    parser.add_argument("--dparams", default=None, help="data parameters")
     parser.add_argument(
         "--pcadim",
         default=3,
@@ -42,14 +42,34 @@ def parse_args():
     return parser.parse_args()
 
 
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 def parse_params(allargs, defaultParams):
-    parser = argparse.ArgumentParser()
+    if allargs is None:
+        return defaultParams
+
+    parser = ArgumentParser()
 
     for args, default in defaultParams.items():
-        parser.add_argument("--" + args, default=default, type=type(default))
+        if type(default) == bool:
+            parser.add_argument(
+                "--" + args,
+                type=str2bool,
+                nargs='?',
+                const=True,
+                default=default,
+                help="Activate " + args + " mode.")
+        else:
+            parser.add_argument(
+                "--" + args, default=default, type=type(default))
 
-    if allargs == "":
-        return defaultParams
     return parser.parse_args(allargs.split(" ")).__dict__
 
 
@@ -88,7 +108,7 @@ class NoneMethod:
 
     def sanity_check(self):
         return None
-    
+
     def __str__(self):
         name = "No Method tested here"
         return name
@@ -108,13 +128,13 @@ def EasyTest(kernel,
     Data = findData(data)
     Kernel = findKernel(kernel)
     KMethod = findMethod(method)
-    
+
     predictions = []
     Ids = []
     scores = []
 
-    datasets = Data(dparams, verbose)    
-    
+    datasets = Data(dparams, verbose)
+
     Logger.indent()
     for dataset in datasets:
         Logger.dindent()
@@ -129,12 +149,12 @@ def EasyTest(kernel,
         Logger.log(verbose, method)
         Logger.log(verbose, train)
         Logger.log(verbose, "")
-        
+
         method.fit()
 
         # Check the value to see if it is alright
         method.sanity_check()
-        
+
         # Compute the score of the train set:
         score = method.score_recall_precision(train)
         scores.append(score)
@@ -142,7 +162,7 @@ def EasyTest(kernel,
         if show:
             Logger.log(verbose, "Show the trainset in the feature space..")
             Logger.indent()
-            
+
             kpca = KPCA(kernel, parameters={"dim": pcadim})
             proj = kpca.project()
             predict = method.predict_array(train.data, desc="Projections")
@@ -163,7 +183,7 @@ def EasyTest(kernel,
 
     Logger.log(verbose, "Score remainder:")
     Logger.indent()
-    [Logger.log(verbose, s) for s in scores] 
+    [Logger.log(verbose, s) for s in scores]
     Logger.dindent()
 
     if dopredictions:
@@ -181,22 +201,21 @@ if __name__ == "__main__":
     mparams = parse_params(args.mparams,
                            findMethod(args.method).defaultParameters)
     dparams = parse_params(args.dparams, findData(args.data).defaultParameters)
-    
+
+    print(kparams)
     if args.csvname is None:
         create_dir(expPath)
         sd = args.data + "_data_"
         sk = args.kernel + "_kernel(" + str(kparams) + ")_"
         sm = args.method + "_method(" + str(mparams) + ")"
-        csvname = path.join(
-            expPath,
-            sd + sk + sm + ".csv")
+        csvname = path.join(expPath, sd + sk + sm + ".csv")
     else:
         csvname = args.csvname
-    
+
     if args.submit:
         print("Results will be saved in: " + csvname)
         print()
-    
+
     scores = EasyTest(
         kernel=args.kernel,
         data=args.data,
