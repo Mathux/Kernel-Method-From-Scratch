@@ -9,6 +9,7 @@ String kernels available:
 - spectral
 - wd
 - la
+- wildcard
 
 Methods availables:
 - kknn
