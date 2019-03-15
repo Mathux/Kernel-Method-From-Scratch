@@ -12,7 +12,7 @@ solvers.options['show_progress'] = False
 
 
 class KSVM(KMethod, metaclass=KMethodCreate):
-    """Documentation for ClassName
+    """Documentation for KSVM
     Solve the KSVM problem:
         minimize    (1/2)*x^T*K*x - y^T*x
         subject to  0 <= yi*xi <= C

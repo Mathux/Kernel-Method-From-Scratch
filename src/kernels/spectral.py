@@ -8,8 +8,10 @@ class SpectralKernel(StringKernel, metaclass=KernelCreate):
 
     def _compute_phi(self, x):
         phi = np.zeros(len(self.mers))
-        for j, mer in enumerate(self.mers):
-            phi[j] += 1 * (mer in x)
+        for offset in range(len(x)) :
+            xkmer = x[offset : offset + self.param.k]
+            for j, mer in enumerate(self.mers):
+                phi[j] += 1 * (xkmer == mer)
         return phi
 
 
