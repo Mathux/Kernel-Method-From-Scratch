@@ -24,7 +24,6 @@ class __SpectralKernel:
         self.name = "spectral"
 
     def __call__(self, dataset=None, parameters=None, verbose=True):
-        print(parameters)
         param = Parameters(parameters, self.defaultParameters)
         if param.trie:
             parameters = Parameters(parameters, self.__trieParameters)

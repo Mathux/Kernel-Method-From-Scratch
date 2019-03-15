@@ -152,6 +152,7 @@ def EasyTest(kernel,
 
         method.fit()
 
+        Logger.log(verbose, method.alpha)
         # Check the value to see if it is alright
         method.sanity_check()
 
@@ -202,7 +203,6 @@ if __name__ == "__main__":
                            findMethod(args.method).defaultParameters)
     dparams = parse_params(args.dparams, findData(args.data).defaultParameters)
 
-    print(kparams)
     if args.csvname is None:
         create_dir(expPath)
         sd = args.data + "_data_"

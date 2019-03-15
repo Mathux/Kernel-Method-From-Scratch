@@ -6,7 +6,12 @@ from src.methods.wkrr import WKRR
 
 class KLR(KMethod, metaclass=KMethodCreate):
     name = "klr"
-    defaultParameters = {"lam": 1, "n_iter": 10, "tol": 10**-6, "eps": 10**-6}
+    defaultParameters = {
+        "lam": 0.01,
+        "n_iter": 10,
+        "tol": 10**-6,
+        "eps": 10**-6
+    }
 
     @klogger("kernel Logistic Regression")
     def fit(self, K):

@@ -38,14 +38,23 @@ class WildcardTrieKernel(TrieKernel, metaclass=KernelCreate):
     name = "wildcard"
     defaultParameters = {"k": 5, 'm': 1, 'la': 1, "trie": True}
 
-    def k_value(self, x):
+    def k_value(self, x, changev=False):
         leafs = self.get_leaf_nodes(self.trie)
+
+        oldvalue = self.verbose
+        if changev:
+            self.verbose = False
+            
+        desc = "Leaf computation"
         self.leaf_kgrams_ = dict((leaf.full_label,
                                   dict((index, (len(kgs),
                                                 leaf.full_label.count('*')))
                                        for index, kgs in leaf.kgrams.items()))
-                                 for leaf in leafs)
+                                 for leaf in self.viterator(leafs, desc=desc))
         k_x = np.zeros(len(self.data))
+
+        self.verbose = oldvalue
+                
         for kmer, count1 in self.unique_kmers(x):
             if kmer in list(self.leaf_kgrams_.keys()):
                 for j in range(len(self.data.data)):

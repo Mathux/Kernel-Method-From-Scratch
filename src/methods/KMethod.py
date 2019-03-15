@@ -16,9 +16,9 @@ class KMethodCreate(type):
         cls.__init__ = init
 
 
-def klogger(name, pca=False):
+def klogger(name, pca=False, wkrr=False):
     def wrap(fitfunc):
-        def f(self, dataset=None, labels=None, K=None):
+        def f(self, dataset=None, labels=None, K=None, w=None):
             t = Timer()
             self._log("Fitting {}..".format(name))
             Logger.indent()
@@ -31,7 +31,10 @@ def klogger(name, pca=False):
             elif K is None:
                 K = self.kernel.K
 
-            result = fitfunc(self, K)
+            if wkrr:
+                result = fitfunc(self, K, w)
+            else:
+                result = fitfunc(self, K)
             
             t.stop()
             Logger.dindent()

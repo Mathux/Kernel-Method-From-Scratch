@@ -341,7 +341,7 @@ class TrieKernel(GenKernel):
         t = Trie(la=self.param.la)
         k_xx, _, _ = t.dfs(np.array([x]), self.param.k, self.param.m)
         k_xx = k_xx.squeeze()
-        k_v = self.k_value(x)
+        k_v = self.k_value(x, changev=True)
         return np.array([
             k_v[i] / np.sqrt(self.K[i, i] * k_xx) + 1
             for i in range(len(self.K))
