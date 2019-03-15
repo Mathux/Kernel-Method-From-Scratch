@@ -60,17 +60,33 @@ class Parameters(Serializable):
             else:
                 self.__dict__[name] = value
 
+    def items(self):
+        return self.dic.items()
+
 
 class Logger:
+    _indent = 0
+    _step = 4
+    
     @staticmethod
     def log(verbose, *args):
         if verbose:
+            print(" "*Logger._indent, end="")
             print(*args)
-    
+
+    @staticmethod
+    def indent():
+        Logger._indent += Logger._step
+
+    @staticmethod
+    def dindent():
+        Logger._indent = max(0, Logger._indent - Logger._step)
+            
     def _log(self, *args):
         Logger.log(self.verbose, *args)
 
     def vrange(self, n, desc="", leave=False):
+        desc = " "*Logger._indent + desc
         if type(n) == int:
             n = (0, n)
         if self.verbose:
@@ -79,11 +95,36 @@ class Logger:
             return range(*n)
 
     def viterator(self, it, desc="", leave=False):
+        desc = " "*Logger._indent + desc
         if self.verbose:
             return tqdm(it, desc=desc, leave=leave)
         else:
             return it
 
+
+class Score:
+    """Score object to evaluate a method
+
+    """
+    def __init__(self, pred, dataset):
+        n = dataset.data.shape[0]
+        labels = dataset.labels
+        self.tp = np.sum((pred == 1.) * (labels == 1.))
+        self.fn = np.sum((pred == -1.) * (labels == 1.))
+        self.fp = np.sum((pred == 1.) * (labels == -1.))
+        self.recall = self.tp / (self.fn + self.tp)
+        self.precision = self.tp / (self.fp + self.tp)
+        self.accuracy = np.sum(labels == pred) / n
+
+    def __str__(self):
+        acc = "Accuracy: " + str(self.accuracy)
+        pre = "Precision: " + str(self.precision)
+        rec = "Recall: " + str(self.recall)
+        return ", ".join([acc, pre, rec])
+    
+    def __repr__(self):
+        return self.__str__()
+        
 
 def sigmoid(x):
     """Return the sigmoid of x

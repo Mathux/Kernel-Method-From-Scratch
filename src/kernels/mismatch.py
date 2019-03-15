@@ -5,6 +5,7 @@ from src.tools.utils import nb_diff
 
 
 class MismatchKernel(StringKernel, metaclass=KernelCreate):
+    name = "mismatch"
     defaultParameters = {"k": 3, "m": 1}
 
     def _compute_phi(self, x):
@@ -17,13 +18,8 @@ class MismatchKernel(StringKernel, metaclass=KernelCreate):
 
 
 if __name__ == "__main__":
-    from src.data.seq import SeqData
-    data = SeqData(small=True, nsmall=500)
+    dparams = {"small": True, "nsmall": 100}
+    kparams = {"k": 5, "m": 2}
 
-    kernel = MismatchKernel(data)
-
-    from src.methods.kpca import KPCA
-    kpca = KPCA(kernel)
-    proj = kpca.project()
-
-    data.show_pca(proj)
+    from src.tools.test import EasyTest
+    EasyTest(kernel="mismatch", data="seq", dparams=dparams, kparams=kparams)

@@ -1,6 +1,7 @@
 from cvxopt import matrix, solvers
 import numpy as np
 from src.methods.KMethod import KMethod, KMethodCreate
+from src.tools.utils import Logger
 
 solvers.options['show_progress'] = False
 
@@ -17,13 +18,13 @@ class KSVM(KMethod, metaclass=KMethodCreate):
         minimize    (1/2)*x^T*K*x - y^T*x
         subject to  0 <= yi*xi <= C
     """
+    name = "ksvm"
     defaultParameters = {"C": 1, "tol": 10**-4}
 
     def fit(self, dataset=None, labels=None, K=None):
-        # Load the dataset (if there are one) in the kernel
-        self.load_dataset(dataset, labels)
         self._log("Fitting kernel svm..")
-        
+        Logger.indent()
+        self.load_dataset(dataset, labels)
         n = self.n
         y = self.labels
         
@@ -41,19 +42,13 @@ class KSVM(KMethod, metaclass=KMethodCreate):
 
         # support_vectors = np.where(np.abs(alpha) > self.param.tol)
 
-        self._alpha = alpha        
-        self._log("Fitting done!")
+        self._alpha = alpha
+        Logger.dindent()
+        self._log("Fitting done!\n")
         return self._alpha
 
 
 if __name__ == "__main__":
-    from src.data.synthetic import GenClassData
-    data = GenClassData(500, 2, mode="circle")
-    
-    from src.kernels.quad import QuadKernel
-    kernel = QuadKernel(data)
-    
-    ksvm = KSVM(kernel)
-    ksvm.fit()
-    data._show_gen_class_predicted(ksvm.predict)
-    
+    from src.tools.test import EasyTest
+    dparams = {"small": True, "nsmall": 300}
+    EasyTest(kernel="spectral", data="seq", method="ksvm", dparams=dparams)

@@ -2,19 +2,13 @@ from src.kernels.kernel import DataKernel, KernelCreate
 
 
 class QuadKernel(DataKernel, metaclass=KernelCreate):
+    name = "quad"
     defaultParameters = {"offset": 10}
     
-    def _kernel(self, x, y):
+    def kernel(self, x, y):
         return (x.dot(y) + self.param.offset)**2
 
 
 if __name__ == "__main__":
-    from src.data.synthetic import GenClassData
-    data = GenClassData(300, 3, nclasses=2)
-    kernel = QuadKernel(data)
-
-    from src.methods.kpca import KPCA
-    kpca = KPCA(kernel)
-    proj = kpca.project()
-
-    data.show_pca(proj)
+    from src.tools.test import EasyTest
+    EasyTest(kernel="quad", data="synth")

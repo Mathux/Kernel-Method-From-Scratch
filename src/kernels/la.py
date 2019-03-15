@@ -4,10 +4,11 @@ from src.kernels.kernel import DataKernel, KernelCreate
 
 # The local alignement kernel
 class LAKernel(DataKernel, metaclass=KernelCreate):
+    name = "la"
     S = np.array([[4, 0, 0, 0], [0, 9, -3, -1], [0, -3, 6, 2], [0, -1, -2, 5]])
     defaultParameters = {"e": 11, "d": 1, "beta": 0.5, "S": S, "mode": "smith"}
 
-    def _kernel(self, x, y):
+    def kernel(self, x, y):
         if self.param.mode == "smith":
             op = max
         elif self.param.mode == "affine_align":
@@ -53,13 +54,8 @@ class LAKernel(DataKernel, metaclass=KernelCreate):
 
 
 if __name__ == "__main__":
-    from src.data.seq import SeqData
-    data = SeqData(small=True, nsmall=50)
-        
-    kernel = LAKernel(data)
+    dparams = {"small": True, "nsmall": 300}
+    kparams = {"k": 6}
 
-    from src.methods.kpca import KPCA
-    kpca = KPCA(kernel)
-    proj = kpca.project()
-
-    data.show_pca(proj)
+    from src.tools.test import EasyTest
+    EasyTest(kernel="la", data="seq", dparams=dparams, kparams=kparams)

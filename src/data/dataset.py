@@ -4,18 +4,10 @@ from src.tools.utils import Logger
 
 
 class Dataset(Logger):
-    def __init__(self,
-                 data,
-                 labels,
-                 Id=None,
-                 seed=SEED,
-                 verbose=True,
-                 labels_change=False,
-                 shuffle=False,
-                 nclasses=2,
-                 name="Dataset"):
-        self.nclasses = nclasses
-        self.__name__ = name
+    def __init__(self, param, data, labels, Id=None, verbose=True):
+        self.param = param
+        self.nclasses = param.nclasses
+        self.__name__ = param.name
         self.verbose = verbose
         self.data = data
         self.labels = labels
@@ -24,10 +16,10 @@ class Dataset(Logger):
         self.n = data.shape[0]
         self.m = data.shape[1] if len(data.shape) > 1 else None
         # Shuffle the dataset
-        if shuffle:
+        if param.shuffle:
             self._log("Dataset shuffled")
-            self.shuffle(seed)
-        if labels_change and labels is not None:
+            self.shuffle(SEED)
+        if param.labels_change and labels is not None:
             self.transform_label()
 
     # Shuffle the dataset
@@ -144,6 +136,7 @@ class Dataset(Logger):
             for ax, label in zip(axes, labels):
                 mask = label == i
                 scatter(ax, mask)
+        plt.ion()
         plt.show()
 
     def _show_gen_class_data(self):
@@ -199,8 +192,15 @@ class Dataset(Logger):
         return Dataset(self.data, labels, self.Id)
 
     def __str__(self):
-        size = "(" + str(self.n) + ", " + str(self.m) + ")"
-        return "Dataset object of size " + size + " with " + self.__name__ + " data"
+        name = "Dataset: " + self.__name__
+        
+        dic = self.param.__dict__
+        bad = ["__name__", "shuffle", "labels_change", "name", "nclasses"]
+        if "small" in self.param.dic and not self.param.small:
+            bad.append("nsmall")
+        param = "Parameters: " + str({i: dic[i] for i in dic if i not in bad})
+        
+        return name + ", " + param
 
     def __repr__(self):
         return self.__str__()
@@ -231,7 +231,9 @@ class KFold(Logger):
 
 
 def AllClassData():
-    from src.data.seq import SeqData
+    from src.data.seq import SeqData, AllSeqData
     from src.data.synthetic import GenClassData
 
-    return [SeqData, GenClassData], ["seq", "synth"]
+    datas = [AllSeqData, SeqData, GenClassData] 
+    names = [data.name for data in datas]
+    return datas, names

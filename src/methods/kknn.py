@@ -1,14 +1,23 @@
 import numpy as np
 import heapq as hq
 from src.methods.KMethod import KMethod, KMethodCreate
+from src.tools.utils import Logger
 
 
 class KKNN(KMethod, metaclass=KMethodCreate):
+    name = "kknn"
     defaultParameters = {"knn": 3}
 
     def fit(self, dataset=None, labels=None):
+        self._log("Fitting kknn..")
+        Logger.indent()
         # Load the dataset (if there are one) in the kernel
         self.load_dataset(dataset, labels)
+        # Compute K here
+        self.kernel.K
+
+        Logger.dindent()
+        self._log("Fitting done!\n")
 
     def predict(self, x):
         return self.majority_vote(x)
@@ -43,13 +52,6 @@ class KKNN(KMethod, metaclass=KMethodCreate):
 
 
 if __name__ == "__main__":
-    from src.data.synthetic import GenClassData
-    data = GenClassData(500, 2, mode="circle")
-
-    from src.kernels.gaussian import GaussianKernel
-    kernel = GaussianKernel(data)
-    kknn = KKNN(kernel, parameters={"knn": 3})
-    # optional here
-    kknn.fit()
-
-    data._show_gen_class_predicted(kknn.predict)
+    from src.tools.test import EasyTest
+    dparams = {"small": True, "nsmall": 300}
+    EasyTest(kernel="spectral", data="seq", method="kknn", dparams=dparams)

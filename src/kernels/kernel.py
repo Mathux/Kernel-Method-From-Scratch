@@ -137,9 +137,6 @@ class Kernel(Logger):
         self._KC = K - oneN.dot(K) - K.dot(oneN) + oneN.dot(K.dot(oneN))
         self._log("Gram matrix centered!")
 
-    def kernel(self, x, y):
-        return self._kernel(x, y)
-
     def predict(self, x):
         return np.array([
             self.kernel(xi, x) / np.sqrt(
@@ -151,11 +148,19 @@ class Kernel(Logger):
         self.config[name] = value
 
     def __str__(self):
-        return self.__name__
+        name = "Kernel: " + self.__name__
+        param = "Parameters: " + str(self.param)
+        return name + ", " + param
 
     def __repr__(self):
-        return self.__name__
+        return self.__str__()
 
+    def show_pca(self, pred=None, dim=3):
+        from src.methods.kpca import KPCA
+        kpca = KPCA(self, parameters={"dim": dim})
+        proj = kpca.project()
+        self.data.show_pca(proj, pred, dim=dim)
+        
 
 class GenKernel(Kernel):
     def __init__(self,
@@ -219,7 +224,7 @@ class StringKernel(GenKernel):
         phix = self._compute_phi(x)
         k_xx = np.dot(phix, phix)
         return np.array(
-            [np.dot(phix, phi) / np.sqrt(phi * k_xx) + 1 for phi in self.phis])
+            [np.dot(phix, phi) / np.sqrt(np.dot(phi, phi) * k_xx) + 1 for phi in self.phis])
 
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
@@ -312,7 +317,6 @@ class TrieKernel(GenKernel):
                 self._collect_leaf_nodes(v, leafs)
 
     def k_value(self, x):
-
         leafs = self.get_leaf_nodes(self.trie)
         self.leaf_kgrams_ = dict((leaf.full_label,
                                   dict((index, (len(kgs),
@@ -358,7 +362,7 @@ def AllStringKernels():
     kernels = [
         MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel
     ]
-    names = ["mismatch", "spectral", "wd", "la", "wildcard"]
+    names = [kernel.name for kernel in kernels]
     return kernels, names
 
 
@@ -375,9 +379,7 @@ def AllDataKernels():
         ExponentialKernel, GaussianKernel, LaplacianKernel, LinearKernel,
         PolynomialKernel, QuadKernel, SigmoidKernel
     ]
-    names = [
-        "exp", "gaussian", "laplacian", "linear", "poly", "quad", "sigmoid"
-    ]
+    names = [kernel.name for kernel in kernels]
     return kernels, names
 
 

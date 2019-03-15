@@ -1,6 +1,6 @@
 from src.tools.utils import Logger, Parameters
 import numpy as np
-from src.tools.utils import sigmoid
+from src.tools.utils import Score
 
 
 class KMethodCreate(type):
@@ -69,17 +69,31 @@ class KMethod(Logger):
         return np.array([fonc(x) for x in X])
 
     def score_recall_precision(self, dataset):
-        X, y = dataset.data, dataset.labels
+        predictions = self.predict_array(dataset.data, binaire=True)
+        score = Score(predictions, dataset)
+        self._log(score)
+        self._log()
+        return score
 
-        predictions = self.predict_array(X, binaire=True)
+    def sanity_check(self):
+        mask = np.arange(self.n)
+        np.random.shuffle(mask)
+        preds = [self.predict(x) for x in self.data[mask][:20]]
 
-        tp = np.sum((predictions == 1.) * (y == 1.))
-        fn = np.sum((predictions == -1.) * (y == 1.))
-        fp = np.sum((predictions == 1.) * (y == -1.))
-        recall = tp / (fn + tp)
-        precision = tp / (fp + tp)
-        return np.sum(y == predictions) / X.shape[0], recall, precision
+        def form(number):
+            return "{0:.2e}".format(number)
+        
+        strings = [form(pred) for pred in preds[:5]]
+        
+        self._log("Sanity check:")
+        Logger.indent()
+        self._log("Min: " + form(min(preds)))
+        self._log("Max: " + form(max(preds)))
+        self._log("Random values:", strings)
+        Logger.dindent()
 
+        self._log("")
+        
     @property
     def alpha(self):
         if self._alpha is None:
@@ -109,15 +123,19 @@ class KMethod(Logger):
         return self.kernel.m
 
     def __str__(self):
-        return self.__name__
+        name = "Method: " + self.__name__
+        param = "Parameters: " + str(self.param)
+        return name + ", " + param
 
     def __repr__(self):
-        return self.__name__
+        return self.__str__()
 
 
 def AllClassMethods():
     from src.methods.kknn import KKNN
     from src.methods.klr import KLR
     from src.methods.ksvm import KSVM
-
-    return [KKNN, KLR, KSVM], ["kknn", "klr", "ksvm"]
+    methods = [KKNN, KLR, KSVM]
+    names = [method.name for method in methods]
+    
+    return methods, names

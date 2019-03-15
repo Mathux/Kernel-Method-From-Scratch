@@ -5,7 +5,8 @@ from src.methods.wkrr import WKRR
 
 
 class KLR(KMethod, metaclass=KMethodCreate):
-    defaultParameters = {"lam": 1, "n_iter": 10, "tol": 10**-5, "eps": 10**-5}
+    name = "klr"
+    defaultParameters = {"lam": 1, "n_iter": 10, "tol": 10**-6, "eps": 10**-6}
 
     def fit(self, dataset=None, labels=None):
         # Load the dataset (if there are one) in the kernel
@@ -36,17 +37,11 @@ class KLR(KMethod, metaclass=KMethodCreate):
             if i == self.param.n_iter - 1:
                 print("WARNING: KLR didn't converge")
 
-        self._log("Fitting done!")
+        self._log("Fitting done!\n")
         return self._alpha
 
 
 if __name__ == "__main__":
-    from src.data.synthetic import GenClassData
-    data = GenClassData(500, 2, mode="circle")
-
-    from src.kernels.gaussian import GaussianKernel
-    kernel = GaussianKernel(data)
-    klr = KLR(kernel, parameters={"lam": 2})
-    klr.fit()
-    
-    # data._show_gen_class_predicted(klr.predict)
+    from src.tools.test import EasyTest
+    dparams = {"small": True, "nsmall": 300}
+    EasyTest(kernel="spectral", data="seq", method="klr", dparams=dparams)

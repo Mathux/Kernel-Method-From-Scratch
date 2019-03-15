@@ -1,37 +1,47 @@
 import src.config as conf
-from src.config import SEED
 from src.data.dataset import Dataset
-from src.tools.utils import Logger
+from src.tools.utils import Parameters, Logger
 
 
-def SeqData(k=0,
-            mat=False,
-            small=False,
-            verbose=True,
-            shuffle=False,
-            dataname="train",
-            nsmall=200):
-    assert (dataname in ["train", "test"])
+class __SeqData:
+    def __init__(self):
+        self.defaultParameters = {
+            "k": 0,
+            "mat": False,
+            "shuffle": False,
+            "small": False,
+            "nsmall": 200,
+            "labels_change": True,
+            "name": "seq",
+            "shuffle": False,
+            "nclasses": 2
+        }
+        self.name = "seq"
+        
+    def __call__(self, parameters=None, verbose=True):
+        Logger.log(verbose, "Loading datasets...")
+        Logger.indent()
+        p = Parameters(parameters, self.defaultParameters)
+        dataset = {}
+        for nameset in ["train", "test"]:
+            data, names = load_data(
+                nameset,
+                k=p.k,
+                mat=p.mat,
+                small=p.small,
+                nsmall=p.nsmall,
+                givename=True)
+            names = "(" + " and ".join(names) + ")"
+            Logger.log(verbose, nameset + " data loaded! " + names)
 
-    if dataname == "train":
-        data, names = load_data(
-            "train", k=k, mat=mat, small=small, nsmall=nsmall, givename=True)
-        Logger.log(
-            verbose,
-            "Train data loaded! (" + names[0] + " and " + names[1] + ")")
-    elif dataname == "test":
-        data, names = load_data(
-            "test", k=k, mat=mat, small=small, nsmall=nsmall, givename=True)
-        Logger.log(verbose, "Test data loaded! (" + names + ")")
+            dataset[nameset] = Dataset(p, *data, verbose=verbose)
 
-    dataset = Dataset(
-        *data,
-        shuffle=shuffle,
-        seed=SEED,
-        verbose=verbose,
-        labels_change=True,
-        name="seq")
-    return dataset
+        Logger.dindent()
+        Logger.log(verbose, "datasets loaded!\n")
+        return [dataset]
+
+
+SeqData = __SeqData()
 
 
 # Loading data
@@ -68,36 +78,46 @@ def load_data(name, k=0, mat=False, small=False, nsmall=100, givename=False):
         labels = shrink(labels["Bound"].values)
         # convert
         if givename:
-            return (data, labels, Id), (datafilename, labelfilename)
+            return (data, labels, Id), [datafilename, labelfilename]
         else:
             return (data, labels, Id)
     else:
         if givename:
-            return (data, None, Id), datafilename
+            return (data, None, Id), [datafilename]
         else:
             return (data, None, Id)
 
 
-def AllSeqData():
-    datasets = []
-    for i in range(3):
-        train = SeqData(k=i,
-                        mat=False,
-                        small=False,
-                        verbose=True,
-                        shuffle=False,
-                        dataname="train")
-
-        test = SeqData(k=i,
-                       mat=False,
-                       small=False,
-                       verbose=True,
-                       shuffle=False,
-                       dataname="test")
+class __AllSeqData:
+    def __init__(self):
+        self.defaultParameters = {
+            "k": 0,
+            "shuffle": False,
+            "small": False,
+            "nsmall": 200,
+            "labels_change": True,
+            "name": "seq",
+            "nclasses": 2
+        }
+        self.name = "allseq"
         
-        datasets.append({"train": train, "test": test})
-    return datasets
+    def __call__(self, parameters=None, verbose=True):
+        p = Parameters(parameters, self.defaultParameters)
+        Logger.log(verbose, "Loading datasets...")
+        Logger.indent()
+        datasets = []
+        for i in range(3):
+            p.k = i
+            dataset = SeqData(p, verbose=verbose)
+            datasets.append(dataset[0])
 
+        Logger.dindent()
+        Logger.log(verbose, "datasets loaded!\n")
+        return datasets
+
+
+AllSeqData = __AllSeqData()
 
 if __name__ == '__main__':
+    # dataset = SeqData()
     datasets = AllSeqData()

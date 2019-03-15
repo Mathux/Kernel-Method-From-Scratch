@@ -1,44 +1,71 @@
 from src.data.dataset import Dataset
-from src.tools.utils import Logger
-import src.config as conf
+from src.tools.utils import Logger, Parameters
 import numpy as np
 
 
-def GenClassData(n=500,
-                 m=2,
-                 nclasses=2,
-                 split_val=0.1,
-                 seed=conf.SEED,
-                 verbose=True,
-                 mode="circle"):
-    data = gen_class_data(n, m, mode=mode, nclasses=nclasses)
-    Logger.log(verbose, "Synthetic data class generated")
-    dataset = Dataset(
-        *data,
-        shuffle=True,
-        seed=conf.SEED,
-        nclasses=nclasses,
-        verbose=verbose,
-        labels_change=True,
-        name="synth")
-    return dataset
+class __GenClassData:
+    def __init__(self):
+        self.defaultParameters = {
+            "n": 500,
+            "m": 2,
+            "nclasses": 2,
+            "split_val": 0.1,
+            "mode": "circle",
+            "shuffle": False,
+            "labels_change": True,
+            "name": "synth"
+        }
+        self.name = "synth"
+        
+    def __call__(self, parameters=None, verbose=True):
+        Logger.log(verbose, "Loading datasets...")
+        Logger.indent()
+        p = Parameters(parameters, self.defaultParameters)
+        dataset = {}
+        for nameset in ["train", "test"]:
+            data = gen_class_data(p.n, p.m, mode=p.mode, nclasses=p.nclasses)
+            Logger.log(verbose, "synthetic " + nameset + " data generated")
+            dataset[nameset] = Dataset(p, *data, verbose=verbose)
+
+        Logger.dindent()
+        Logger.log(verbose, "datasets loaded!\n")
+        return [dataset]
 
 
-def GenRegData(n, m, seed=conf.SEED, verbose=True):
-    data, labels = gen_reg_data(n, m)
-    Logger.log(verbose, "Synthetic data reg generated")
-    dataset = Dataset(
-        data,
-        shuffle=True,
-        seed=conf.SEED,
-        nclasses=1,
-        verbose=verbose,
-        name="synth")
-    return dataset
+GenClassData = __GenClassData()
+
+
+class __GenRegData:
+    def __init__(self):
+        self.defaultParameters = {
+            "n": 300,
+            "m": 2,
+            "nclasses": 1,
+            "shuffle": True,
+            "name": "synth"
+        }
+        self.name = "synth"
+        
+    def __call__(self, parameters=None, verbose=True):
+        Logger.log(verbose, "Loading datasets...")
+        Logger.indent()
+        p = Parameters(parameters, self.defaultParameters)        
+        dataset = {}
+        for nameset in ["train", "test"]:
+            data, labels = gen_reg_data(p.n, p.m)
+            Logger.log(verbose, "synthetic " + nameset + " data generated")            
+            dataset[nameset] = Dataset(p, data, verbose=verbose)
+            
+        Logger.dindent()
+        Logger.log(verbose, "datasets loaded!\n")
+        return [dataset]
+
+
+GenRegData = __GenRegData()
 
 
 def gen_class_data(n, m, mode="circle", nclasses=2):
-    assert(nclasses == 2)
+    assert (nclasses == 2)
     if mode == "gauss":
         data1 = np.random.normal(
             2 * np.ones(m), scale=np.arange(1, m + 1), size=(n // 2, m))
@@ -87,4 +114,4 @@ def gen_reg_data(n, m):
 
 
 if __name__ == '__main__':
-    data = GenClassData(n=300, m=2, mode="circle")
+    data = GenClassData()

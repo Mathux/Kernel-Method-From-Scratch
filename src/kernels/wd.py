@@ -3,9 +3,10 @@ from src.kernels.kernel import DataKernel, KernelCreate
 
 
 class WDKernel(DataKernel, metaclass=KernelCreate):
+    name = "wd"
     defaultParameters = {"d": 3}
 
-    def _kernel(self, x, y):
+    def kernel(self, x, y):
         beta = 2 * np.linspace(
             1, self.param.d, self.param.d,
             dtype='int')[::-1] / (self.param.d * (self.param.d + 1))
@@ -21,13 +22,8 @@ class WDKernel(DataKernel, metaclass=KernelCreate):
 
 
 if __name__ == "__main__":
-    from src.data.seq import SeqData
-    data = SeqData(small=True, nsmall=500)
-        
-    kernel = WDKernel(data)
+    dparams = {"small": True, "nsmall": 300}
+    kparams = {"d": 4}
 
-    from src.methods.kpca import KPCA
-    kpca = KPCA(kernel)
-    proj = kpca.project()
-
-    data.show_pca(proj)
+    from src.tools.test import EasyTest
+    EasyTest(kernel="wd", data="seq", dparams=dparams, kparams=kparams)

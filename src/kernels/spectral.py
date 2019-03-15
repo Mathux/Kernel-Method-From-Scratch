@@ -3,6 +3,7 @@ from src.kernels.kernel import StringKernel, KernelCreate
 
 
 class SpectralKernel(StringKernel, metaclass=KernelCreate):
+    name = "spectral"
     defaultParameters = {"k": 6}
 
     def _compute_phi(self, x):
@@ -13,12 +14,8 @@ class SpectralKernel(StringKernel, metaclass=KernelCreate):
 
 
 if __name__ == "__main__":
-    from src.data.seq import SeqData
-    data = SeqData(small=True, nsmall=500)
-        
-    kernel = SpectralKernel(data, parameters = {'k' : 3, 'm' : 2})
-    from src.methods.kpca import KPCA
-    kpca = KPCA(kernel)
-    proj = kpca.project()
+    dparams = {"small": True, "nsmall": 300}
+    kparams = {"k": 6}
 
-    data.show_pca(proj)
+    from src.tools.test import EasyTest
+    EasyTest(kernel="spectral", data="seq", dparams=dparams, kparams=kparams)

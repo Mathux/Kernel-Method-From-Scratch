@@ -20,6 +20,7 @@ def wildcard_match(x, y):
 
 
 class WildcardKernel(StringKernel, metaclass=KernelCreate):
+    name = "wildcard"
     defaultParameters = {"k": 2, "m": 1, 'la': 1}
 
     def _compute_phi(self, x):
@@ -33,12 +34,20 @@ class WildcardKernel(StringKernel, metaclass=KernelCreate):
 
 
 if __name__ == "__main__":
+    dparams = {"small": True, "nsmall": 100}
+    kparams = {'k': 5, 'm': 1, 'la': 1}
+
+    from src.tools.test import EasyTest
+    EasyTest(kernel="wildcard", data="seq", dparams=dparams, kparams=kparams)
+
+
+    """
     from src.data.seq import SeqData
     data = SeqData(small=False)
     data.data = np.array([data.data[0]])
     import time
     debut = time.perf_counter()
-    kernel = WildcardKernel(data, parameters={'k': 5, 'm': 1, 'la': 1})
+    kernel = WildcardKernel(data, parameters=
     fin = time.perf_counter()
     print(fin - debut)
     from src.methods.kpca import KPCA
@@ -46,3 +55,4 @@ if __name__ == "__main__":
     proj = kpca.project()
 
     data.show_pca(proj)
+"""
