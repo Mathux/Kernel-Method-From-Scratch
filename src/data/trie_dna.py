@@ -1,5 +1,6 @@
 import numpy as np
 from src.tools.utils import Logger
+# import ipdb
 
 
 class _Trie(Logger):
@@ -203,6 +204,7 @@ if __name__ == '__main__':
     debut = time.perf_counter()
     t = WildcardTrie()
     ker, n_kmers, _ = t.dfs(data, 2, 1)
+    # ipdb.set_trace()
     fin = time.perf_counter()
     print('temps = ', fin - debut)
 

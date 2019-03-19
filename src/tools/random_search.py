@@ -161,7 +161,6 @@ if __name__ == '__main__':
     parameter_grid = {
         'kernel': [SpectralKernel],
         'k': 6,
-        'm': 1,
         'C': uniform(loc=0.1, scale=15),
     }
     rand_klr = RandomHyperParameterTuning(

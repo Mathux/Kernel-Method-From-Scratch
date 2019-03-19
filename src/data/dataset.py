@@ -57,20 +57,19 @@ class Dataset(Logger):
         def f(data):
             return func(dic[data]) if dic[data] is not None else None
 
-        return Dataset(*map(f, Dataset.ITERON))
+        return Dataset(self.param, *map(f, Dataset.ITERON))
 
     # To add two Dataset together
     def __add__(self, other):
         assert (type(other) == Dataset)
         assert (self.__name__ == other.__name__)
-        name = self.__name__
         data = np.concatenate((self.data, other.data))
         labels = np.concatenate((self.labels, other.labels))
         if self.Id is not None and other.Id is not None:
             Id = np.concatenate((self.Id, other.Id))
         else:
             Id = None
-        return Dataset(data, labels, Id, name=name)
+        return Dataset(self.param, data, labels, Id)
 
     # Invert labels signification
     def transform_label(self, inplace=True):
