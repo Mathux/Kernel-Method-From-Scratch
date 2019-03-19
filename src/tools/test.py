@@ -152,7 +152,7 @@ def EasyTest(kernel,
 
         method.fit()
 
-        Logger.log(verbose, method.alpha)
+        # Logger.log(verbose, method.alpha)
         # Check the value to see if it is alright
         method.sanity_check()
 

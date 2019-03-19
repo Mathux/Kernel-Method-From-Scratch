@@ -6,7 +6,6 @@ vocab = {0: 'A', 1: 'T', 2: 'G', 3: 'C', 4: '*'}
 
 class Trie(object):
     def __init__(self, la=1, label=None, parent=None):
-
         self.label = label
         self.level = 0
         self.children = {}
@@ -21,19 +20,15 @@ class Trie(object):
             parent.add_child(self)
 
     def is_root(self):
-
         return self.parent is None
 
     def is_leaf(self):
-
         return len(self.children) == 0
 
     def is_empty(self):
-
         return len(self.kgrams) == 0
 
     def copy_kgrams(self):
-
         return {
             index: np.array(substring_pointers)
             for index, substring_pointers in self.kgrams.items()
@@ -73,7 +68,6 @@ class Trie(object):
             self.nb_wildcard += 1
 
         else:
-
             for index, substring_pointers in self.kgrams.items():
                 substring_pointers[:, 1] += (
                     X[index][substring_pointers[:, 0] + self.level - 1] !=
@@ -112,7 +106,7 @@ class Trie(object):
                 n_kmers += 1
                 self.update_kernel(kernel)
             else:
-                for j in (range(l)):
+                for j in range(l):
                     child = Trie(la=self.la, label=vocab[j], parent=self)
                     kernel, child_kmers, child_alive = child.dfs(
                         X, k - 1, m, kernel=kernel)
