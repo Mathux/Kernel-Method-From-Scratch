@@ -34,7 +34,7 @@ def parse_args():
         type=int,
         help="pca dimention for visualization")
     parser.add_argument(
-        "--show", type=bool, default=True, help="True to draw the pca")
+        "--show", type=bool, default=False, help="True to draw the pca")
     parser.add_argument(
         "--csvname", default=None, help="Path to the csv file to write")
     parser.add_argument(
@@ -121,7 +121,7 @@ def EasyTest(kernel,
              kparams=None,
              mparams=None,
              pcadim=3,
-             show=True,
+             show=False,
              dopredictions=False,
              verbose=True):
 
@@ -224,7 +224,7 @@ if __name__ == "__main__":
         kparams=kparams,
         mparams=mparams,
         pcadim=args.pcadim,
-        show=True,
+        show=False,
         dopredictions=args.submit,
         verbose=True)
 

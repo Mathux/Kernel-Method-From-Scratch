@@ -8,7 +8,7 @@ Created on Tue Mar 12 15:30:29 2019
 
 import numpy as np
 from src.tools.utils import Parameters, Logger
-from src.data.trie_dna import Trie
+from src.data.trie_dna import MismatchTrie, WildcardTrie
 
 
 class KernelCreate(type):
@@ -276,13 +276,20 @@ class StringKernel(GenKernel):
 
 class TrieKernel(GenKernel):
     toreset = ["_K", "_KC", "_n"]
-
+    
     def __init__(self,
                  dataset=None,
                  name="TrieKernel",
                  parameters=None,
                  verbose=True,
                  cls=None):
+        if cls.name == "wildcard":
+            self.Trie = WildcardTrie
+        elif cls.name == "mismatch":
+            self.Trie = MismatchTrie
+        else:
+            string = "This kernel " + cls.name + " has no trie."
+            raise NotImplementedError(string)
         super(TrieKernel, self).__init__(
             dataset=dataset,
             name=name,
@@ -338,7 +345,7 @@ class TrieKernel(GenKernel):
         return k_x
 
     def predict(self, x):
-        t = Trie(la=self.param.la)
+        t = self.Trie(la=self.param.la)
         k_xx, _, _ = t.dfs(np.array([x]), self.param.k, self.param.m)
         k_xx = k_xx.squeeze()
         k_v = self.k_value(x, changev=True)
@@ -349,7 +356,7 @@ class TrieKernel(GenKernel):
 
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
-        self.trie = Trie(la=self.param.la)
+        self.trie = self.Trie(la=self.param.la)
         K, _, _ = (self.trie).dfs(
             self.dataset.data, k=self.param.k, m=self.param.m)
         self._normalized_kernel(K)
