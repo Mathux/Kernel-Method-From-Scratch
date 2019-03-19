@@ -9,6 +9,7 @@ Created on Mon Mar 11 20:04:38 2019
 import numpy as np
 from src.kernels.kernel import StringKernel, TrieKernel, KernelCreate
 from src.tools.utils import Parameters
+from src.data.trie_dna import WildcardTrie
 
 
 def wildcard_match(x, y):
@@ -37,33 +38,7 @@ class WildcardStringKernel(StringKernel, metaclass=KernelCreate):
 class WildcardTrieKernel(TrieKernel, metaclass=KernelCreate):
     name = "wildcard"
     defaultParameters = {"k": 5, 'm': 1, 'la': 1, "trie": True}
-
-    def k_value(self, x, changev=False):
-        leafs = self.get_leaf_nodes(self.trie)
-
-        oldvalue = self.verbose
-        if changev:
-            self.verbose = False
-            
-        desc = "Leaf computation"
-        self.leaf_kgrams_ = dict((leaf.full_label,
-                                  dict((index, (len(kgs),
-                                                leaf.full_label.count('*')))
-                                       for index, kgs in leaf.kgrams.items()))
-                                 for leaf in self.viterator(leafs, desc=desc))
-        k_x = np.zeros(len(self.data))
-
-        self.verbose = oldvalue
-                
-        for kmer, count1 in self.unique_kmers(x):
-            if kmer in list(self.leaf_kgrams_.keys()):
-                for j in range(len(self.data.data)):
-                    if j in list(self.leaf_kgrams_[kmer].keys()):
-                        kgrams, nb_wildcard = self.leaf_kgrams_[kmer][j]
-                        k_x[j] += self.param.la**nb_wildcard * (
-                            count1 * kgrams)
-
-        return k_x
+    Trie = WildcardTrie
 
 
 class __WildcardKernel:

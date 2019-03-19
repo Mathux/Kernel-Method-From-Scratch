@@ -82,7 +82,7 @@ class _Trie(Logger):
              k=2,
              m=1,
              kernel=None,
-             first=True,
+             show=1,
              wildcard=False,
              mismatch=False):
         assert (wildcard or mismatch)
@@ -96,22 +96,26 @@ class _Trie(Logger):
                 n_kmers += 1
                 self.update_kernel(kernel)
             else:
-                if first:
+                if show > 0:
                     erange = self.vrange(length, desc="Trie DFS")
                 else:
                     erange = range(length)
                 for j in erange:
+                    
+                    Logger.indent()
                     if wildcard:
                         child = WildcardTrie(
                             la=self.la, label=self.vocab[j], parent=self)
                     elif mismatch:
                         child = MismatchTrie(label=self.vocab[j], parent=self)
                     kernel, child_kmers, child_alive = child.dfs(
-                        X, k - 1, m, kernel=kernel, first=False)
+                        X, k - 1, m, kernel=kernel, show=show-1)
                     if child.is_empty():
                         self.delete_child(child)
                     n_kmers += child_kmers if child_alive else 0
-
+                    
+                    Logger.dindent()
+                    
         return kernel, n_kmers, alive
 
 
@@ -157,12 +161,14 @@ class WildcardTrie(_Trie):
                 kernel[i, j] += (len(self.kgrams[i]) * len(self.kgrams[j])) * (
                     self.la**self.nb_wildcard)
         
-    def dfs(self, X, k=2, m=1, kernel=None, first=True):
-        return self._dfs(X, k, m, kernel, first, wildcard=True)
+    def dfs(self, X, k=2, m=1, kernel=None, show=1):
+        return self._dfs(X, k, m, kernel, show, wildcard=True)
 
 
 class MismatchTrie(_Trie):
-    def __init__(self, label=None, parent=None, verbose=True):
+    def __init__(self, la=1, label=None, parent=None, verbose=True):
+        assert(la == 1)
+        self.la = 1
         self.label = label
         self.level = 0
         self.children = {}
@@ -187,8 +193,8 @@ class MismatchTrie(_Trie):
             for j in self.kgrams.keys():
                 kernel[i, j] += (len(self.kgrams[i]) * len(self.kgrams[j]))
 
-    def dfs(self, X, k=2, m=1, kernel=None, first=True):
-        return self._dfs(X, k, m, kernel, first, mismatch=True)
+    def dfs(self, X, k=2, m=1, kernel=None, show=1):
+        return self._dfs(X, k, m, kernel, show, mismatch=True)
 
 
 if __name__ == '__main__':

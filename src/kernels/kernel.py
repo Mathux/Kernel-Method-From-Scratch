@@ -8,7 +8,6 @@ Created on Tue Mar 12 15:30:29 2019
 
 import numpy as np
 from src.tools.utils import Parameters, Logger
-from src.data.trie_dna import MismatchTrie, WildcardTrie
 
 
 class KernelCreate(type):
@@ -283,13 +282,7 @@ class TrieKernel(GenKernel):
                  parameters=None,
                  verbose=True,
                  cls=None):
-        if cls.name == "wildcard":
-            self.Trie = WildcardTrie
-        elif cls.name == "mismatch":
-            self.Trie = MismatchTrie
-        else:
-            string = "This kernel " + cls.name + " has no trie."
-            raise NotImplementedError(string)
+        self.Trie = cls.Trie
         super(TrieKernel, self).__init__(
             dataset=dataset,
             name=name,
@@ -297,6 +290,11 @@ class TrieKernel(GenKernel):
             verbose=verbose,
             cls=cls)
 
+        if self.param.isaparam("la"):
+            self.la = self.param.la
+        else:
+            self.la = 1
+            
     def unique_kmers(self, x):
         x = list(x)
         ukmers = []
@@ -325,28 +323,36 @@ class TrieKernel(GenKernel):
             for k, v in node.children.items():
                 self._collect_leaf_nodes(v, leafs)
 
-    def k_value(self, x):
+    def k_value(self, x, changev=False):
         leafs = self.get_leaf_nodes(self.trie)
+
+        oldvalue = self.verbose
+        if changev:
+            self.verbose = False
+            
+        desc = "Leaf computation"
         self.leaf_kgrams_ = dict((leaf.full_label,
                                   dict((index, (len(kgs),
                                                 leaf.full_label.count('*')))
                                        for index, kgs in leaf.kgrams.items()))
-                                 for leaf in leafs)
+                                 for leaf in self.viterator(leafs, desc=desc))
         k_x = np.zeros(len(self.data))
-        for kmer, count1 in self.unique_kmers(x, self.param.k):
-            if kmer in self.leaf_kgrams_.keys():
-                for j in range(len(self.data.data)):
-                    if j in self.leaf_kgrams_[kmer].keys():
 
+        self.verbose = oldvalue
+                
+        for kmer, count1 in self.unique_kmers(x):
+            if kmer in list(self.leaf_kgrams_.keys()):
+                for j in range(len(self.data.data)):
+                    if j in list(self.leaf_kgrams_[kmer].keys()):
                         kgrams, nb_wildcard = self.leaf_kgrams_[kmer][j]
-                        k_x[j] += self.param.la**nb_wildcard * (
+                        k_x[j] += self.la**nb_wildcard * (
                             count1 * kgrams)
 
         return k_x
-
+    
     def predict(self, x):
-        t = self.Trie(la=self.param.la)
-        k_xx, _, _ = t.dfs(np.array([x]), self.param.k, self.param.m)
+        t = self.Trie(la=self.la)
+        k_xx, _, _ = t.dfs(np.array([x]), self.param.k, self.param.m, show=0)
         k_xx = k_xx.squeeze()
         k_v = self.k_value(x, changev=True)
         return np.array([
@@ -356,9 +362,9 @@ class TrieKernel(GenKernel):
 
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
-        self.trie = self.Trie(la=self.param.la)
+        self.trie = self.Trie(la=self.la)
         K, _, _ = (self.trie).dfs(
-            self.dataset.data, k=self.param.k, m=self.param.m)
+            self.dataset.data, k=self.param.k, m=self.param.m, show=2)
         self._normalized_kernel(K)
 
 
