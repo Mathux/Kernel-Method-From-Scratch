@@ -84,6 +84,7 @@ class _Trie(Logger):
              m=1,
              kernel=None,
              show=1,
+             name=None,
              wildcard=False,
              mismatch=False):
         assert (wildcard or mismatch)
@@ -98,7 +99,11 @@ class _Trie(Logger):
                 self.update_kernel(kernel)
             else:
                 if show > 0:
-                    erange = self.vrange(length, desc="Trie DFS")
+                    if name is not None:
+                        desc = "Trie DFS for " + name
+                    else:
+                        desc = "Trie DFS"
+                    erange = self.vrange(length, desc=desc)
                 else:
                     erange = range(length)
                 for j in erange:
@@ -162,8 +167,8 @@ class WildcardTrie(_Trie):
                 kernel[i, j] += (len(self.kgrams[i]) * len(self.kgrams[j])) * (
                     self.la**self.nb_wildcard)
         
-    def dfs(self, X, k=2, m=1, kernel=None, show=1):
-        return self._dfs(X, k, m, kernel, show, wildcard=True)
+    def dfs(self, X, k=2, m=1, kernel=None, show=1, name=None):
+        return self._dfs(X, k, m, kernel, show, name=name, wildcard=True)
 
 
 class MismatchTrie(_Trie):
@@ -194,8 +199,8 @@ class MismatchTrie(_Trie):
             for j in self.kgrams.keys():
                 kernel[i, j] += (len(self.kgrams[i]) * len(self.kgrams[j]))
 
-    def dfs(self, X, k=2, m=1, kernel=None, show=1):
-        return self._dfs(X, k, m, kernel, show, mismatch=True)
+    def dfs(self, X, k=2, m=1, kernel=None, show=1, name=None):
+        return self._dfs(X, k, m, kernel, show, name=name, mismatch=True)
 
 
 if __name__ == '__main__':

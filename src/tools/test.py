@@ -104,7 +104,7 @@ class NoneMethod:
     def fit(self):
         return None
 
-    def score_recall_precision(self, dataset):
+    def score_recall_precision(self, dataset, nsmall=None):
         return None
 
     def sanity_check(self):

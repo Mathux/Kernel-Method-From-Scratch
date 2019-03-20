@@ -275,7 +275,7 @@ class StringKernel(GenKernel):
 
 class TrieKernel(GenKernel):
     toreset = ["_K", "_KC", "_n"]
-    
+
     def __init__(self,
                  dataset=None,
                  name="TrieKernel",
@@ -294,7 +294,7 @@ class TrieKernel(GenKernel):
             self.la = self.param.la
         else:
             self.la = 1
-            
+
     def unique_kmers(self, x):
         x = list(x)
         ukmers = []
@@ -329,7 +329,7 @@ class TrieKernel(GenKernel):
         oldvalue = self.verbose
         if changev:
             self.verbose = False
-            
+
         desc = "Leaf computation"
         self.leaf_kgrams_ = dict((leaf.full_label,
                                   dict((index, (len(kgs),
@@ -339,17 +339,16 @@ class TrieKernel(GenKernel):
         k_x = np.zeros(len(self.data))
 
         self.verbose = oldvalue
-                
+
         for kmer, count1 in self.unique_kmers(x):
             if kmer in list(self.leaf_kgrams_.keys()):
                 for j in range(len(self.data.data)):
                     if j in list(self.leaf_kgrams_[kmer].keys()):
                         kgrams, nb_wildcard = self.leaf_kgrams_[kmer][j]
-                        k_x[j] += self.la**nb_wildcard * (
-                            count1 * kgrams)
+                        k_x[j] += self.la**nb_wildcard * (count1 * kgrams)
 
         return k_x
-    
+
     def predict(self, x):
         t = self.Trie(la=self.la)
         k_xx, _, _ = t.dfs(np.array([x]), self.param.k, self.param.m, show=0)
@@ -364,7 +363,11 @@ class TrieKernel(GenKernel):
         K = np.zeros((self.n, self.n))
         self.trie = self.Trie(la=self.la)
         K, _, _ = (self.trie).dfs(
-            self.dataset.data, k=self.param.k, m=self.param.m, show=2)
+            self.dataset.data,
+            k=self.param.k,
+            m=self.param.m,
+            show=2,
+            name=self.__name__)
         self._normalized_kernel(K)
 
 
@@ -399,7 +402,11 @@ def AllDataKernels():
     return kernels, names
 
 
-def AllKernels():
+def AllKernels(multi=True):
     k1, n1 = AllStringKernels()
     k2, n2 = AllDataKernels()
-    return k1 + k2, n1 + n2
+    if multi:
+        from src.kernels.multikernel import MultiKernel
+        return k1 + k2 + [MultiKernel], n1 + n2 + [MultiKernel.name]
+    else:
+        return k1 + k2, n1 + n2
