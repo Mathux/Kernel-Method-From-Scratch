@@ -12,4 +12,4 @@ class SigmoidKernel(DataKernel, metaclass=KernelCreate):
 
 if __name__ == "__main__":
     from src.tools.test import EasyTest
-    EasyTest(kernel="sigmoid", data="synth")
+    EasyTest(kernels="sigmoid", data="synth")

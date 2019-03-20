@@ -4,9 +4,10 @@ from src.data.dataset import AllClassData
 from src.kernels.kernel import AllKernels
 from src.methods.kpca import KPCA
 from src.config import expPath
-from src.tools.utils import submit, create_dir, Logger
+from src.tools.utils import submit, create_dir, Logger, objdict
 from os import path
 import sys
+import json
 
 methods, methodsNames = AllClassMethods()
 datas, datasNames = AllClassData()
@@ -21,8 +22,8 @@ class ArgumentParser(argparse.ArgumentParser):
 
 def parse_args():
     parser = ArgumentParser()
-    parser.add_argument("kernel", choices=kernelsNames, help="kernel name")
-    parser.add_argument("method", choices=methodsNames, help="method name")
+    parser.add_argument("kernels", choices=kernelsNames, help="kernel name")
+    parser.add_argument("methods", choices=methodsNames, help="method name")
     parser.add_argument("data", choices=datasNames, help="data name")
     parser.add_argument("--kparams", default=None, help="kernel parameters")
     parser.add_argument("--mparams", default=None, help="method parameters")
@@ -114,9 +115,16 @@ class NoneMethod:
         return name
 
 
-def EasyTest(kernel,
+def find_more_or_one(string_or_list, find_func, n):
+    if isinstance(string_or_list, list):
+        return [find_func(x) for x in string_or_list]
+    else:
+        return [find_func(string_or_list) for _ in range(n)]
+
+
+def EasyTest(kernels,
              data="seq",
-             method=None,
+             methods=None,
              dparams=None,
              kparams=None,
              mparams=None,
@@ -125,25 +133,28 @@ def EasyTest(kernel,
              dopredictions=False,
              verbose=True):
 
-    Data = findData(data)
-    Kernel = findKernel(kernel)
-    KMethod = findMethod(method)
+    Datasets = findData(data)(dparams, verbose)
+    ndatas = len(Datasets)
+
+    Kernels = find_more_or_one(kernels, findKernel, ndatas)
+    KMethods = find_more_or_one(methods, findMethod, ndatas)
+    Kparams = find_more_or_one(kparams, lambda x: x, ndatas)
+    Mparams = find_more_or_one(mparams, lambda x: x, ndatas)
 
     predictions = []
     Ids = []
     scores = []
 
-    datasets = Data(dparams, verbose)
-
     Logger.indent()
-    for dataset in datasets:
+    for Dataset, Kernel, KMethod, Kparam, Mparam in zip(
+            Datasets, Kernels, KMethods, Kparams, Mparams):
         Logger.dindent()
         Logger.log(verbose, "Experiment on:")
         Logger.indent()
 
-        train = dataset["train"]
-        kernel = Kernel(train, parameters=kparams)
-        method = KMethod(kernel, parameters=mparams)
+        train = Dataset["train"]
+        kernel = Kernel(train, parameters=Kparam)
+        method = KMethod(kernel, parameters=Mparam)
 
         Logger.log(verbose, kernel)
         Logger.log(verbose, method)
@@ -155,11 +166,9 @@ def EasyTest(kernel,
         # Logger.log(verbose, method.alpha)
         # Check the value to see if it is alright
         method.sanity_check()
-
         # Compute the score of the train set:
-        score = method.score_recall_precision(train)
+        score = method.score_recall_precision(train, nsmall=200)
         scores.append(score)
-
         if show:
             Logger.log(verbose, "Show the trainset in the feature space..")
             Logger.indent()
@@ -173,7 +182,7 @@ def EasyTest(kernel,
 
         if dopredictions:
             # Predictict on the test set and save the result
-            test = dataset["test"]
+            test = Dataset["test"]
             test.labels = method.predict_array(test.data)
             test.transform_label()
             predictions.append(test.labels)
@@ -195,20 +204,30 @@ def EasyTest(kernel,
 
 
 if __name__ == "__main__":
-    args = parse_args()
-
-    kparams = parse_params(args.kparams,
-                           findKernel(args.kernel).defaultParameters)
-    mparams = parse_params(args.mparams,
-                           findMethod(args.method).defaultParameters)
-    dparams = parse_params(args.dparams, findData(args.data).defaultParameters)
+    # If we call this function with the link testmodel
+    if "testmodel" in sys.argv[0]:
+        args = objdict(json.load(open("config.json", "r")))
+        args.csvname = None
+        kparams = args.kparams
+        mparams = args.mparams
+        dparams = args.dparams
+    else:
+        args = parse_args()
+        kparams = parse_params(args.kparams,
+                               findKernel(args.kernels).defaultParameters)
+        mparams = parse_params(args.mparams,
+                               findMethod(args.methods).defaultParameters)
+        dparams = parse_params(args.dparams,
+                               findData(args.data).defaultParameters)
 
     if args.csvname is None:
         create_dir(expPath)
-        sd = args.data + "_data_"
-        sk = args.kernel + "_kernel(" + str(kparams) + ")_"
-        sm = args.method + "_method(" + str(mparams) + ")"
-        csvname = path.join(expPath, sd + sk + sm + ".csv")
+        # sd = args.data + "_data_"
+        # sk = args.kernels + "_kernel(" + str(kparams) + ")_"
+        # sm = args.methods + "_method(" + str(mparams) + ")"
+        # TODO, find a way to store all the infos
+        name = "experiment"
+        csvname = path.join(expPath, name + ".csv")
     else:
         csvname = args.csvname
 
@@ -217,9 +236,9 @@ if __name__ == "__main__":
         print()
 
     scores = EasyTest(
-        kernel=args.kernel,
+        kernels=args.kernels,
         data=args.data,
-        method=args.method,
+        methods=args.methods,
         dparams=dparams,
         kparams=kparams,
         mparams=mparams,
@@ -231,6 +250,5 @@ if __name__ == "__main__":
     if args.submit:
         scores, predictions, Ids = scores
         submit(predictions, Ids, csvname)
-        
-        print("Results saved in: " + csvname)
 
+        print("Results saved in: " + csvname)

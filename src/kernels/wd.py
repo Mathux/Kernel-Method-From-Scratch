@@ -26,4 +26,4 @@ if __name__ == "__main__":
     kparams = {"d": 4}
 
     from src.tools.test import EasyTest
-    EasyTest(kernel="wd", data="seq", dparams=dparams, kparams=kparams)
+    EasyTest(kernels="wd", data="seq", dparams=dparams, kparams=kparams)

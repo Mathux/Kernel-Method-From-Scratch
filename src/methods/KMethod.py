@@ -23,7 +23,7 @@ def klogger(name, pca=False, wkrr=False):
             self._log("Fitting {}..".format(name))
             Logger.indent()
             t.start()
-            
+
             self.load_dataset(dataset, labels)
 
             if pca:
@@ -35,13 +35,15 @@ def klogger(name, pca=False, wkrr=False):
                 result = fitfunc(self, K, w)
             else:
                 result = fitfunc(self, K)
-            
+
             t.stop()
             Logger.dindent()
             self._log("Fitting done! (computed in {})\n".format(t))
 
             return result
+
         return f
+
     return wrap
 
 
@@ -96,17 +98,25 @@ class KMethod(Logger):
             fonc = self.predict
 
         results = []
-        for i in self.vrange(len(X), desc) :
+        for i in self.vrange(len(X), desc):
             results.append(fonc(X[i]))
         return np.array(results)
 
-    def score_recall_precision(self, dataset):
+    def score_recall_precision(self, dataset, nsmall=None):
+        mask = np.arange(dataset.n)
+        np.random.shuffle(mask)
+        if nsmall is not None:
+            mask = mask[:nsmall]
+            stringset = "training set ({} samples)".format(nsmall)
+        else:
+            stringset = "training set"
+
         t = Timer()
         t.start()
-        predictions = self.predict_array(dataset.data, binaire=True)
-        score = Score(predictions, dataset)
+        predictions = self.predict_array(dataset.data[mask], binaire=True, desc="Computing train set score")
+        score = Score(predictions, dataset.labels[mask])
         t.stop()
-        self._log("Results of the training set (computed in {})".format(t))
+        self._log("Results of the {} (computed in {})".format(stringset, t))
         Logger.indent()
         self._log(score)
         Logger.dindent()
@@ -116,13 +126,15 @@ class KMethod(Logger):
     def sanity_check(self):
         mask = np.arange(self.n)
         np.random.shuffle(mask)
-        preds = [self.predict(x) for x in self.data[mask][:20]]
+
+        preds = self.predict_array(
+            self.data[mask][:20], binaire=False, desc="Sanity check")
 
         def form(number):
             return "{0:.2e}".format(number)
-        
+
         strings = [form(pred) for pred in preds[:5]]
-        
+
         self._log("Sanity check:")
         Logger.indent()
         self._log("Min: " + form(min(preds)))
@@ -131,7 +143,7 @@ class KMethod(Logger):
         Logger.dindent()
 
         self._log("")
-        
+
     @property
     def alpha(self):
         if self._alpha is None:
@@ -175,5 +187,5 @@ def AllClassMethods():
     from src.methods.ksvm import KSVM
     methods = [KKNN, KLR, KSVM]
     names = [method.name for method in methods]
-    
+
     return methods, names

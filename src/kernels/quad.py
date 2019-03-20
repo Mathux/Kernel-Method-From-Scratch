@@ -11,4 +11,4 @@ class QuadKernel(DataKernel, metaclass=KernelCreate):
 
 if __name__ == "__main__":
     from src.tools.test import EasyTest
-    EasyTest(kernel="quad", data="synth")
+    EasyTest(kernels="quad", data="synth")

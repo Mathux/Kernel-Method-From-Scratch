@@ -44,4 +44,4 @@ if __name__ == "__main__":
     kparams = {"k": 5, "m": 2}
 
     from src.tools.test import EasyTest
-    EasyTest(kernel="mismatch", data="seq", dparams=dparams, kparams=kparams)
+    EasyTest(kernels="mismatch", data="seq", dparams=dparams, kparams=kparams)

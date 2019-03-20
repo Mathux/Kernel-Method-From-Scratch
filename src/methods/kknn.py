@@ -46,4 +46,4 @@ class KKNN(KMethod, metaclass=KMethodCreate):
 if __name__ == "__main__":
     from src.tools.test import EasyTest
     dparams = {"small": True, "nsmall": 300}
-    EasyTest(kernel="spectral", data="seq", method="kknn", dparams=dparams)
+    EasyTest(kernels="spectral", data="seq", methods="kknn", dparams=dparams)

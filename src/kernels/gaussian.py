@@ -12,4 +12,4 @@ class GaussianKernel(DataKernel, metaclass=KernelCreate):
 
 if __name__ == "__main__":
     from src.tools.test import EasyTest
-    EasyTest(kernel="gaussian", data="synth")
+    EasyTest(kernels="gaussian", data="synth")

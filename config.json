@@ -1,0 +1,49 @@
+{
+    "data": "allseq",
+    "kernels": [
+        "spectral",
+        "wildcard",
+        "mismatch"
+    ],
+    "kparams": [
+        {
+            "k": 6,
+            "trie": true
+        },
+        {
+            "k": 5,
+            "la": 1,
+            "m": 1,
+            "trie": true
+        },
+        {
+            "k": 3,
+            "m": 1,
+            "trie": true
+        }
+    ],
+    "methods": [
+        "ksvm",
+        "klr",
+        "kknn"
+    ],
+    "mparams": [
+        {
+	    "C": 1.0,
+	    "tol": 1e-04
+        },
+        {
+            "eps": 1e-06,
+            "lam": 0.01,
+            "n_iter": 10,
+            "tol": 1e-06
+        },
+        {
+            "knn": 3
+        }
+    ],
+    "dparams": {},
+    "pcadim": 3,
+    "show": true,
+    "submit": false
+}

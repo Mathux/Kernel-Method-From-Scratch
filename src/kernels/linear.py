@@ -11,7 +11,7 @@ class LinearKernel(DataKernel, metaclass=KernelCreate):
 
 if __name__ == "__main__":
     from src.tools.test import EasyTest
-    EasyTest(kernel="linear", data="synth")
+    EasyTest(kernels="linear", data="synth")
 
     #import src.data.kernelLoader as kernelLoader
     #pathKernel = kernelLoader.save(kernel)

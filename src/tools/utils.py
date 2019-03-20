@@ -133,9 +133,8 @@ class Score:
     """Score object to evaluate a method
 
     """
-    def __init__(self, pred, dataset):
-        n = dataset.data.shape[0]
-        labels = dataset.labels
+    def __init__(self, pred, labels):
+        n = len(labels)
         self.tp = np.sum((pred == 1.) * (labels == 1.))
         self.fn = np.sum((pred == -1.) * (labels == 1.))
         self.fp = np.sum((pred == 1.) * (labels == -1.))
@@ -152,6 +151,23 @@ class Score:
     def __repr__(self):
         return self.__str__()
         
+
+class objdict(dict):
+    def __getattr__(self, name):
+        if name in self:
+            return self[name]
+        else:
+            raise AttributeError("No such attribute: " + name)
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
+    def __delattr__(self, name):
+        if name in self:
+            del self[name]
+        else:
+            raise AttributeError("No such attribute: " + name)
+
 
 def sigmoid(x):
     """Return the sigmoid of x
