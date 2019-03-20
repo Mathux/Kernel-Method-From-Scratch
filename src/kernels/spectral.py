@@ -40,11 +40,3 @@ if __name__ == "__main__":
     kparams = {"k": 6, "m": 0, "trie": True}
     from src.tools.test import EasyTest
     EasyTest(kernel="wildcard", data="seq", dparams=dparams, kparams=kparams)
-
-
-if __name__ == "__main__":
-    dparams = {"small": True, "nsmall": 300}
-    kparams = {"k": 6}
-
-    from src.tools.test import EasyTest
-    EasyTest(kernel="spectral", data="seq", dparams=dparams, kparams=kparams)

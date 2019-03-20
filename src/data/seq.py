@@ -13,7 +13,6 @@ class __SeqData:
             "nsmall": 200,
             "labels_change": True,
             "name": "seq",
-            "shuffle": False,
             "nclasses": 2
         }
         self.name = "seq"
@@ -96,8 +95,9 @@ class __AllSeqData:
             "small": False,
             "nsmall": 200,
             "labels_change": True,
-            "name": "seq",
-            "nclasses": 2
+            "name": "allseq",
+            "nclasses": 2,
+            "mat": False
         }
         self.name = "allseq"
         

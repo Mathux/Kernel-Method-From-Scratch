@@ -64,6 +64,10 @@ class Parameters(Serializable):
     def items(self):
         return self.dic.items()
 
+    def isaparam(self, x):
+        dic = self.dic
+        return x in dic.keys()
+
 
 class Logger:
     _indent = 0
