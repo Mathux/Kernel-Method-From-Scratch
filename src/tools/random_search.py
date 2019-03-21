@@ -39,10 +39,10 @@ class RandomHyperParameterTuningPerKernel(Logger):
             if param in list(grid.keys()):
                 if isinstance(grid[param],
                               stats._distn_infrastructure.rv_frozen):
-                    temp_params[param] = grid[param].rvs(size=n)
+                    temp_params[param] = grid[param]
                 else:
-                    temp_params[param] = np.array([grid[param]] * n)
-                    fix = True
+                    temp_params[param] = grid[param]
+                    # fix = True
         return temp_params, fix
 
     def fit(self):
@@ -145,7 +145,7 @@ class RandomHyperParameterTuning(Logger):
 
 
 if __name__ == '__main__':
-    from scipy.stats import uniform
+    from scipy.stats import uniform, randint
     from src.kernels.mismatch import MismatchKernel
     from src.kernels.spectral import SpectralKernel
     from src.kernels.wd import WDKernel
@@ -155,15 +155,16 @@ if __name__ == '__main__':
     from src.methods.klr import KLR
     from src.data.seq import AllSeqData
 
-    alldata = AllSeqData()
+    alldata = AllSeqData()  # parameters={"nsmall": 10, "small": True})
     data0 = alldata[0]["train"]
 
     parameter_grid = {
-        'kernel': [SpectralKernel],
-        'k': 6,
-        'C': uniform(loc=0.1, scale=15),
+        'kernel': [MismatchKernel],
+        'k': [7, 7, 7],
+        'm': [1, 2, 3],
+        'C': [3, 3, 3],
     }
     rand_klr = RandomHyperParameterTuning(
-        KSVM, data0, n_sampling=5, parameter_grid=parameter_grid, kfold=4)
+        KLR, data0, n_sampling=3, parameter_grid=parameter_grid, kfold=4)
     rand_klr.fit()
     print(rand_klr.best_parameters())
