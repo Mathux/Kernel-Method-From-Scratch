@@ -4,10 +4,10 @@
     "kparams": {
         "kernels": ["spectral", "wildcard"],
         "_parameters": [{
-            "k": 6,
+            "k": 8,
             "trie": true
         }, {
-            "k": 5,
+            "k": 8,
             "m": 1,
             "la": 1,
             "trie": true
@@ -16,27 +16,25 @@
     },
     "methods": [
         "ksvm",
-        "klr",
+        "ksvm",
         "ksvm"
     ],
     "mparams": [
         {
-	    "C": 1.0,
+	    "C": 5,
 	    "tol": 1e-04
         },
         {
-            "eps": 1e-06,
-            "lam": 0.01,
-            "n_iter": 10,
-            "tol": 1e-06
+            "C": 5.0,
+	    "tol": 1e-04
         },
         {
-            "C": 2.0,
+            "C": 5.0,
 	    "tol": 1e-04
         }
     ],
-    "dparams": {"small": true, "nsmall": 100},
+    "dparams": {"small": false},
     "pcadim": 3,
-    "show": true,
-    "submit": false
+    "show": false,
+    "submit": true
 }
