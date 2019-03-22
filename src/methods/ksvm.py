@@ -44,5 +44,5 @@ if __name__ == "__main__":
     dparams = {"small": False, "nsmall": 300}
     EasyTest(kernels="spectral", data="seq", methods="ksvm", dparams=dparams)
     
-    # from src.kernels.wildcard_trie import WildcardTrieKernel
-    # kernel = WildcardTrieKernel(data)
+#     from src.kernels.wildcard_trie import WildcardTrieKernel
+#     kernel = WildcardTrieKernel(data)
