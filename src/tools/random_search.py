@@ -10,7 +10,7 @@ import numpy as np
 from src.tools.cross_validation import CrossValidation
 from src.tools.utils import Logger
 from scipy import stats
-
+from copy import deepcopy
 
 class RandomHyperParameterTuningPerKernel(Logger):
     def __init__(self,
@@ -34,15 +34,21 @@ class RandomHyperParameterTuningPerKernel(Logger):
 
     def get_params_to_test(self, parameters, grid, n):
         temp_params = {}
-        fix = False
+        fix = True
         for param in parameters:
             if param in list(grid.keys()):
                 if isinstance(grid[param],
                               stats._distn_infrastructure.rv_frozen):
-                    temp_params[param] = grid[param].rvs(size=n)
+                    temp_params[param] = grid[param].rvs(size = n)
                 else:
-                    temp_params[param] = np.array([grid[param]] * n)
-                    fix = True
+                    if isinstance(grid[param], np.ndarray) or isinstance(grid[param], list) :
+                        if len(param) == n :
+                            temp_params[param] = grid[param]
+                        else : 
+                            pass
+                    else :
+                        temp_params[param] = np.array([grid[param]]*n)
+                        fix = True
         return temp_params, fix
 
     def fit(self):
@@ -51,8 +57,8 @@ class RandomHyperParameterTuningPerKernel(Logger):
             self.kernel_parameters, self.parameter_grid, self.n)
         self.clf_parameters_to_test, _ = self.get_params_to_test(
             self.clf_parameters, self.parameter_grid, self.n)
-
-        if fix_kernel:
+        print('fix_kernel : ',fix_kernel)
+        if fix_kernel :
             params = {
                 key: value[0]
                 for key, value in self.kernel_parameters_to_test.items()
@@ -112,6 +118,7 @@ class RandomHyperParameterTuning(Logger):
 
     def fit(self):
         self.parameters = {}
+        self.all_parameters = {}
         self.criterias = {}
         for kernel in self.kernels:
             temp = RandomHyperParameterTuningPerKernel(
@@ -132,20 +139,23 @@ class RandomHyperParameterTuning(Logger):
                 temp_dict[key] = values[id_param_to_take]
             for key, values in temp.kernel_parameters_to_test.items():
                 temp_dict[key] = values[id_param_to_take]
-            self.parameters[kernel.__name__] = temp_dict
+            self.parameters[kernel] = temp_dict
+            self.all_parameters[kernel] = {**temp.clf_parameters_to_test, 
+                               **temp.kernel_parameters_to_test}
             self.criterias[
-                kernel.__name__] = scores_for_kernel[id_param_to_take]
+                kernel] = scores_for_kernel[id_param_to_take]
 
     def best_parameters(self):
         argmax_kernel = np.argmax(np.array(list(self.criterias.values())))
         best_kernel = list(self.criterias.keys())[argmax_kernel]
         best_parameters = self.parameters[best_kernel]
         best_parameters['kernel'] = best_kernel
+        print('Tested parameters : ', self.all_parameters)
         return best_parameters, self.criterias[best_kernel]
 
 
 if __name__ == '__main__':
-    from scipy.stats import uniform
+    from scipy.stats import uniform, randint
     from src.kernels.mismatch import MismatchKernel
     from src.kernels.spectral import SpectralKernel
     from src.kernels.wd import WDKernel
@@ -155,15 +165,15 @@ if __name__ == '__main__':
     from src.methods.klr import KLR
     from src.data.seq import AllSeqData
 
-    alldata = AllSeqData()
+    alldata = AllSeqData(parameters={"nsmall": 100, "small": False})  # 
     data0 = alldata[0]["train"]
 
     parameter_grid = {
         'kernel': [SpectralKernel],
         'k': 6,
-        'C': uniform(loc=0.1, scale=15),
+        'C': uniform(loc = 1/2, scale = 20 - 1/2),
     }
     rand_klr = RandomHyperParameterTuning(
-        KSVM, data0, n_sampling=5, parameter_grid=parameter_grid, kfold=4)
+        KSVM, data0, n_sampling=10, parameter_grid=parameter_grid, kfold=3)
     rand_klr.fit()
     print(rand_klr.best_parameters())

@@ -2,41 +2,58 @@
     "data": "allseq",
     "kernels": "multikernel",
     "kparams": {
-        "kernels": ["spectral", "wildcard"],
+        "kernels": ["spectral", "spectral", "spectral"],
         "_parameters": [{
-            "k": 6,
+            "k": 8,
             "trie": true
+<<<<<<< HEAD
         }, {
-            "k": 5,
+            "k": 8,
             "m": 1,
             "la": 1,
             "trie": true
+=======
+>>>>>>> 0c169baa8c178b6e7bfd8c214c7ab9508ef8b394
         }],
-        "_weights": [0.5, 0.5]
+        "_weights": [1,1,1]
     },
     "methods": [
         "ksvm",
-        "klr",
+        "ksvm",
         "ksvm"
     ],
     "mparams": [
         {
-	    "C": 1.0,
+<<<<<<< HEAD
+	    "C": 5,
 	    "tol": 1e-04
         },
         {
-            "eps": 1e-06,
-            "lam": 0.01,
-            "n_iter": 10,
-            "tol": 1e-06
+            "C": 5.0,
+	    "tol": 1e-04
         },
         {
-            "C": 2.0,
+            "C": 5.0,
+=======
+	    "C": 0.5,
+	    "tol": 1e-04
+        },
+        {
+	    "C": 0.5,
+	    "tol": 1e-04
+        },
+        {
+	    "C": 0.5,
+>>>>>>> 0c169baa8c178b6e7bfd8c214c7ab9508ef8b394
 	    "tol": 1e-04
         }
     ],
-    "dparams": {"small": true, "nsmall": 100},
+    "dparams": {"small": false},
     "pcadim": 3,
+<<<<<<< HEAD
+    "show": false,
+=======
     "show": true,
-    "submit": false
+>>>>>>> 0c169baa8c178b6e7bfd8c214c7ab9508ef8b394
+    "submit": true
 }

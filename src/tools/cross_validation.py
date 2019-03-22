@@ -26,7 +26,8 @@ class CrossValidation(Logger):
             train_dataset, val_dataset = self.folds[k]
             estimator.fit(train_dataset)
 
-            acc, recall, pres = estimator.score_recall_precision(val_dataset)
+            Score = estimator.score_recall_precision(val_dataset)
+            acc, recall, pres = Score.accuracy, Score.recall, Score.precision
             self.accuracy[k] = acc
             self.recall[k] = recall
             self.precision[k] = pres
