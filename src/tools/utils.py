@@ -68,6 +68,13 @@ class Parameters(Serializable):
         dic = self.dic
         return x in dic.keys()
 
+    # Give a path, to store things
+    def topath(self, origin):
+        path = origin
+        for key, value in self.items():
+            path = os.path.join(path, key + "_" + str(value))
+        return path
+        
 
 class Logger:
     _indent = 0

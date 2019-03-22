@@ -22,16 +22,20 @@ def load(path):
         return pickle.load(handle)
 
 
-def save(kernel) :
+def save(kernel, path=None):
     dataName = kernel.__name__
     params = kernel.param.dic
     for key, values in params.items() :
         dataName += '_' + str(key) + '_' + str(values)
     dataName = dataName + '_' + kernel.dataset.__name__ + kernelSaveExt
-
-    create_dir(kernelSavePath)
-    path = pjoin(kernelSavePath, dataName)
-
+    
+    if path is None:
+        create_dir(kernelSavePath)
+        path = pjoin(kernelSavePath, dataName)
+    else:
+        create_dir(path)
+        path = pjoin(path, "kernel" + kernelSaveExt)
+        
     kernel._log("The kernel in saved in " + path)
     with open(path, 'wb') as handle:
         pickle.dump(kernel, handle, protocol=pickle.HIGHEST_PROTOCOL)
