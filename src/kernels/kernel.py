@@ -302,13 +302,13 @@ class TrieKernel(GenKernel):
         seen_kmers = []
         for offset in range(len(x) - self.param.k + 1):
             kmer = x[offset:offset + self.param.k]
-            if kmer not in seen_kmers:
+            if not kmer in seen_kmers:
                 seen_kmers.append(kmer)
-            count = 1
-            for _offset in range(offset + 1, len(x) - self.param.k + 1):
-                if np.all(x[_offset:_offset + self.param.k] == kmer):
-                    count += 1
-            ukmers.append((''.join(kmer), count))
+                count = 1
+                for _offset in range(offset + 1, len(x) - self.param.k + 1):
+                    if np.all(x[_offset:_offset + self.param.k] == kmer):
+                        count += 1
+                ukmers.append((''.join(kmer), count))
         return ukmers
 
     def get_leaf_nodes(self, node):
