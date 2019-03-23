@@ -63,6 +63,7 @@ class KMethod(Logger):
         self.__name__ = name
         self.verbose = verbose
         self._alpha = None
+        self._b = None
         self.kernel = kernel
         self._labels = None
 
@@ -85,7 +86,7 @@ class KMethod(Logger):
 
     def predict(self, x):
         K_xi = self.kernel.predict(x)
-        return self.alpha.dot(K_xi)
+        return self.alpha.dot(K_xi) + self.b
 
     def predictBin(self, x):
         pred = self.predict(x)
@@ -149,6 +150,12 @@ class KMethod(Logger):
         if self._alpha is None:
             raise Exception("Model is not trained yet")
         return self._alpha
+
+    @property
+    def b(self):
+        if self._b is None:
+            return 0
+        return self._b
 
     @property
     def dataset(self):

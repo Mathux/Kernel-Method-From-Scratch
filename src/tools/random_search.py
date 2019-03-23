@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -164,8 +165,10 @@ if __name__ == '__main__':
     from src.methods.ksvm import KSVM
     from src.methods.klr import KLR
     from src.data.seq import AllSeqData
+    from send_sms import send_sms
 
-    alldata = AllSeqData()  # parameters={"nsmall": 100, "small": False}
+
+    alldata = AllSeqData(parameters={"nsmall": 500, "small": False})
     data0 = alldata[0]["train"]
 
     parameter_grid = {
@@ -174,6 +177,7 @@ if __name__ == '__main__':
         'C': uniform(loc = 1/2, scale = 20 - 1/2),
     }
     rand_klr = RandomHyperParameterTuning(
-        KSVM, data0, n_sampling=1, parameter_grid=parameter_grid, kfold=2)
+        KLR, data0, n_sampling=1, parameter_grid=parameter_grid, kfold=3)
     rand_klr.fit()
     print(rand_klr.best_parameters())
+    send_sms("Finished random_search")

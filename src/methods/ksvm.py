@@ -31,18 +31,27 @@ class KSVM(KMethod, metaclass=KMethodCreate):
         G = matrix(np.concatenate((np.diag(y), np.diag(-y))), (2 * n, n), "d")
         h = matrix(
             np.concatenate((C * np.ones(n), np.zeros(n))), (2 * n, 1), "d")
-        alpha = np.array(solvers.qp(P, q, G, h)["x"]).reshape(-1)
+        A = matrix(np.ones(n), (1, n), "d")
 
-        # support_vectors = np.where(np.abs(alpha) > self.param.tol)
+        b = matrix(0.0) 
+        alpha = np.array(solvers.qp(P, q, G, h, A = A, b = b)["x"]).reshape(-1)
 
+        support_vectors = np.where(np.abs(alpha) > self.param.tol)[0]
+        intercept = 0
+        for sv in support_vectors:
+            intercept += y[sv]
+            intercept -= np.sum(alpha[support_vectors] * K[sv, support_vectors])
+        intercept /= len(support_vectors)
+        
+        self._b = intercept
         self._alpha = alpha
-        return self._alpha
+        return self._alpha, self._b
 
 
 if __name__ == "__main__":
     from src.tools.test import EasyTest
-    dparams = {"small": False, "nsmall": 300}
-    EasyTest(kernels="spectral", data="seq", methods="ksvm", dparams=dparams)
+    dparams = {"small": True, "nsmall": 200}
+    EasyTest(kernels="spectral", data="seq", methods="ksvm", show = True, dparams=dparams)
     
 #     from src.kernels.wildcard_trie import WildcardTrieKernel
 #     kernel = WildcardTrieKernel(data)

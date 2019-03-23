@@ -43,4 +43,4 @@ class KLR(KMethod, metaclass=KMethodCreate):
 if __name__ == "__main__":
     from src.tools.test import EasyTest
     dparams = {"small": True, "nsmall": 300}
-    EasyTest(kernels="spectral", data="seq", methods="klr", dparams=dparams)
+    EasyTest(kernels="spectral", data="seq", show = True, methods="klr", dparams=dparams)
