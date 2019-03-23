@@ -50,8 +50,10 @@ class KSVM(KMethod, metaclass=KMethodCreate):
 
 if __name__ == "__main__":
     from src.tools.test import EasyTest
-    dparams = {"small": True, "nsmall": 200}
-    EasyTest(kernels="spectral", data="seq", methods="ksvm", show = True, dparams=dparams)
+    dparams = {"small": False, "nsmall": 200}
+    kparams = {'k' : 6}
+    EasyTest(kernels="spectral", data="seq", methods="ksvm", show = True, 
+             dparams=dparams, kparams= kparams)
     
 #     from src.kernels.wildcard_trie import WildcardTrieKernel
 #     kernel = WildcardTrieKernel(data)
