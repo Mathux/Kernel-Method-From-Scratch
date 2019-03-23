@@ -174,10 +174,10 @@ if __name__ == '__main__':
     parameter_grid = {
         'kernel': [SpectralKernel],
         'k': 6,
-        'C': uniform(loc = 1/2, scale = 20 - 1/2),
+        'C': uniform(loc = 1, scale = 1/2),
     }
     rand_klr = RandomHyperParameterTuning(
-        KLR, data0, n_sampling=1, parameter_grid=parameter_grid, kfold=3)
+        KSVM, data0, n_sampling=1, parameter_grid=parameter_grid, kfold=3)
     rand_klr.fit()
     print(rand_klr.best_parameters())
     send_sms("Finished random_search")
