@@ -11,6 +11,8 @@ import numpy as np
 from tqdm import tqdm
 import os
 import time
+from tqdm import trange
+from src.config import expPath
 
 
 class Serializable:
@@ -221,6 +223,28 @@ def nb_diff(x, y):
         if char1 != char2:
             nb_diff += 1
     return nb_diff
+
+def average_predictions(predictions, csvname, weights = None) :
+    
+    assert len(predictions) > 0
+    
+    if weights is None :
+        weights = np.ones(len(predictions))/len(predictions)
+    else :
+        weights = np.asarray(weights)
+    ids = predictions[0]['Id']
+    temp_pred = np.zeros(len(predictions[0]['Id'].values))
+    for k in trange(len(predictions), desc = 'Averaging predictions') :
+        temp_pred = temp_pred + weights[k]*predictions[k]['Bound'].values
+    temp_pred = 1*(temp_pred >=1/2)
+    final_pred = pd.DataFrame()
+    final_pred['Id'] = ids
+    final_pred['Bound'] = temp_pred
+    create_dir(expPath)
+    name = csvname
+    csvname = os.path.join(expPath, name + ".csv")
+    final_pred.to_csv(csvname, index = False) 
+    
 
 
 def submit(predictions, ids, csvname):
