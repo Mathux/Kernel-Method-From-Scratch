@@ -23,7 +23,7 @@ def wildcard_match(x, y):
 
 class WildcardStringKernel(StringKernel, metaclass=KernelCreate):
     name = "wildcard"
-    defaultParameters = {"k": 5, "m": 1, 'la': 1, "trie": False}
+    defaultParameters = {"k": 5, "m": 1, 'la': 1.0, "trie": False}
 
     def _compute_phi(self, x):
         phi = np.zeros(len(self.mers_wildcard))
@@ -37,13 +37,13 @@ class WildcardStringKernel(StringKernel, metaclass=KernelCreate):
 
 class WildcardTrieKernel(TrieKernel, metaclass=KernelCreate):
     name = "wildcard"
-    defaultParameters = {"k": 5, 'm': 1, 'la': 1, "trie": True}
+    defaultParameters = {"k": 5, 'm': 1, 'la': 1.0, "trie": True}
     Trie = WildcardTrie
 
 
 class __WildcardKernel:
     def __init__(self):
-        self.defaultParameters = {"k": 5, 'm': 1, 'la': 1, "trie": True}
+        self.defaultParameters = {"k": 5, 'm': 1, 'la': 1.0, "trie": True}
         self.name = "wildcard"
 
     def __call__(self, dataset=None, parameters=None, verbose=True):
