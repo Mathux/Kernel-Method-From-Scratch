@@ -165,7 +165,7 @@ if __name__ == '__main__':
     from src.methods.klr import KLR
     from src.data.seq import AllSeqData
 
-    alldata = AllSeqData(parameters={"nsmall": 100, "small": False})  # 
+    alldata = AllSeqData()  # parameters={"nsmall": 100, "small": False}
     data0 = alldata[0]["train"]
 
     parameter_grid = {
@@ -174,6 +174,6 @@ if __name__ == '__main__':
         'C': uniform(loc = 1/2, scale = 20 - 1/2),
     }
     rand_klr = RandomHyperParameterTuning(
-        KSVM, data0, n_sampling=10, parameter_grid=parameter_grid, kfold=3)
+        KSVM, data0, n_sampling=1, parameter_grid=parameter_grid, kfold=2)
     rand_klr.fit()
     print(rand_klr.best_parameters())
