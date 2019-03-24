@@ -168,7 +168,7 @@ if __name__ == '__main__':
     from send_sms import send_sms
 
 
-    alldata = AllSeqData(parameters={"nsmall": 500, "small": False})
+    alldata = AllSeqData(parameters={"nsmall": 500, "small": True})
     data0 = alldata[0]["train"]
 
     parameter_grid = {

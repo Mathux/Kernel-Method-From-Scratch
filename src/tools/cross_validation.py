@@ -24,6 +24,7 @@ class CrossValidation(Logger):
 
         for k in self.vrange(kfolds, desc="Fitting folds"):
             train_dataset, val_dataset = self.folds[k]
+            val_dataset.labels = 2*val_dataset.labels - 1
             estimator.fit(train_dataset)
 
             Score = estimator.score_recall_precision(val_dataset)
