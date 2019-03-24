@@ -168,16 +168,16 @@ if __name__ == '__main__':
     from send_sms import send_sms
 
 
-    alldata = AllSeqData(parameters={"nsmall": 500, "small": True})
+    alldata = AllSeqData(parameters={"nsmall": 500, "small": False})
     data0 = alldata[0]["train"]
 
     parameter_grid = {
         'kernel': [SpectralKernel],
         'k': 6,
-        'C': uniform(loc = 1, scale = 1/2),
+        'lam': uniform(loc = 1/2, scale = 20),
     }
     rand_klr = RandomHyperParameterTuning(
-        KSVM, data0, n_sampling=1, parameter_grid=parameter_grid, kfold=3)
+        KLR, data0, n_sampling=1, parameter_grid=parameter_grid, kfold=7)
     rand_klr.fit()
     print(rand_klr.best_parameters())
-    send_sms("Finished random_search")
+    send_sms("Finished random search")
