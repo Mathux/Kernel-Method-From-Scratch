@@ -80,10 +80,10 @@ class Dataset(Logger):
             return y
 
         y = self.labels
-        if -1 in y:
-            y = replace(-1, 0, y)
-        elif 0 in y:
-            y = replace(0, -1, y)
+        if -1. in y:
+            y = replace(-1., 0., y)
+        elif 0. in y:
+            y = replace(0., -1., y)
         else:
             raise Exception("Bad labels")
 
@@ -213,10 +213,11 @@ class KFold(Logger):
         folds = list(
             map(lambda i: self.dataset.map(lambda x: x[i * nbF:(i + 1) * nbF]),
                 range(kfold)))
+
         self._log("Dataset splitted into " + str(kfold) + " folds")
-
+        
         self.folds = folds
-
+        
     def __getitem__(self, key):
         assert (key in range(self.kfold))
         return KFold.merge_folds(self.folds, key), self.folds[key]
