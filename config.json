@@ -1,27 +1,41 @@
-l{
+{
     "data": "allseq",
-    "kernels": "singlekernel",
-    "kparams": {
-        "kernels": ["mismatch"],
-        "_parameters": [{
+    "kernels": ["mismatch","mismatch","mismatch"],
+    "kparams": [{
             "k": 9,
             "m" : 1,
             "trie": true
-        }],
-        "_weights": [1]
     },
+		{
+		    "k" : 9,
+		    "m" : 1,
+		    "trie" : true
+		},
+		{
+		    "k": 9,
+		    "m" : 1
+		},
+		{
+		    "k" : 9,
+		    "m" : 1
+		}],
     "methods": [
-        "ksvm"
+        "ksvm",
+	"ksvm",
+	"ksvm"
     ],
     "mparams": [
         {
         "C": 5.0,
 	    "tol": 1e-04
         },
-    ],
-    "dparams": {"small": true},
+	{
+	    "C" : 5
+	},
+	{
+	    "C" : 5
+	}],
+    "dparams": {"small": false},
     "pcadim": 3,
     "show": false,
-    "submit": true
-    "csvname" : mismatch
-}
+    "submit": true}
