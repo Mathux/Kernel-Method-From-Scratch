@@ -1,6 +1,7 @@
 # Ugly but necessary for pickle
 from src.kernels.spectral import SpectralKernel
 from src.kernels.mismatch import MismatchKernel
+from src.kernels.gappy import GappyKernel
 from src.kernels.wd import WDKernel
 from src.kernels.la import LAKernel
 from src.kernels.exponential import ExponentialKernel

@@ -369,6 +369,75 @@ class TrieKernel(GenKernel):
             show=2,
             name=self.__name__)
         self._normalized_kernel(K)
+    
+class GappyTrieKernel(TrieKernel):
+    toreset = ["_K", "_KC", "_n"]
+
+    def __init__(self,
+                 dataset=None,
+                 name="TrieKernel",
+                 parameters=None,
+                 verbose=True,
+                 cls=None):
+        self.Trie = cls.Trie
+        super(GappyTrieKernel, self).__init__(
+            dataset=dataset,
+            name=name,
+            parameters=parameters,
+            verbose=verbose,
+            cls=cls)
+        
+        self.la = 1
+
+    def unique_kmers(self, x):
+        x = list(x)
+        ukmers = []
+        offset = 0
+        seen_kmers = []
+        for offset in range(len(x) - self.param.g + 1):
+            kmer = x[offset:offset + self.param.g]
+            if not kmer in seen_kmers:
+                seen_kmers.append(kmer)
+                count = 1
+                for _offset in range(offset + 1, len(x) - self.param.g + 1):
+                    if np.all(x[_offset:_offset + self.param.g] == kmer):
+                        count += 1
+                ukmers.append((''.join(kmer), count))
+        return ukmers
+
+    def get_leaf_nodes(self, node):
+        leafs = []
+        self._collect_leaf_nodes(node, leafs)
+        return leafs
+
+    def _collect_leaf_nodes(self, node, leafs):
+        if node is not None:
+            if len(node.children) == 0:
+                leafs.append(node)
+            for k, v in node.children.items():
+                self._collect_leaf_nodes(v, leafs)
+
+
+    def predict(self, x):
+        t = self.Trie(la=self.la)
+        k_xx, _, _ = t.dfs(np.array(x), self.param.g, self.param.l, show=0)
+        k_xx = k_xx.squeeze()
+        k_v = self.k_value(x, changev=True)
+        return np.array([
+            k_v[i] / np.sqrt(self.K[i, i] * k_xx) + 1
+            for i in range(len(self.K))
+        ])
+
+    def _compute_gram(self):
+        K = np.zeros((self.n, self.n))
+        self.trie = self.Trie(la=self.la)
+        K, _, _ = (self.trie).dfs(
+            self.dataset.data,
+            g=self.param.g,
+            l=self.param.l,
+            show=2,
+            name=self.__name__)
+        self._normalized_kernel(K)
 
 
 def AllStringKernels():
@@ -377,10 +446,11 @@ def AllStringKernels():
     from src.kernels.wd import WDKernel
     from src.kernels.la import LAKernel
     from src.kernels.wildcard import WildcardKernel
-
+    from src.kernels.gappy import GappyKernel
+    
     kernels = [
-        MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel
-    ]
+        MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel,
+    GappyKernel]
     names = [kernel.name for kernel in kernels]
     return kernels, names
 

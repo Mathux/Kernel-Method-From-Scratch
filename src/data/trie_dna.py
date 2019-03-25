@@ -137,9 +137,10 @@ def normalized_kernel(K):
     return K + 1
 
 class GappyTrie(_Trie) :
-    def __init__(self,label = None, parent = None, verbose = True):
+    def __init__(self, la = 1, label = None, parent = None, verbose = True):
         self.label = label
         self.level = 0
+        self.la = la
         self.children = {}
         self.kgrams = {}
         self.parent = parent
