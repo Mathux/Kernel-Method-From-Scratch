@@ -367,7 +367,7 @@ class TrieKernel(GenKernel):
             self.dataset.data,
             k=self.param.k,
             m=self.param.m,
-            show=2,
+            show=8,
             name=self.__name__)
         self._normalized_kernel(K)
     
@@ -458,7 +458,7 @@ class GappyTrieKernel(GenKernel):
             self.dataset.data,
             g=self.param.g,
             l=self.param.l,
-            show=2,
+            show=8,
             name=self.__name__)
         #self._normalized_kernel(K)
         self._K = K

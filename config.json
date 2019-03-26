@@ -1,39 +1,16 @@
 {
     "data": "allseq",
-    "kernels": ["wildcard","wildcard","wildcard"],
+    "kernels": ["spectral"],
     "kparams": [{
-            "k": 9,
-            "m" : 1,
+            "k": 11,
             "trie": true
-    },
-		{
-		    "k" : 9,
-		    "m" : 1,
-		    "trie" : true
-		},
-		{
-		    "k": 9,
-		    "m" : 1
-		},
-		{
-		    "k" : 9,
-		    "m" : 1
-		}],
+    }],
     "methods": [
-        "ksvm",
-	"ksvm",
-	"ksvm"
+        "ksvm"
     ],
     "mparams": [
         {
-        "C": 2.0,
-	    "tol": 1e-04
-        },
-	{
-	    "C" : 2
-	},
-	{
-	    "C" : 2
+        "C": 2.0
 	}],
     "dparams": {"small": false},
     "pcadim": 3,

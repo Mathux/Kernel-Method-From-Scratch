@@ -1,6 +1,6 @@
 import numpy as np
 from src.kernels.kernel import StringKernel, KernelCreate
-from src.kernels.wildcard import WildcardTrieKernel
+from src.kernels.mismatch import MismatchTrieKernel
 from src.tools.utils import Parameters
 
 
@@ -27,7 +27,7 @@ class __SpectralKernel:
         param = Parameters(parameters, self.defaultParameters)
         if param.trie:
             parameters = Parameters(parameters, self.__trieParameters)
-            return WildcardTrieKernel(dataset, parameters, verbose)
+            return MismatchTrieKernel(dataset, parameters, verbose)
         else:
             return SpectralStringKernel(dataset, param, verbose)
 
@@ -37,6 +37,6 @@ SpectralKernel = __SpectralKernel()
 
 if __name__ == "__main__":
     dparams = {"small": False, "nsmall": 100}
-    kparams = {"k": 1, "m": 0, "trie": True}
+    kparams = {"k": 12, "m": 0, "trie": True}
     from src.tools.test import EasyTest
     EasyTest(kernels="spectral", data="seq", dparams=dparams, kparams=kparams)
