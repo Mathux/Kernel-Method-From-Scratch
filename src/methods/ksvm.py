@@ -59,11 +59,21 @@ class KSVM(KMethod, metaclass=KMethodCreate):
 
 
 if __name__ == "__main__":
-    from src.tools.test import EasyTest
+ #   from src.tools.test import EasyTest
     dparams = {"small": False, "nsmall": 200}
-    kparams = {'k' : 6, 'm' : 1}
-    EasyTest(kernels="wildcard", data="seq", methods="ksvm", show = False, 
-             dparams=dparams, kparams= kparams)
+    kparams = {'g' : 8, 'l' : 6}
+    from src.kernels.gappy import GappyKernel
+    from src.data.seq import AllSeqData
+    alldata = AllSeqData(parameters = dparams)
+    data0 = alldata[0]['train']
+    train, val = data0.split(split_val = 0.1)
+    
+    kernel = GappyKernel(train, parameters= kparams)
+    ksvm = KSVM(kernel, parameters = {'C' : 2})
+    ksvm.fit()
+    print(ksvm.score_recall_precision(val))
+#    EasyTest(kernels="wildcard", data="seq", methods="ksvm", show = False, 
+#             dparams=dparams, kparams= kparams)
     
 #     from src.kernels.wildcard_trie import WildcardTrieKernel
 #     kernel = WildcardTrieKernel(data)

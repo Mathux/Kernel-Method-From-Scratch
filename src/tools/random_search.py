@@ -174,12 +174,12 @@ if __name__ == '__main__':
 
     parameter_grid = {
         'kernel': [GappyKernel],
-        'g': 6,
-        'l' : 5,
+        'g': 10,
+        'l' : 8,
         'C': uniform(loc = 1/2, scale = 2),
     }
     rand_klr = RandomHyperParameterTuning(
-        KSVM, data0, n_sampling=10, parameter_grid=parameter_grid, kfold=5)
+        KSVM, data0, n_sampling=3, parameter_grid=parameter_grid, kfold=5)
     rand_klr.fit()
     print(rand_klr.best_parameters())
     send_sms("Finished random search")

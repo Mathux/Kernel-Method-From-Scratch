@@ -302,13 +302,15 @@ class MismatchTrie(_Trie):
 
 
 if __name__ == '__main__':
-    data = np.array(['ATTA', 'AAAA'])
+    data = np.array(['ATTA', 'AGAA'])
     import time
     debut = time.perf_counter()
-    t = GappyTrie()
-    ker, n_kmers, _ = t.dfs(data, 2, 1)
+    t_m = MismatchTrie()
+    ker_m, n_kmers, _ = t_m.dfs(data, k = 2, m =0)
     # ipdb.set_trace()
     fin = time.perf_counter()
     print('temps = ', fin - debut)
-
-    print(ker)
+    t_w = WildcardTrie()
+    ker_w, n_kmers, _ = t_w.dfs(data, k = 2, m =0)
+    print(ker_m)
+    print(ker_w)
