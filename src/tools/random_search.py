@@ -161,6 +161,7 @@ if __name__ == '__main__':
     from src.kernels.spectral import SpectralKernel
     from src.kernels.wd import WDKernel
     from src.kernels.la import LAKernel
+    from src.kernels.gappy import GappyKernel
     from src.kernels.wildcard import WildcardKernel
     from src.methods.ksvm import KSVM
     from src.methods.klr import KLR
@@ -172,9 +173,9 @@ if __name__ == '__main__':
     data0 = alldata[0]["train"]
 
     parameter_grid = {
-        'kernel': [MismatchKernel],
-        'k': 6,
-        'm' : 1,
+        'kernel': [GappyKernel],
+        'g': 6,
+        'l' : 5,
         'C': uniform(loc = 1/2, scale = 2),
     }
     rand_klr = RandomHyperParameterTuning(

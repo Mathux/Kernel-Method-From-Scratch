@@ -8,6 +8,7 @@ Created on Tue Mar 12 15:30:29 2019
 
 import numpy as np
 from src.tools.utils import Parameters, Logger
+from itertools import product
 
 
 class KernelCreate(type):
@@ -370,12 +371,12 @@ class TrieKernel(GenKernel):
             name=self.__name__)
         self._normalized_kernel(K)
     
-class GappyTrieKernel(TrieKernel):
+class GappyTrieKernel(GenKernel):
     toreset = ["_K", "_KC", "_n"]
 
     def __init__(self,
                  dataset=None,
-                 name="TrieKernel",
+                 name="GappyTrieKernel",
                  parameters=None,
                  verbose=True,
                  cls=None):
@@ -387,23 +388,43 @@ class GappyTrieKernel(TrieKernel):
             verbose=verbose,
             cls=cls)
         
-        self.la = 1
+    
+    def k_value(self, x, t_x, changev=False):
+        leafs = self.get_leaf_nodes(self.trie)
 
-    def unique_kmers(self, x):
+        oldvalue = self.verbose
+        if changev:
+            self.verbose = False
+
+        desc = "Leaf computation"
+        self.leaf_kgrams_ = dict((leaf.full_label,
+                                  dict((index, len(kgs))
+                                       for index, kgs in leaf.kgrams.items()))
+                                 for leaf in self.viterator(leafs, desc=desc))
+        k_x = np.zeros(len(self.data))
+
+        self.verbose = oldvalue
+        phi_x = self.unique_lmers(x, t_x)
+        for kmer, count1 in phi_x.items() :
+            if kmer in list(self.leaf_kgrams_.keys()):
+                for j in range(len(self.data.data)):
+                    if j in list(self.leaf_kgrams_[kmer].keys()):
+                        kgrams = self.leaf_kgrams_[kmer][j]
+                        k_x[j] +=  (count1 * kgrams)
+
+        return k_x
+    
+    def unique_lmers(self, x, t_x):
         x = list(x)
-        ukmers = []
-        offset = 0
-        seen_kmers = []
-        for offset in range(len(x) - self.param.g + 1):
-            kmer = x[offset:offset + self.param.g]
-            if not kmer in seen_kmers:
-                seen_kmers.append(kmer)
-                count = 1
-                for _offset in range(offset + 1, len(x) - self.param.g + 1):
-                    if np.all(x[_offset:_offset + self.param.g] == kmer):
-                        count += 1
-                ukmers.append((''.join(kmer), count))
-        return ukmers
+        leaf = self.get_leaf_nodes(t_x)
+        leaf_kgrams_ = dict((l.full_label,
+                                  dict((index, len(kgs))
+                                       for index, kgs in l.kgrams.items()))
+                                 for l in leaf)
+        leaf_kgrams_ = {key : value[0] for key, value in leaf_kgrams_.items()}
+
+#        print(leaf_kgrams_)
+        return leaf_kgrams_
 
     def get_leaf_nodes(self, node):
         leafs = []
@@ -419,25 +440,28 @@ class GappyTrieKernel(TrieKernel):
 
 
     def predict(self, x):
-        t = self.Trie(la=self.la)
-        k_xx, _, _ = t.dfs(np.array(x), self.param.g, self.param.l, show=0)
+        t_x = self.Trie()
+        k_xx, _, _ = t_x.dfs(np.array([x]), g = self.param.g, l = self.param.l, 
+                           show=0)
         k_xx = k_xx.squeeze()
-        k_v = self.k_value(x, changev=True)
+        k_v = self.k_value(x, t_x, changev=True)
         return np.array([
             k_v[i] / np.sqrt(self.K[i, i] * k_xx) + 1
             for i in range(len(self.K))
         ])
 
+
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
-        self.trie = self.Trie(la=self.la)
+        self.trie = self.Trie()
         K, _, _ = (self.trie).dfs(
             self.dataset.data,
             g=self.param.g,
             l=self.param.l,
             show=2,
             name=self.__name__)
-        self._normalized_kernel(K)
+        #self._normalized_kernel(K)
+        self._K = K
 
 
 def AllStringKernels():
