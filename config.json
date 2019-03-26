@@ -1,6 +1,6 @@
 {
     "data": "allseq",
-    "kernels": ["mismatch","mismatch","mismatch"],
+    "kernels": ["wildcard","wildcard","wildcard"],
     "kparams": [{
             "k": 9,
             "m" : 1,
@@ -26,14 +26,14 @@
     ],
     "mparams": [
         {
-        "C": 5.0,
+        "C": 2.0,
 	    "tol": 1e-04
         },
 	{
-	    "C" : 5
+	    "C" : 2
 	},
 	{
-	    "C" : 5
+	    "C" : 2
 	}],
     "dparams": {"small": false},
     "pcadim": 3,
