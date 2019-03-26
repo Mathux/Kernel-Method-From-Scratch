@@ -36,7 +36,7 @@ class _Trie(Logger):
             self.kgrams[index] = np.array(
                 [(offset, 0) for offset in range(len(X[index]) - k + 1)])
 
-    def _process_node(self, X, k, m, wildcard=False, mismatch=False):
+    def _process_node(self, X, k, m,  wildcard=False, mismatch=False):
         assert (wildcard or mismatch)
         if X.ndim == 1:
             XX = []
@@ -48,7 +48,7 @@ class _Trie(Logger):
             valsup = 0
         elif mismatch:
             valsup = m
-    
+        
         if self.is_root():
             self.compute_kgrams(X, k)
 
@@ -58,7 +58,7 @@ class _Trie(Logger):
         else:
             for index, substring_pointers in self.kgrams.items():
                 substring_pointers[:, 1] += (
-                    X[index][substring_pointers[:, 0] + self.level - 1] !=
+                    X[index][substring_pointers[..., 0] + self.level - 1] !=
                     self.label)
                 self.kgrams[index] = np.delete(
                     substring_pointers,
@@ -136,6 +136,104 @@ def normalized_kernel(K):
     np.fill_diagonal(K, 1.)
     return K + 1
 
+class GappyTrie(_Trie) :
+    def __init__(self, la = 1, label = None, parent = None, verbose = True):
+        self.label = label
+        self.level = 0
+        self.la = la
+        self.children = {}
+        self.kgrams = {}
+        self.parent = parent
+        self.full_label = ''
+        self.vocab = {0: 'A', 1: 'T', 2: 'G', 3: 'C'}
+        if parent is not None:
+            self.full_label = parent.full_label + self.label
+            parent.add_child(self)
+        self.verbose = verbose
+        
+    def is_root(self):
+        return self.parent is None
+    
+    def update_kernel(self, kernel):
+        for i in self.kgrams.keys():
+            for j in self.kgrams.keys():
+                kernel[i, j] += (len(self.kgrams[i])) * (len(self.kgrams[j]))
+    
+    def compute_kgrams(self, X, g):
+        for index in range(len(X)):
+            self.kgrams[index] = np.array(
+                [(offset, -1) for offset in range(len(X[index]) - g + 1)])
+    
+    def process_node(self, X, g, l):
+#        if X.ndim == 1:
+#            XX = []
+#            for i in range(X.shape[0]):
+#                XX.append(np.array(list(X[i])))
+#            X = 1 * XX
+        
+        if self.is_root():
+            self.compute_kgrams(X, g)
+
+        else:
+            for index, substring_pointers in self.kgrams.items():
+                for j in range(len(substring_pointers)) :
+                    in_remainder = (X[index][substring_pointers[j,0] + substring_pointers[j,1] + 1: substring_pointers[j,0]  + g]).find(self.label)
+                    if in_remainder < 0 :
+                        substring_pointers[j,1] = g + 1
+                    else : 
+                        substring_pointers[j,1] = substring_pointers[j,1] + 1 + in_remainder
+                    self.kgrams[index] = np.delete(
+                            substring_pointers,
+                            np.nonzero(substring_pointers[..., 1] > g),
+                            axis=0)
+
+            self.kgrams = {
+                index: substring_pointers
+                for (index, substring_pointers) in self.kgrams.items()
+                if len(substring_pointers) > 0
+            }
+
+        alive = (not self.is_empty())
+
+        return alive
+    
+    def dfs(self,
+             X,
+             g=2,
+             l=1,
+             kernel=None,
+             show=1,
+             name=None):
+        length = len(self.vocab)
+        if kernel is None:
+            kernel = np.zeros((len(X), len(X)))
+        n_kmers = 0
+        alive = self.process_node(X, g, l)
+        if alive:
+            if l == 0:
+                n_kmers += 1
+                self.update_kernel(kernel)
+            else:
+                if show > 0:
+                    if name is not None:
+                        desc = "Trie DFS for " + name
+                    else:
+                        desc = "Trie DFS"
+                    erange = self.vrange(length, desc=desc)
+                else:
+                    erange = range(length)
+                for j in erange:
+                    Logger.indent()
+                    child = GappyTrie(label=self.vocab[j], parent=self)
+                    kernel, child_kmers, child_alive = child.dfs(
+                        X, g, l - 1, kernel=kernel, show=show-1)
+                    if child.is_empty():
+                        self.delete_child(child)
+                    n_kmers += child_kmers if child_alive else 0
+                    
+                    Logger.dindent()
+                    
+        return kernel, n_kmers, alive
 
 class WildcardTrie(_Trie):
     def __init__(self, la=1, label=None, parent=None, verbose=True):
@@ -204,13 +302,15 @@ class MismatchTrie(_Trie):
 
 
 if __name__ == '__main__':
-    data = np.array(['ATTA', 'AAAA'])
+    data = np.array(['ATTA', 'AGAA'])
     import time
     debut = time.perf_counter()
-    t = WildcardTrie()
-    ker, n_kmers, _ = t.dfs(data, 2, 1)
+    t_m = MismatchTrie()
+    ker_m, n_kmers, _ = t_m.dfs(data, k = 2, m =0)
     # ipdb.set_trace()
     fin = time.perf_counter()
     print('temps = ', fin - debut)
-
-    print(ker)
+    t_w = WildcardTrie()
+    ker_w, n_kmers, _ = t_w.dfs(data, k = 2, m =0)
+    print(ker_m)
+    print(ker_w)

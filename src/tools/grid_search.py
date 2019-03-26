@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -12,6 +11,7 @@ from src.tools.cross_validation import CrossValidation
 from src.tools.utils import Logger
 from scipy import stats
 from copy import deepcopy
+from itertools import product
 
 class RandomHyperParameterTuningPerKernel(Logger):
     def __init__(self,
@@ -19,7 +19,6 @@ class RandomHyperParameterTuningPerKernel(Logger):
                  clf,
                  kernel,
                  parameter_grid,
-                 n_sampling,
                  kfold=5,
                  verbose=True):
 
@@ -28,61 +27,46 @@ class RandomHyperParameterTuningPerKernel(Logger):
         self.kernel = kernel
         self.parameter_grid = parameter_grid
         self.dataset = dataset
-        self.n = n_sampling
         self.kfold = kfold
         self.kernel_parameters = list(kernel.defaultParameters.keys())
         self.clf_parameters = list(clf.defaultParameters.keys())
-
-    def get_params_to_test(self, parameters, grid, n):
+    
+    def get_product(self,lists) :
+        return list(product(*lists))
+            
+    def get_params_to_test(self, kparameters, mparameters, grid):
         temp_params = {}
-        fix = True
+        parameters = kparameters + mparameters
         for param in parameters:
             if param in list(grid.keys()):
-                if isinstance(grid[param],
-                              stats._distn_infrastructure.rv_frozen):
-                    temp_params[param] = grid[param].rvs(size = n)
-                else:
-                    if isinstance(grid[param], np.ndarray) or isinstance(grid[param], list) :
-                        if len(param) == n :
-                            temp_params[param] = grid[param]
-                        else : 
-                            pass
-                    else :
-                        temp_params[param] = np.array([grid[param]]*n)
-                        fix = True
-        return temp_params, fix
+                temp_params[param] = list(grid[param])
+        
+        temp_params_list = self.get_product(list(temp_params.values()))
+        l = []
+        for j in range(len(temp_params_list)) :
+            temp_dict_kparams = {}
+            temp_dict_mparams = {}
+            for k,param in enumerate(temp_params.keys()):
+                if param in kparameters :
+                    temp_dict_kparams[param] = temp_params_list[j][k]
+                else :
+                    temp_dict_mparams[param] = temp_params_list[j][k]
+            l.append((temp_dict_kparams,temp_dict_mparams))
+        return l
 
     def fit(self):
         self.scores = {}
-        self.kernel_parameters_to_test, fix_kernel = self.get_params_to_test(
-            self.kernel_parameters, self.parameter_grid, self.n)
-        self.clf_parameters_to_test, _ = self.get_params_to_test(
-            self.clf_parameters, self.parameter_grid, self.n)
-        if fix_kernel :
-            params = {
-                key: value[0]
-                for key, value in self.kernel_parameters_to_test.items()
-            }
+        parameters_to_test = self.get_params_to_test(self.kernel_parameters, 
+                                                     self.clf_parameters, 
+                                                     self.parameter_grid)
+        for j,l in enumerate(parameters_to_test) :
+            kernel_params = l[0]
+            clf_params = l[1]
             kernel_to_try = self.kernel(
-                dataset=self.dataset, parameters=params)
-        for j in range(self.n):
-            temp_clf_parameters = {}
-            for c_param in self.clf_parameters:
-                if c_param in list(self.parameter_grid.keys()):
-                    temp_clf_parameters[c_param] = self.clf_parameters_to_test[
-                        c_param][j]
-            if not fix_kernel:
-                temp_kernel_parameters = {}
-                for k_param in self.kernel_parameters:
-                    if k_param in list(self.parameter_grid.keys()):
-                        temp_kernel_parameters[
-                            k_param] = self.kernel_parameters_to_test[k_param][
-                                j]
-                kernel_to_try = self.kernel(
-                    self.dataset, parameters=temp_kernel_parameters)
-                print('Testing kernel parameters :', temp_kernel_parameters)
-            print('Testing clf classifiers : ', temp_clf_parameters)
-            temp_clf = self.clf(kernel_to_try, parameters=temp_clf_parameters)
+                    self.dataset, parameters=kernel_params)
+            temp_clf = self.clf(kernel_to_try, parameters=clf_params)
+            print('Testing kernel parameters :', kernel_params)
+            print('Testing clf classifiers : ', clf_params)
             CV = CrossValidation(self.dataset, temp_clf, kfolds=self.kfold)
             temp_report = CV.stats
             self.scores[j] = temp_report
@@ -92,7 +76,6 @@ class RandomHyperParameterTuning(Logger):
     def __init__(self,
                  classifier,
                  dataset,
-                 n_sampling=5,
                  parameter_grid={},
                  criteria='accuracy',
                  kfold=3,
@@ -103,7 +86,6 @@ class RandomHyperParameterTuning(Logger):
         self.clf = classifier
         self.parameter_grid = parameter_grid
         self.dataset = dataset
-        self.n = n_sampling
         self.kfold = kfold
 
         if criteria == 'accuracy':
@@ -127,7 +109,6 @@ class RandomHyperParameterTuning(Logger):
                 self.clf,
                 kernel,
                 self.parameter_grid,
-                self.n,
                 kfold=self.kfold)
             temp.fit()
             scores_for_kernel = []
@@ -161,7 +142,6 @@ if __name__ == '__main__':
     from src.kernels.spectral import SpectralKernel
     from src.kernels.wd import WDKernel
     from src.kernels.la import LAKernel
-    from src.kernels.gappy import GappyKernel
     from src.kernels.wildcard import WildcardKernel
     from src.methods.ksvm import KSVM
     from src.methods.klr import KLR
@@ -170,16 +150,15 @@ if __name__ == '__main__':
 
 
     alldata = AllSeqData(parameters={"nsmall": 200, "small": False})
-    data0 = alldata[0]["train"]
+    data0 = alldata[1]["train"]
 
     parameter_grid = {
-        'kernel': [GappyKernel],
-        'g': 10,
-        'l' : 8,
-        'C': uniform(loc = 1/2, scale = 2),
+        'kernel': [SpectralKernel],
+        'k': [9],
+        'C': [1/2,1, 3/2, 2],
     }
     rand_klr = RandomHyperParameterTuning(
-        KSVM, data0, n_sampling=3, parameter_grid=parameter_grid, kfold=5)
+        KSVM, data0, parameter_grid=parameter_grid, kfold=3)
     rand_klr.fit()
     print(rand_klr.best_parameters())
     send_sms("Finished random search")

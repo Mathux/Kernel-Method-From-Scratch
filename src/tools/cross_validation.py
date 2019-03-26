@@ -21,9 +21,13 @@ class CrossValidation(Logger):
 
         self.dataset = dataset
         self.folds = KFold(dataset, kfolds, verbose)
+        
+        for l in range(kfolds) :
+            self.folds[l][1].transform_label()
 
         for k in self.vrange(kfolds, desc="Fitting folds"):
             train_dataset, val_dataset = self.folds[k]
+#            print(val_dataset.labels)
             estimator.fit(train_dataset)
 
             Score = estimator.score_recall_precision(val_dataset)
