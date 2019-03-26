@@ -153,6 +153,7 @@ def EasyTest(kernels,
         Logger.indent()
 
         train = Dataset["train"]
+        # train._show_gen_class_data()
         kernel = Kernel(train, parameters=Kparam)
         method = KMethod(kernel, parameters=Mparam)
 
@@ -243,7 +244,7 @@ if __name__ == "__main__":
         kparams=kparams,
         mparams=mparams,
         pcadim=args.pcadim,
-        show=False,
+        show=args.show,
         dopredictions=args.submit,
         verbose=True)
 

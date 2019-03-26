@@ -145,6 +145,7 @@ class Dataset(Logger):
             mask = self.labels == i
             plt.scatter(self.data[mask][:, 0], self.data[mask][:, 1])
         plt.title("Generated data")
+        plt.ion()
         plt.show()
 
     def _show_gen_class_predicted(self, predict):
@@ -163,6 +164,7 @@ class Dataset(Logger):
             axpred.scatter(self.data[mask_pred][:, 0],
                            self.data[mask_pred][:, 1])
             axgt.scatter(self.data[mask_gt][:, 0], self.data[mask_gt][:, 1])
+        plt.ion()
         plt.show()
 
     def _show_gen_reg_data(self):
