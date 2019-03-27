@@ -57,14 +57,15 @@ SpectralKernel = __SpectralKernel()
 
 class SpectralConcatKernel(SparseKernel, metaclass=KernelCreate):
     name = "spectralconcat"
-    defaultParameters = {"kmin": 6, "kmax": 11}
+    defaultParameters = {"kmin": 6, "kmax": 11, "lam": 1.0}
 
     def _compute_phi(self, x):
         phi = {}
         for k in range(self.param.kmin, self.param.kmax + 1):
+            count = self.param.lam**(self.param.kmax - k)
             for offset in range(len(x) - k + 1):
                 xkmer = x[offset:offset + k]
-                phi[xkmer] = phi.get(xkmer, 0) + 1
+                phi[xkmer] = phi.get(xkmer, 0) + count
         return phi
 
 

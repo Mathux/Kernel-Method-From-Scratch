@@ -2,7 +2,7 @@ from cvxopt import matrix, solvers
 import numpy as np
 from src.methods.KMethod import KMethod, KMethodCreate, klogger
 
-solvers.options['show_progress'] = True
+solvers.options['show_progress'] = False
 
 # Solve the QP Problem:
 #  minimize    1/2 x^T*P*x + q^T*x

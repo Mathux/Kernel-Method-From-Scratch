@@ -9,7 +9,7 @@ Created on Tue Mar 12 15:30:29 2019
 import numpy as np
 from src.tools.utils import Parameters, Logger
 from itertools import product
-import ipdb
+# import ipdb
 
 
 class KernelCreate(type):
@@ -113,7 +113,7 @@ class Kernel(Logger):
                     K[i, j] /= q
                     K[j, i] = K[i, j]
         np.fill_diagonal(K, 1.)
-        self._K = K + 1
+        self._K = K
 
     @property
     def KC(self):
