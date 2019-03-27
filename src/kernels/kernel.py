@@ -129,7 +129,7 @@ class Kernel(Logger):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = self.kernel(self.data[i], self.data[j])
         self._K = K
-        # self._normalized_kernel(K)
+        self._normalized_kernel(K)
 
     def _compute_centered_gram(self):
         K = self.K
@@ -142,7 +142,7 @@ class Kernel(Logger):
     def predict(self, x):
         return np.array([
             self.kernel(xi, x) / np.sqrt(
-                self.kernel(xi, xi) * self.kernel(x, x)) + 1
+                self.kernel(xi, xi) * self.kernel(x, x))
             for xi in self.data
         ])
 
@@ -226,7 +226,7 @@ class StringKernel(GenKernel):
         phix = self._compute_phi(x)
         k_xx = np.dot(phix, phix)
         return np.array([
-            np.dot(phix, phi) / np.sqrt(np.dot(phi, phi) * k_xx) + 1
+            np.dot(phix, phi) / np.sqrt(np.dot(phi, phi) * k_xx)
             for phi in self.phis
         ])
 
@@ -238,7 +238,7 @@ class StringKernel(GenKernel):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = np.dot(phis[i], phis[j])
         self._K = K
-        # self._normalized_kernel(K)
+        self._normalized_kernel(K)
 
     def kernel(self, x, y):
         return np.dot(self._compute_phi(x), self._compute_phi(y))
@@ -358,7 +358,7 @@ class TrieKernel(GenKernel):
         k_xx = k_xx.squeeze()
         k_v = self.k_value(x, changev=True)
         return np.array([
-            k_v[i] / np.sqrt(self.K[i, i] * k_xx) + 1
+            k_v[i] / np.sqrt(self.K[i, i] * k_xx)
             for i in range(len(self.K))
         ])
 
@@ -372,7 +372,7 @@ class TrieKernel(GenKernel):
             show=8,
             name=self.__name__)
         self._K = K
-        # self._normalized_kernel(K)
+        self._normalized_kernel(K)
 
 
 class GappyTrieKernel(GenKernel):
@@ -448,7 +448,7 @@ class GappyTrieKernel(GenKernel):
         k_xx = k_xx.squeeze()
         k_v = self.k_value(x, t_x, changev=True)
         return np.array([
-            k_v[i] / np.sqrt(self.K[i, i] * k_xx) + 1
+            k_v[i] / np.sqrt(self.K[i, i] * k_xx)
             for i in range(len(self.K))
         ])
 
@@ -462,7 +462,7 @@ class GappyTrieKernel(GenKernel):
             show=8,
             name=self.__name__)
         self._K = K
-        # self._normalized_kernel(K)
+        self._normalized_kernel(K)
 
 
 class SparseKernel(StringKernel):
@@ -491,7 +491,7 @@ class SparseKernel(StringKernel):
         k_xx = SparseKernel.dot(phix, phix)
         return np.array([
             SparseKernel.dot(phix, phi) / np.sqrt(
-                SparseKernel.dot(phi, phi) * k_xx) + 1 for phi in self.phis
+                SparseKernel.dot(phi, phi) * k_xx) for phi in self.phis
         ])
 
     def _compute_gram(self):
@@ -502,23 +502,23 @@ class SparseKernel(StringKernel):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = SparseKernel.dot(phis[i], phis[j])
         self._K = K
-        # self._normalized_kernel(K)
+        self._normalized_kernel(K)
 
     def kernel(self, x, y):
         return SparseKernel.dot(self._compute_phi(x), self._compute_phi(y))
 
 
 def AllStringKernels():
-    from src.kernels.spectral import SpectralKernel
+    from src.kernels.spectral import SpectralKernel, SpectralConcatKernel
     from src.kernels.mismatch import MismatchKernel
     from src.kernels.wd import WDKernel
     from src.kernels.la import LAKernel
     from src.kernels.wildcard import WildcardKernel
     from src.kernels.gappy import GappyKernel
-
+    
     kernels = [
         MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel,
-        GappyKernel
+        GappyKernel, SpectralConcatKernel
     ]
     names = [kernel.name for kernel in kernels]
     return kernels, names
