@@ -9,6 +9,8 @@ from os import path
 import sys
 import json
 
+import ipdb
+
 methods, methodsNames = AllClassMethods()
 datas, datasNames = AllClassData()
 kernels, kernelsNames = AllKernels()
@@ -122,6 +124,45 @@ def find_more_or_one(string_or_list, find_func, n):
         return [find_func(string_or_list) for _ in range(n)]
 
 
+def KernelTest(kernelname, parameters):
+    Dataset = findData("allseq")()[0]
+    train = Dataset["train"]
+    import numpy as np
+    from src.data.dataset import Dataset
+    
+    defaultParameters = {
+        "k": 0,
+        "mat": False,
+        "shuffle": False,
+        "small": False,
+        "nsmall": 200,
+        "labels_change": True,
+        "name": "seq",
+        "nclasses": 2
+    }
+    
+    from src.tools.utils import Parameters
+    p = Parameters(None, defaultParameters)
+    
+    train = Dataset(p, np.array(['ATTA', 'AAAA']), np.array([0, 1]))
+    
+    Kernel = findKernel(kernelname)
+
+    Logger.log(True, "Test the " + kernelname + " kernel.")
+    Logger.indent()
+    kernels = []
+    for params in parameters:
+        Logger.log(True, "Test with these parameters: " + str(params))
+        Logger.indent()
+        kernel = Kernel(train, params)
+        kernels.append(kernel)
+        Logger.log(True, kernel.K)
+        Logger.dindent()
+
+    ipdb.set_trace()
+    Logger.dindent()
+    
+    
 def EasyTest(kernels,
              data="seq",
              methods=None,

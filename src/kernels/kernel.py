@@ -9,6 +9,7 @@ Created on Tue Mar 12 15:30:29 2019
 import numpy as np
 from src.tools.utils import Parameters, Logger
 from itertools import product
+import ipdb
 
 
 class KernelCreate(type):
@@ -127,7 +128,8 @@ class Kernel(Logger):
         for i in self.vrange(self.n, "Gram matrix of " + self.__name__):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = self.kernel(self.data[i], self.data[j])
-        self._normalized_kernel(K)
+        self._K = K
+        # self._normalized_kernel(K)
 
     def _compute_centered_gram(self):
         K = self.K
@@ -235,8 +237,8 @@ class StringKernel(GenKernel):
         for i in self.vrange(self.n, desc="Gram matrix of " + self.__name__):
             for j in range(i, self.n):
                 K[i, j] = K[j, i] = np.dot(phis[i], phis[j])
-
-        self._normalized_kernel(K)
+        self._K = K
+        # self._normalized_kernel(K)
 
     def kernel(self, x, y):
         return np.dot(self._compute_phi(x), self._compute_phi(y))
@@ -369,8 +371,10 @@ class TrieKernel(GenKernel):
             m=self.param.m,
             show=8,
             name=self.__name__)
-        self._normalized_kernel(K)
-    
+        self._K = K
+        # self._normalized_kernel(K)
+
+
 class GappyTrieKernel(GenKernel):
     toreset = ["_K", "_KC", "_n"]
 
@@ -387,8 +391,7 @@ class GappyTrieKernel(GenKernel):
             parameters=parameters,
             verbose=verbose,
             cls=cls)
-        
-    
+
     def k_value(self, x, t_x, changev=False):
         leafs = self.get_leaf_nodes(self.trie)
 
@@ -405,25 +408,25 @@ class GappyTrieKernel(GenKernel):
 
         self.verbose = oldvalue
         phi_x = self.unique_lmers(x, t_x)
-        for kmer, count1 in phi_x.items() :
+        for kmer, count1 in phi_x.items():
             if kmer in list(self.leaf_kgrams_.keys()):
                 for j in range(len(self.data.data)):
                     if j in list(self.leaf_kgrams_[kmer].keys()):
                         kgrams = self.leaf_kgrams_[kmer][j]
-                        k_x[j] +=  (count1 * kgrams)
+                        k_x[j] += (count1 * kgrams)
 
         return k_x
-    
+
     def unique_lmers(self, x, t_x):
         x = list(x)
         leaf = self.get_leaf_nodes(t_x)
         leaf_kgrams_ = dict((l.full_label,
-                                  dict((index, len(kgs))
-                                       for index, kgs in l.kgrams.items()))
-                                 for l in leaf)
-        leaf_kgrams_ = {key : value[0] for key, value in leaf_kgrams_.items()}
+                             dict((index, len(kgs))
+                                  for index, kgs in l.kgrams.items()))
+                            for l in leaf)
+        leaf_kgrams_ = {key: value[0] for key, value in leaf_kgrams_.items()}
 
-#        print(leaf_kgrams_)
+        #        print(leaf_kgrams_)
         return leaf_kgrams_
 
     def get_leaf_nodes(self, node):
@@ -438,18 +441,16 @@ class GappyTrieKernel(GenKernel):
             for k, v in node.children.items():
                 self._collect_leaf_nodes(v, leafs)
 
-
     def predict(self, x):
         t_x = self.Trie()
-        k_xx, _, _ = t_x.dfs(np.array([x]), g = self.param.g, l = self.param.l, 
-                           show=0)
+        k_xx, _, _ = t_x.dfs(
+            np.array([x]), g=self.param.g, l=self.param.l, show=0)
         k_xx = k_xx.squeeze()
         k_v = self.k_value(x, t_x, changev=True)
         return np.array([
             k_v[i] / np.sqrt(self.K[i, i] * k_xx) + 1
             for i in range(len(self.K))
         ])
-
 
     def _compute_gram(self):
         K = np.zeros((self.n, self.n))
@@ -460,8 +461,51 @@ class GappyTrieKernel(GenKernel):
             l=self.param.l,
             show=8,
             name=self.__name__)
-        #self._normalized_kernel(K)
         self._K = K
+        # self._normalized_kernel(K)
+
+
+class SparseKernel(StringKernel):
+    def __init__(self,
+                 dataset=None,
+                 name="SparseKernel",
+                 parameters=None,
+                 verbose=True,
+                 cls=None):
+        super(SparseKernel, self).__init__(
+            dataset=dataset,
+            name=name,
+            parameters=parameters,
+            verbose=verbose,
+            cls=cls)
+
+    def dot(x, y):
+        x, y = (x, y) if len(x) < len(y) else (y, x)
+        res = 0
+        for key, val in x.items():
+            res += y.get(key, 0) * val
+        return res
+
+    def predict(self, x):
+        phix = self._compute_phi(x)
+        k_xx = SparseKernel.dot(phix, phix)
+        return np.array([
+            SparseKernel.dot(phix, phi) / np.sqrt(
+                SparseKernel.dot(phi, phi) * k_xx) + 1 for phi in self.phis
+        ])
+
+    def _compute_gram(self):
+        K = np.zeros((self.n, self.n))
+        phis = self.phis
+
+        for i in self.vrange(self.n, desc="Gram matrix of " + self.__name__):
+            for j in range(i, self.n):
+                K[i, j] = K[j, i] = SparseKernel.dot(phis[i], phis[j])
+        self._K = K
+        # self._normalized_kernel(K)
+
+    def kernel(self, x, y):
+        return SparseKernel.dot(self._compute_phi(x), self._compute_phi(y))
 
 
 def AllStringKernels():
@@ -471,10 +515,11 @@ def AllStringKernels():
     from src.kernels.la import LAKernel
     from src.kernels.wildcard import WildcardKernel
     from src.kernels.gappy import GappyKernel
-    
+
     kernels = [
         MismatchKernel, SpectralKernel, WDKernel, LAKernel, WildcardKernel,
-    GappyKernel]
+        GappyKernel
+    ]
     names = [kernel.name for kernel in kernels]
     return kernels, names
 
