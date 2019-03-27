@@ -61,10 +61,7 @@ if __name__ == "__main__":
     # EasyTest(kernels="spectral", data="seq", dparams=dparams, kparams=kparams)
     from src.tools.test import KernelTest
     parameters = []
-
-    data = np.array(['ATTA', 'AGAA'])
-
-
+    
     K = 2
     parameters.append({"k": K, "sparse": False, "trie": False})
     parameters.append({"k": K, "sparse": False, "trie": True})

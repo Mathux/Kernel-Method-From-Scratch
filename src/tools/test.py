@@ -9,7 +9,7 @@ from os import path
 import sys
 import json
 
-import ipdb
+# import ipdb
 
 methods, methodsNames = AllClassMethods()
 datas, datasNames = AllClassData()
@@ -124,27 +124,29 @@ def find_more_or_one(string_or_list, find_func, n):
         return [find_func(string_or_list) for _ in range(n)]
 
 
-def KernelTest(kernelname, parameters):
+def KernelTest(kernelname, parameters, synth=False):
     Dataset = findData("allseq")()[0]
-    train = Dataset["train"]
-    import numpy as np
-    from src.data.dataset import Dataset
-    
-    defaultParameters = {
-        "k": 0,
-        "mat": False,
-        "shuffle": False,
-        "small": False,
-        "nsmall": 200,
-        "labels_change": True,
-        "name": "seq",
-        "nclasses": 2
-    }
-    
-    from src.tools.utils import Parameters
-    p = Parameters(None, defaultParameters)
-    
-    train = Dataset(p, np.array(['ATTA', 'AAAA']), np.array([0, 1]))
+    if synth:
+        import numpy as np
+        from src.data.dataset import Dataset
+
+        defaultParameters = {
+            "k": 0,
+            "mat": False,
+            "shuffle": False,
+            "small": False,
+            "nsmall": 200,
+            "labels_change": True,
+            "name": "seq",
+            "nclasses": 2
+        }
+
+        from src.tools.utils import Parameters
+        p = Parameters(None, defaultParameters)
+
+        train = Dataset(p, np.array(['ATTA', 'AAAA']), np.array([0, 1]))
+    else:
+        train = Dataset["train"]
     
     Kernel = findKernel(kernelname)
 
@@ -159,7 +161,7 @@ def KernelTest(kernelname, parameters):
         Logger.log(True, kernel.K)
         Logger.dindent()
 
-    ipdb.set_trace()
+    # ipdb.set_trace()
     Logger.dindent()
     
     
