@@ -2,12 +2,11 @@
     "data": "allseq",
     "kernels": "spectralconcat",
     "kparams": {
-        "kmin": 5,
-	"kmax": 20,
-	"lam": 0.87
+        "kmin": 10,
+	"kmax": 40
     },
     "methods": "ksvm",
-    "mparams": {"C": 3.0},
+    "mparams": {"C": 5.0},
     "dparams": {"small": false},
     "pcadim": 3,
     "show": false,

@@ -154,31 +154,17 @@ class SimpleMKL(KMethod, metaclass=KMethodCreate):
         return np.sign(f)
 
 
-data = "seq" if False else "synth"
-
 if __name__ == '__main__':
-    if data == "seq":
-        from src.kernels.spectral import SpectralKernel
-        from src.kernels.wd import WDKernel
-        from src.kernels.mismatch import MismatchKernel
-
-        kernels = SpectralKernel, MismatchKernel, WDKernel
-            
-        from src.data.seq import SeqData
-        data = SeqData(small=True, nsmall=300)
-    
-    elif data == "synth":
-        from src.kernels.gaussian import GaussianKernel
-        from src.kernels.quad import QuadKernel
-        from src.kernels.exponential import ExponentialKernel
-
-        kernels = GaussianKernel, ExponentialKernel, QuadKernel
-        
-        from src.data.synthetic import GenClassData
-        data = GenClassData(500, 2, mode="circle")
+    from src.data.seq import AllSeqData
+    data = AllSeqData()[0]["train"]
 
     from src.kernels.multikernel import MultiKernel
-    multikernel = MultiKernel(data, kernels)
+    
+    parameters = {
+        "kernels": ["spectral"]*31,
+        "_parameters": [{"k": i, "sparse": True} for i in range(10, 41)]
+    }
+    multikernel = MultiKernel(data, parameters)
     
     smkl = SimpleMKL(multikernel)
     weights = smkl.fit()
@@ -191,7 +177,7 @@ if __name__ == '__main__':
         kpca = KPCA(multikernel, verbose=False)
         proj = kpca.project()
         data.show_pca(proj)
-
+    
     print()
     print("weights:", weights)
 
