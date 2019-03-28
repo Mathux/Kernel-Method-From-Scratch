@@ -15,3 +15,5 @@ kernelSavePath = 'GramMatrices/'
 kernelSaveExt = '.pickle'
 
 expPath = "experiments"
+
+hamming_distance_dir = "hamming/"

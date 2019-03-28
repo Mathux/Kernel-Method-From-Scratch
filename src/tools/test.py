@@ -134,7 +134,7 @@ def KernelTest(kernelname, parameters, synth=False):
             "k": 0,
             "mat": False,
             "shuffle": False,
-            "small": False,
+            "small": True,
             "nsmall": 200,
             "labels_change": True,
             "name": "seq",

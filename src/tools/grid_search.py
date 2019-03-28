@@ -13,7 +13,7 @@ from scipy import stats
 from copy import deepcopy
 from itertools import product
 
-class RandomHyperParameterTuningPerKernel(Logger):
+class GridHyperParameterTuningPerKernel(Logger):
     def __init__(self,
                  dataset,
                  clf,
@@ -56,10 +56,10 @@ class RandomHyperParameterTuningPerKernel(Logger):
 
     def fit(self):
         self.scores = {}
-        parameters_to_test = self.get_params_to_test(self.kernel_parameters, 
+        self.parameters_to_test = self.get_params_to_test(self.kernel_parameters, 
                                                      self.clf_parameters, 
                                                      self.parameter_grid)
-        for j,l in enumerate(parameters_to_test) :
+        for j,l in enumerate(self.parameters_to_test) :
             kernel_params = l[0]
             clf_params = l[1]
             kernel_to_try = self.kernel(
@@ -104,7 +104,7 @@ class RandomHyperParameterTuning(Logger):
         self.all_parameters = {}
         self.criterias = {}
         for kernel in self.kernels:
-            temp = RandomHyperParameterTuningPerKernel(
+            temp = GridHyperParameterTuningPerKernel(
                 self.dataset,
                 self.clf,
                 kernel,
@@ -116,14 +116,8 @@ class RandomHyperParameterTuning(Logger):
                 scores_for_kernel.append(temp.scores[j][self.criteria])
             scores_for_kernel = np.array(scores_for_kernel)
             id_param_to_take = np.argmax(scores_for_kernel)
-            temp_dict = {}
-            for key, values in temp.clf_parameters_to_test.items():
-                temp_dict[key] = values[id_param_to_take]
-            for key, values in temp.kernel_parameters_to_test.items():
-                temp_dict[key] = values[id_param_to_take]
-            self.parameters[kernel] = temp_dict
-            self.all_parameters[kernel] = {**temp.clf_parameters_to_test, 
-                               **temp.kernel_parameters_to_test}
+            self.parameters[kernel] = {**temp.parameters_to_test[id_param_to_take][0],**temp.parameters_to_test[id_param_to_take][1]}
+            self.all_parameters[kernel] = temp.parameters_to_test
             self.criterias[
                 kernel] = scores_for_kernel[id_param_to_take]
 
@@ -139,7 +133,7 @@ class RandomHyperParameterTuning(Logger):
 if __name__ == '__main__':
     from scipy.stats import uniform, randint
     from src.kernels.mismatch import MismatchKernel
-    from src.kernels.spectral import SpectralKernel
+    from src.kernels.spectral import SpectralKernel, SpectralSparseKernel
     from src.kernels.wd import WDKernel
     from src.kernels.la import LAKernel
     from src.kernels.wildcard import WildcardKernel
@@ -149,16 +143,17 @@ if __name__ == '__main__':
     from send_sms import send_sms
 
 
-    alldata = AllSeqData(parameters={"nsmall": 200, "small": False})
+    alldata = AllSeqData(parameters={"nsmall": 300, "small": True})
     data0 = alldata[1]["train"]
 
     parameter_grid = {
-        'kernel': [SpectralKernel],
-        'k': [9],
+        'kernel': [WildcardKernel],
+        'k': [10],
+        'm' : [1],
         'C': [1/2,1, 3/2, 2],
     }
     rand_klr = RandomHyperParameterTuning(
         KSVM, data0, parameter_grid=parameter_grid, kfold=3)
     rand_klr.fit()
-    print(rand_klr.best_parameters())
+    print('Best parameters and accuracy :', rand_klr.best_parameters())
     send_sms("Finished random search")
