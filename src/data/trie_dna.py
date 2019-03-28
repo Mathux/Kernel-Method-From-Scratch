@@ -64,6 +64,7 @@ class _Trie(Logger):
                     substring_pointers,
                     np.nonzero(substring_pointers[..., 1] > valsup),
                     axis=0)
+                
 
             self.kgrams = {
                 index: substring_pointers

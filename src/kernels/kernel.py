@@ -9,7 +9,7 @@ Created on Tue Mar 12 15:30:29 2019
 import numpy as np
 from src.tools.utils import Parameters, Logger
 from itertools import product
-# import ipdb
+
 
 
 class KernelCreate(type):
@@ -190,7 +190,8 @@ class DataKernel(GenKernel):
                  name="DataKernel",
                  parameters=None,
                  verbose=True,
-                 cls=None):
+                 cls=None) :
+        #self.d_hamm = {}
         super(DataKernel, self).__init__(
             dataset=dataset,
             name=name,

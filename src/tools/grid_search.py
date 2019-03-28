@@ -55,9 +55,10 @@ class GridHyperParameterTuningPerKernel(Logger):
 
     def fit(self):
         self.scores = {}
-        self.parameters_to_test = self.get_params_to_test(
-            self.kernel_parameters, self.clf_parameters, self.parameter_grid)
-        for j, l in enumerate(self.parameters_to_test):
+        self.parameters_to_test = self.get_params_to_test(self.kernel_parameters, 
+                                                     self.clf_parameters, 
+                                                     self.parameter_grid)
+        for j,l in enumerate(self.parameters_to_test) :
             kernel_params = l[0]
             clf_params = l[1]
             kernel_to_try = self.kernel(self.dataset, parameters=kernel_params)
@@ -117,9 +118,11 @@ class GridHyperParameterTuning(Logger):
                 scores_for_kernel.append(temp.scores[j][self.criteria])
             scores_for_kernel = np.array(scores_for_kernel)
             id_param_to_take = np.argmax(scores_for_kernel)
+            self.parameters[kernel] = {**temp.parameters_to_test[id_param_to_take][0],**temp.parameters_to_test[id_param_to_take][1]}
             self.all_parameters[kernel] = temp.parameters_to_test
-            self.criterias[kernel] = scores_for_kernel[id_param_to_take]
-            self.parameters
+            self.criterias[
+                kernel] = scores_for_kernel[id_param_to_take]
+
 
     def best_parameters(self):
         argmax_kernel = np.argmax(np.array(list(self.criterias.values())))
@@ -133,6 +136,7 @@ class GridHyperParameterTuning(Logger):
 if __name__ == '__main__':
     from scipy.stats import uniform, randint
     from src.kernels.mismatch import MismatchKernel
+    from src.kernels.spectral import SpectralKernel, SpectralSparseKernel
     from src.kernels.spectral import SpectralKernel, SpectralConcatKernel
     from src.kernels.wd import WDKernel
     from src.kernels.la import LAKernel
@@ -155,11 +159,13 @@ if __name__ == '__main__':
     rand_klr = GridHyperParameterTuningPerKernel(
         data0, KSVM, SpectralConcatKernel, parameter_grid=parameter_grid, kfold=8)
     rand_klr.fit()
-    argmax = np.argmax([rand_klr.scores[i]["mean_acc"] for i in range(len(rand_klr.scores))])
-    print("Best parameters:")
-    print(rand_klr.parameters_to_test[argmax])
-    print("Scores:")
-    print(rand_klr.scores[argmax])
+    print('Best parameters and accuracy :', rand_klr.best_parameters())
+    send_sms("Finished random search")
+#    argmax = np.argmax([rand_klr.scores[i]["mean_acc"] for i in range(len(rand_klr.scores))])
+#    print("Best parameters:")
+#    print(rand_klr.parameters_to_test[argmax])
+#    print("Scores:")
+#    print(rand_klr.scores[argmax])
     
     # print(rand_klr.best_parameters())
     # send_sms("Finished grid search")
