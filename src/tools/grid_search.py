@@ -173,20 +173,22 @@ if __name__ == '__main__':
         "nsmall": 600,
         "shuffle": True
     })
-    data0 = alldata[0]["train"]
-
+    data = alldata[0]["train"]
+    
+    C = [3, 5, 7, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 110, 120, 130, 140, 150, 175, 200, 250, 300, 500]
+    
     parameter_grid = {
         'kmin': [7],
-        'kmax': [30],
-        'C': [1 / 2, 10],
+        'kmax': [20],
+        'C': C,
     }
 
     rand_klr = GridHyperParameterTuningPerKernel(
-        data0,
+        data,
         KSVM,
         SpectralConcatKernel,
         parameter_grid=parameter_grid,
-        kfold=2)
+        kfold=7)
     rand_klr.fit()
     print('Best parameters and accuracy :', rand_klr.best_parameters())
     # send_sms("Finished random search")
