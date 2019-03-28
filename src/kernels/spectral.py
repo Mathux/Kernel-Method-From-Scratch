@@ -54,6 +54,21 @@ class __SpectralKernel:
 
 SpectralKernel = __SpectralKernel()
 
+
+class SpectralConcatKernel(SparseKernel, metaclass=KernelCreate):
+    name = "spectralconcat"
+    defaultParameters = {"kmin": 6, "kmax": 11, "lam": 1.0}
+
+    def _compute_phi(self, x):
+        phi = {}
+        for k in range(self.param.kmin, self.param.kmax + 1):
+            count = self.param.lam**(self.param.kmax - k)
+            for offset in range(len(x) - k + 1):
+                xkmer = x[offset:offset + k]
+                phi[xkmer] = phi.get(xkmer, 0) + count
+        return phi
+
+
 if __name__ == "__main__":
     dparams = {"small": False, "nsmall": 100}
     kparams = {"k": 12, "sparse": True}
@@ -61,9 +76,18 @@ if __name__ == "__main__":
     # EasyTest(kernels="spectral", data="seq", dparams=dparams, kparams=kparams)
     from src.tools.test import KernelTest
     parameters = []
+
+    kmin = 5
+    kmax = 6
+    parameters.append({"kmin": kmin, "kmax": kmax})
+    KernelTest("spectralconcat", parameters)
+    """K = 6
+    parameters.append({"k": K})
+    KernelTest("spectral", parameters)"""
     
-    K = 2
+"""K = 2
     parameters.append({"k": K, "sparse": False, "trie": False})
     parameters.append({"k": K, "sparse": False, "trie": True})
     parameters.append({"k": K, "sparse": True, "trie": False})
     KernelTest("spectral", parameters)
+"""

@@ -11,7 +11,7 @@ import numpy as np
 from src.tools.cross_validation import CrossValidation
 from src.tools.utils import Logger
 from scipy import stats
-from copy import deepcopy
+
 
 class RandomHyperParameterTuningPerKernel(Logger):
     def __init__(self,
@@ -158,7 +158,7 @@ class RandomHyperParameterTuning(Logger):
 if __name__ == '__main__':
     from scipy.stats import uniform, randint
     from src.kernels.mismatch import MismatchKernel
-    from src.kernels.spectral import SpectralKernel
+    from src.kernels.spectral import SpectralKernel, SpectralConcatKernel
     from src.kernels.wd import WDKernel
     from src.kernels.la import LAKernel
     from src.kernels.gappy import GappyKernel
@@ -168,12 +168,11 @@ if __name__ == '__main__':
     from src.data.seq import AllSeqData
     from send_sms import send_sms
 
-
     alldata = AllSeqData(parameters={"nsmall": 200, "small": False})
     data0 = alldata[0]["train"]
 
     parameter_grid = {
-        'kernel': [GappyKernel],
+        'kernel': [SpectralConcatKernel],
         'g': 10,
         'l' : 8,
         'C': uniform(loc = 1/2, scale = 2),

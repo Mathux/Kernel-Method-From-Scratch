@@ -57,6 +57,8 @@ class Dataset(Logger):
         def f(data):
             return func(dic[data]) if dic[data] is not None else None
 
+        self.param.labels_change = False
+        self.param.shuffle = False
         return Dataset(self.param, *map(f, Dataset.ITERON))
 
     # To add two Dataset together

@@ -1,17 +1,13 @@
 {
     "data": "allseq",
-    "kernels": ["spectral"],
-    "kparams": [{
-            "k": 11,
-            "trie": true
-    }],
-    "methods": [
-        "ksvm"
-    ],
-    "mparams": [
-        {
-        "C": 2.0
-	}],
+    "kernels": "spectralconcat",
+    "kparams": {
+        "kmin": 5,
+	"kmax": 20,
+	"lam": 0.87
+    },
+    "methods": "ksvm",
+    "mparams": {"C": 3.0},
     "dparams": {"small": false},
     "pcadim": 3,
     "show": false,
