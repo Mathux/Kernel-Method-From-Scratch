@@ -192,7 +192,8 @@ def AllClassMethods():
     from src.methods.kknn import KKNN
     from src.methods.klr import KLR
     from src.methods.ksvm import KSVM
-    methods = [KKNN, KLR, KSVM]
+    from src.methods.simple_mkl import SimpleMKL
+    methods = [KKNN, KLR, KSVM, SimpleMKL]
     names = [method.name for method in methods]
 
     return methods, names
