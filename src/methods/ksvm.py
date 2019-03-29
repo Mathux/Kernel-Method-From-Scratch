@@ -49,6 +49,9 @@ class KSVM(KMethod, metaclass=KMethodCreate):
         if len(support_vectors) > 0:
             intercept /= len(support_vectors)
 
+        # set to zero non support vectors
+        alpha[np.where(np.abs(alpha) <= self.param.tol)[0]] = 0
+        
         self._b = intercept
         self._alpha = alpha
         return self._alpha, self._b

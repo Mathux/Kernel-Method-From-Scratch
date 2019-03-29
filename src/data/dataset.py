@@ -20,6 +20,7 @@ class Dataset(Logger):
             self._log("Dataset shuffled")
             self.shuffle(SEED)
         if param.labels_change and labels is not None:
+            self._log("change labels")
             self.transform_label()
 
     # Shuffle the dataset

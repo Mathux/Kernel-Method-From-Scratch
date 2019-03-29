@@ -1,53 +1,35 @@
 {
     "data": "allseq",
-    "kernels": "multikernel",
-    "kparams": {
-            "kernels" : ["spectral","spectral","spectral","spectral","spectral","spectral","spectral","spectral","spectral","spectral","spectral","spectral","spectral","spectral"],
-            "_parameters" : [{
-                                "k": 7, 
-                                "sparse": true
-                                },{
-                                 "k": 8, 
-                                 "sparse": true
-                             },{
-                                 "k": 9, 
-                                 "sparse": true
-                             },{
-                                 "k": 10, 
-                                 "sparse": true
-                             },{
-                                 "k": 11, 
-                                 "sparse": true
-                             },{
-                                 "k": 12, 
-                                 "sparse": true
-                             },{
-                                 "k": 13,
-                                 "sparse": true
-                              },{
-                                 "k": 14, 
-                                 "sparse": true
-                             },{
-                                 "k": 15,
-                                  "sparse": true
-                              },{
-                                 "k": 16, 
-                                 "sparse": true
-                             },{
-                                 "k": 17, 
-                                 "sparse": true
-                             },{
-                                 "k": 18,
-                                 "sparse": true
-                              },{
-                                 "k": 19, 
-                                 "sparse": true
-                             },{
-                                 "k": 20, 
-                                 "sparse": true}]},
-    "methods": ["simple_mkl"],
-    "mparams": [{"C": 5.0}],
-    "dparams": {"small": false, "nsmall" : 200},
+    "kernels": ["spectralconcat","spectralconcat","spectralconcat"],
+    "kparams":
+    [{
+        "kmin": 7,
+        "kmax" : 100
+    },
+     {
+         "kmin": 7,
+         "kmax" : 100
+     },
+     {
+         "kmin": 7,
+         "kmax" : 100
+     }],
+    "methods": [
+	"ksvm",
+	"ksvm",
+	"ksvm"
+    ],
+    "mparams": [
+	{
+            "C": 5.0
+        },
+	{
+	    "C" : 5.0
+	},
+	{
+	    "C" : 5.0
+	}],
+    "dparams": {},
     "pcadim": 3,
     "show": false,
     "submit": true
