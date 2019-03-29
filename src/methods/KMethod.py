@@ -24,12 +24,12 @@ def klogger(name, pca=False, wkrr=False):
             Logger.indent()
             t.start()
 
-            self.load_dataset(dataset, labels)
-
-            if pca:
-                K = self.kernel.KC
-            elif K is None:
-                K = self.kernel.K
+            if K is None:
+                self.load_dataset(dataset, labels)
+                if pca:
+                    K = self.kernel.KC
+                else:
+                    K = self.kernel.K
 
             if wkrr:
                 result = fitfunc(self, K, w)

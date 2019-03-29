@@ -12,7 +12,7 @@ from src.data.dataset import KFold
 
 
 class CrossValidation(Logger):
-    def __init__(self, dataset, estimator, kfolds=5, verbose=True):
+    def __init__(self, dataset, estimator=None, kfolds=5, verbose=True):
         self.verbose = verbose
 
         self.accuracy = np.zeros(kfolds)
@@ -20,9 +20,14 @@ class CrossValidation(Logger):
         self.precision = np.zeros(kfolds)
 
         self.dataset = dataset
+        self.kfolds = kfolds
         self.folds = KFold(dataset, kfolds, verbose)
-        
-        for k in self.vrange(kfolds, desc="Fitting folds"):
+
+        if estimator is not None:
+            self.fit(estimator)
+
+    def fit(self, estimator):
+        for k in self.vrange(self.kfolds, desc="Fitting folds"):
             train_dataset, val_dataset = self.folds[k]
 #            print(val_dataset.labels)
             estimator.fit(train_dataset)
@@ -36,6 +41,29 @@ class CrossValidation(Logger):
         self.f1 = 2 * self.precision * self.recall / (
             self.precision + self.recall)
 
+    def constant_kernel(self, kernelClass, params):
+        self.kernels = []
+        for k in self.vrange(self.kfolds, desc="Prepare kernels"):
+            train_dataset, val_dataset = self.folds[k]
+            kernel = kernelClass(train_dataset, params)
+            _ = kernel.K
+            self.kernels.append(kernel)
+        return self.kernels
+    
+    def fit_K(self, estimator, kernels):
+        for k in self.vrange(self.kfolds, desc="Fitting folds"):
+            _, val_dataset = self.folds[k]
+            estimator.fit(K=kernels[k].K)
+
+            Score = estimator.score_recall_precision(val_dataset)
+            acc, recall, pres = Score.accuracy, Score.recall, Score.precision
+            self.accuracy[k] = acc
+            self.recall[k] = recall
+            self.precision[k] = pres
+
+        self.f1 = 2 * self.precision * self.recall / (
+            self.precision + self.recall)
+        
     @property
     def mean_acc(self):
         return np.mean(self.accuracy)

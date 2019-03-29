@@ -53,25 +53,46 @@ class GridHyperParameterTuningPerKernel(Logger):
             l.append((temp_dict_kparams, temp_dict_mparams))
         return l
 
-    def fit(self):
+    def fit(self, onekernel=True):
         self.scores = {}
-        self.parameters_to_test = self.get_params_to_test(self.kernel_parameters, 
-                                                     self.clf_parameters, 
-                                                     self.parameter_grid)
-        for j,l in enumerate(self.parameters_to_test) :
+        self.parameters_to_test = self.get_params_to_test(
+            self.kernel_parameters, self.clf_parameters, self.parameter_grid)
+        if onekernel:
+            CV = CrossValidation(self.dataset, kfolds=self.kfold, verbose=True)
+            kernel_param = self.parameters_to_test[0][0]
+            print('Testing kernel parameters :', kernel_param)
+            kernels = CV.constant_kernel(self.kernel, kernel_param)
+
+        for j, l in enumerate(self.parameters_to_test):
             kernel_params = l[0]
             clf_params = l[1]
-            kernel_to_try = self.kernel(self.dataset, parameters=kernel_params)
-            temp_clf = self.clf(kernel_to_try, parameters=clf_params, verbose=False)
-            print('Testing kernel parameters :', kernel_params)
+            if not onekernel:
+                kernel_to_try = self.kernel(
+                    self.dataset, parameters=kernel_params)
+                print('Testing kernel parameters :', kernel_params)
+            else:
+                kernel_to_try = kernels[0]
+            temp_clf = self.clf(
+                kernel_to_try, parameters=clf_params, verbose=False)
             print('Testing clf classifiers : ', clf_params)
             Logger.indent()
-            CV = CrossValidation(self.dataset, temp_clf, kfolds=self.kfold, verbose=True)
+            if not onekernel:
+                CV = CrossValidation(
+                    self.dataset, temp_clf, kfolds=self.kfold, verbose=True)
+            else:
+                CV.fit_K(temp_clf, kernels)
             Logger.log(True, CV)
             Logger.log(True, "")
             Logger.dindent()
             temp_report = CV.stats
             self.scores[j] = temp_report
+
+    def best_parameters(self):
+        argmax = np.argmax(
+            [self.scores[i]["mean_acc"] for i in range(len(self.scores))])
+        params = self.parameters_to_test[argmax]
+        scores = self.scores[argmax]
+        return params, scores
 
 
 class GridHyperParameterTuning(Logger):
@@ -118,11 +139,12 @@ class GridHyperParameterTuning(Logger):
                 scores_for_kernel.append(temp.scores[j][self.criteria])
             scores_for_kernel = np.array(scores_for_kernel)
             id_param_to_take = np.argmax(scores_for_kernel)
-            self.parameters[kernel] = {**temp.parameters_to_test[id_param_to_take][0],**temp.parameters_to_test[id_param_to_take][1]}
+            self.parameters[kernel] = {
+                **temp.parameters_to_test[id_param_to_take][0],
+                **temp.parameters_to_test[id_param_to_take][1]
+            }
             self.all_parameters[kernel] = temp.parameters_to_test
-            self.criterias[
-                kernel] = scores_for_kernel[id_param_to_take]
-
+            self.criterias[kernel] = scores_for_kernel[id_param_to_take]
 
     def best_parameters(self):
         argmax_kernel = np.argmax(np.array(list(self.criterias.values())))
@@ -146,26 +168,27 @@ if __name__ == '__main__':
     from src.data.seq import AllSeqData
     from send_sms import send_sms
 
-    alldata = AllSeqData(parameters={"small": False, "shuffle": True})
-    data0 = alldata[1]["train"]
-
+    alldata = AllSeqData(parameters={
+        "small": True,
+        "nsmall": 600,
+        "shuffle": True
+    })
+    data = alldata[0]["train"]
+    
+    C = [3, 5, 7, 9, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 110, 120, 130, 140, 150, 175, 200, 250, 300, 500]
+    
     parameter_grid = {
-        'kernel': [SpectralConcatKernel],
-        'kmin': [5 , 6, 7],
-        'kmax': [20, 21, 22, 23, 24, 25],
-        'C': [1 / 2, 1, 3 / 2, 2, 5, 0.1, 10],
+        'kmin': [7],
+        'kmax': [20],
+        'C': C,
     }
 
     rand_klr = GridHyperParameterTuningPerKernel(
-        data0, KSVM, SpectralConcatKernel, parameter_grid=parameter_grid, kfold=8)
+        data,
+        KSVM,
+        SpectralConcatKernel,
+        parameter_grid=parameter_grid,
+        kfold=7)
     rand_klr.fit()
     print('Best parameters and accuracy :', rand_klr.best_parameters())
-    send_sms("Finished random search")
-#    argmax = np.argmax([rand_klr.scores[i]["mean_acc"] for i in range(len(rand_klr.scores))])
-#    print("Best parameters:")
-#    print(rand_klr.parameters_to_test[argmax])
-#    print("Scores:")
-#    print(rand_klr.scores[argmax])
-    
-    # print(rand_klr.best_parameters())
-    # send_sms("Finished grid search")
+    # send_sms("Finished random search")
