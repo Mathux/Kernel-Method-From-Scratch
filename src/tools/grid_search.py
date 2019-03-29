@@ -169,8 +169,7 @@ if __name__ == '__main__':
     from send_sms import send_sms
 
     alldata = AllSeqData(parameters={
-        "small": True,
-        "nsmall": 600,
+        "small": False,
         "shuffle": True
     })
     data = alldata[0]["train"]
@@ -179,7 +178,7 @@ if __name__ == '__main__':
     
     parameter_grid = {
         'kmin': [7],
-        'kmax': [20],
+        'kmax': [100],
         'C': C,
     }
 
