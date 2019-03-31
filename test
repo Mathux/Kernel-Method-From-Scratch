@@ -1,2 +1,0 @@
-#!/bin/bash
-python -i test.py --method kknn --kernel exp --data synth --dim 3
