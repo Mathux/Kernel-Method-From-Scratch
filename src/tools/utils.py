@@ -224,8 +224,7 @@ def nb_diff(x, y):
             nb_diff += 1
     return nb_diff
 
-def average_predictions(predictions, csvname, weights = None) :
-    
+def average_predictions(predictions, csvname, weights = None):    
     assert len(predictions) > 0
     
     if weights is None :
@@ -244,8 +243,43 @@ def average_predictions(predictions, csvname, weights = None) :
     name = csvname
     csvname = os.path.join(expPath, name + ".csv")
     final_pred.to_csv(csvname, index = False) 
-    
 
+
+def combine_preds2(csv1, csv2, csvfinal):
+    import random
+    random.seed(666)
+    data1 = pd.read_csv(csv1)
+    data2 = pd.read_csv(csv2)
+    data = pd.DataFrame.copy(data1)
+    tot = len(data1)
+    for i in range(tot):
+        d1 = data1["Bound"][i]
+        d2 = data2["Bound"][i]
+        if d1 == d2:
+            data["Bound"][i] = d1
+        # Choose randomly
+        else:
+            if random.randint(0,1):
+                d = d2
+            else:
+                d = d1
+            data["Bound"][i] = d
+
+    diff1 = 0
+    diff2 = 0
+    for i in range(tot):
+        d1 = data1["Bound"][i]
+        d2 = data2["Bound"][i]
+        d = data["Bound"][i]
+        if not d1 == d:
+            diff1 += 1
+        elif not d2 == d:
+            diff2 += 1
+            
+    print("diff1:", diff1)
+    print("diff2:", diff2)
+
+    data.to_csv(csvfinal, index=False)
 
 def submit(predictions, ids, csvname):
     """Create the csvfile to submit a solution
@@ -283,7 +317,7 @@ def create_dir(directory):
 
 
 if __name__ == "__main__":
-    param = {'z': 4, 'r': 5}
-    p = Parameters(param)
-
-    t = Timer()
+    csv1 = "good/experiement_svm0_min7_max20_C5.csv"
+    csv2 = "good/experiment_spectrallconcat_kmin_5_kmax_20.csv"
+    csvfinal = "good/experiement_final2.csv"
+    combine_preds2(csv1, csv2, csvfinal)

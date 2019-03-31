@@ -251,7 +251,7 @@ if __name__ == "__main__":
     # If we call this function with the link testmodel
     if "testmodel" in sys.argv[0]:
         args = objdict(json.load(open("config.json", "r")))
-        args.csvname = None
+        args.csvname = "Yte.csv"
         kparams = args.kparams
         mparams = args.mparams
         dparams = args.dparams

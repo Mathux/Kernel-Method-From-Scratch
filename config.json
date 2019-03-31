@@ -4,15 +4,15 @@
     "kparams":
     [{
         "kmin": 7,
-        "kmax" : 100
+        "kmax" : 20
     },
      {
          "kmin": 7,
-         "kmax" : 100
+         "kmax" : 20
      },
      {
          "kmin": 7,
-         "kmax" : 100
+         "kmax" : 20
      }],
     "methods": [
 	"ksvm",
