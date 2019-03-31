@@ -17,7 +17,7 @@ The model we choose for the final submission was the sum of spectrum kernel for 
 ## Recreate this submission
 Just run this command in a terminal:
 ```bash
-./run
+./start
 ```
 
 ## Test other kernels/methods
