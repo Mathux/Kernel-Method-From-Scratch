@@ -20,6 +20,12 @@ Just run this command in a terminal:
 ./start
 ```
 
+or
+
+```bash
+python start.py
+```
+
 ## Test other kernels/methods
 String kernels available:
 - mismatch

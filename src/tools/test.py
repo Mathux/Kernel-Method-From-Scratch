@@ -247,9 +247,9 @@ def EasyTest(kernels,
         return scores
 
 
-if __name__ == "__main__":
+def main(start=False):
     # If we call this function with the link testmodel
-    if "testmodel" in sys.argv[0]:
+    if start or "testmodel" in sys.argv[0]:
         args = objdict(json.load(open("config.json", "r")))
         args.csvname = "Yte.csv"
         kparams = args.kparams
@@ -296,3 +296,6 @@ if __name__ == "__main__":
         submit(predictions, Ids, csvname)
 
         print("Results saved in: " + csvname)
+
+if __name__ == "__main__":
+    main()
